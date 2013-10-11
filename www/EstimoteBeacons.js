@@ -4,7 +4,7 @@ var exec = require('cordova/exec');
  */
 function EstimoteBeacons() {}
 
-EstimoteBeacons.prototype.echo = function(callback) {
+EstimoteBeacons.prototype.getClosestBeaconDistance = function(callback) {
     exec(callback,
         function(error){
             console.error("Error", error);

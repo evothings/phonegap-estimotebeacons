@@ -30,13 +30,7 @@
 
 - (void)getClosestBeaconDistance:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
-
-    if (echo != nil && [echo length] > 0) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:self.distanceLabel];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-    }
+    CDVPluginResult* pluginResult  = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:self.distanceLabel];
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
