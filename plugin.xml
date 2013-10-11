@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+    id="pl.makingwaves.myplugin"
+    version="0.1.0">
+    <name>MyPlugin</name>
+    <!-- ios -->
+    <platform name="ios">    
+        <config-file target="config.xml" parent="/*">
+            <feature name="MyPlugin">
+                <param name="ios-package" value="MyPlugin" /> 
+            </feature>
+        </config-file>
+        <js-module src="www/MyPlugin.js" name="MyPlugin">
+            <clobbers target="myPlugin" />
+        </js-module>
+        <header-file src="src/ios/MyPlugin.h" />
+        <source-file src="src/ios/MyPlugin.m" />
+    </platform>
+</plugin>
