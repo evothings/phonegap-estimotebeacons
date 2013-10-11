@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1C1BD74B-9C38-4929-ADBE-5CFBCA6BC24B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Untitled</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>6EEE3FEC-36E8-401E-8EDB-3ADF3B34727E</key>
+		<string>ssh://github.com/kdzwinel/phonegap-plugin.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>src/ios/Untitled.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>6EEE3FEC-36E8-401E-8EDB-3ADF3B34727E</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/kdzwinel/phonegap-plugin.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>6EEE3FEC-36E8-401E-8EDB-3ADF3B34727E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>6EEE3FEC-36E8-401E-8EDB-3ADF3B34727E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>phonegap-plugin</string>
+		</dict>
+	</array>
+</dict>
+</plist>

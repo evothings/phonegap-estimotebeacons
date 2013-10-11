@@ -8,7 +8,8 @@
     <platform name="ios">    
         <config-file target="config.xml" parent="/*">
             <feature name="MyPlugin">
-                <param name="ios-package" value="MyPlugin" /> 
+                <param name="ios-package" value="MyPlugin" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         <js-module src="www/MyPlugin.js" name="MyPlugin">

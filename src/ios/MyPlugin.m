@@ -1,7 +1,6 @@
 #import "MyPlugin.h"
 #import <Cordova/CDV.h>
-#import "ESTViewController.h"
-#import <ESTBeaconManager.h>
+#import "ESTBeaconManager.h"
 
 @interface MyPlugin () <ESTBeaconManagerDelegate>
 
@@ -11,21 +10,21 @@
 
 @implementation MyPlugin
 
-- (MyPlugin*)init
+- (MyPlugin*)pluginInitialize
 {
-    self = [super init];
-    if (self) {
-        // craete manager instance
-        self.beaconManager = [[ESTBeaconManager alloc] init];
-        self.beaconManager.delegate = self;
+    // craete manager instance
+    self.beaconManager = [[ESTBeaconManager alloc] init];
+    self.beaconManager.delegate = self;
         
-        // create sample region object (you can additionaly pass major / minor values)
-        ESTBeaconRegion* region = [[ESTBeaconRegion alloc] initRegionWithIdentifier:@"EstimoteSampleRegion"];
+    // create sample region object (you can additionaly pass major / minor values)
+    ESTBeaconRegion* region = [[ESTBeaconRegion alloc] initRegionWithIdentifier:@"EstimoteSampleRegion"];
         
-        // start looking for estimtoe beacons in region
-        // when beacon ranged beaconManager:didRangeBeacons:inRegion: invoked
-        [self.beaconManager startRangingBeaconsInRegion:region];
-    }
+    // start looking for estimtoe beacons in region
+    // when beacon ranged beaconManager:didRangeBeacons:inRegion: invoked
+    [self.beaconManager startRangingBeaconsInRegion:region];
+        
+    self.distanceLabel = @"INIT";
+    
     return self;
 }
 
@@ -70,9 +69,13 @@
             break;
             
             default:
+            self.distanceLabel = @"CASE DEFAULT";
             break;
         }
+    } else {
+        self.distanceLabel = @"NO BEACONS";
     }
+
 }
 
 

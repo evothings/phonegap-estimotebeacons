@@ -3,7 +3,7 @@
 @interface MyPlugin : CDVPlugin
 
 @property NSString *distanceLabel;
-- (MyPlugin*)init;
+- (MyPlugin*)pluginInitialize;
 - (void)echo:(CDVInvokedUrlCommand*)command;
 
 @end
