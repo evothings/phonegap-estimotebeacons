@@ -1,16 +1,16 @@
-#import "MyPlugin.h"
+#import "EstimoteBeacons.h"
 #import <Cordova/CDV.h>
 #import "ESTBeaconManager.h"
 
-@interface MyPlugin () <ESTBeaconManagerDelegate>
+@interface EstimoteBeacons () <ESTBeaconManagerDelegate>
 
 @property (nonatomic, strong) ESTBeaconManager* beaconManager;
 
 @end
 
-@implementation MyPlugin
+@implementation EstimoteBeacons
 
-- (MyPlugin*)pluginInitialize
+- (EstimoteBeacons*)pluginInitialize
 {
     // craete manager instance
     self.beaconManager = [[ESTBeaconManager alloc] init];
@@ -28,10 +28,9 @@
     return self;
 }
 
-- (void)echo:(CDVInvokedUrlCommand*)command
+- (void)getClosestBeaconDistance:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
-    NSString* echo = [command.arguments objectAtIndex:0];
 
     if (echo != nil && [echo length] > 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:self.distanceLabel];
