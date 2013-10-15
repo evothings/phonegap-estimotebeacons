@@ -4,13 +4,79 @@ var exec = require('cordova/exec');
  */
 function EstimoteBeacons() {}
 
-EstimoteBeacons.prototype.getClosestBeaconDistance = function(callback) {
+EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function(callback) {
     exec(callback,
         function(error){
             console.error("Error", error);
         },
         "EstimoteBeacons",
-        "getClosestBeaconDistance",
+        "startEstimoteBeaconsDiscoveryForRegion",
+        []
+    );
+};
+
+EstimoteBeacons.prototype.stopEstimoteBeaconsDiscoveryForRegion = function(callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "stopEstimoteBeaconsDiscoveryForRegion",
+        []
+    );
+};
+
+EstimoteBeacons.prototype.startRangingBeaconsInRegion = function(callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "startRangingBeaconsInRegion",
+        []
+    );
+};
+
+EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function(callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "stopRangingBeaconsInRegion",
+        []
+    );
+};
+
+EstimoteBeacons.prototype.getBeaconByIdx = function(idx, callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "getBeaconByIdx",
+        [idx]
+    );
+};
+
+EstimoteBeacons.prototype.getClosestBeacon = function(callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "getClosestBeacon",
+        []
+    );
+};
+
+EstimoteBeacons.prototype.getBeacons = function(callback) {
+    exec(callback,
+        function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "getBeacons",
         []
     );
 };
