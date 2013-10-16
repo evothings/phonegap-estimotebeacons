@@ -22,7 +22,7 @@
     self.beaconManager = [[ESTBeaconManager alloc] init];
     self.beaconManager.delegate = self;
     self.beaconManager.avoidUnknownStateBeacons = YES;
-        
+    
     // create sample region object (you can additionaly pass major / minor values)
     self.currentRegion = [[ESTBeaconRegion alloc] initRegionWithIdentifier:@"EstimoteSampleRegion"];
     
@@ -72,19 +72,21 @@
 
 - (void)getBeacons:(CDVInvokedUrlCommand*)command
 {
-    NSMutableArray* output = [NSMutableArray array];
-    
-    if([self.beacons count] > 0)
-    {
-        //convert list of beacons to a an array of simple property-value objects
-        for (id beacon in self.beacons) {
-            [output addObject:[self beaconToDictionary:beacon]];
+    [self.commandDelegate runInBackground:^{
+        NSMutableArray* output = [NSMutableArray array];
+        
+        if([self.beacons count] > 0)
+        {
+            //convert list of beacons to a an array of simple property-value objects
+            for (id beacon in self.beacons) {
+                [output addObject:[self beaconToDictionary:beacon]];
+            }
         }
-    }
-    
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:output];
-    
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:output];
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
 }
 
 - (void)getBeaconByIdx:(CDVInvokedUrlCommand*)command
@@ -106,7 +108,7 @@
 {
     if ([self.beacons count] > 0) {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                messageAsDictionary:[self beaconToDictionary:[self.beacons objectAtIndex:0]]]
+                                                             messageAsDictionary:[self beaconToDictionary:[self.beacons objectAtIndex:0]]]
                                     callbackId:command.callbackId];
     } else {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
@@ -115,19 +117,20 @@
 
 - (NSMutableDictionary*)beaconToDictionary:(ESTBeacon*)beacon
 {
-    NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:14];
+    NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:15];
     
     [props setValue:beacon.baterryLevel forKey:@"baterryLevel"];
     [props setValue:beacon.firmwareVersion forKey:@"firmwareVersion"];
     [props setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
-    [props setValue:beacon.major forKey:@"major"];
-    [props setValue:beacon.minor forKey:@"minor"];
+    [props setValue:beacon.ibeacon.major forKey:@"major"];
+    [props setValue:beacon.ibeacon.minor forKey:@"minor"];
     [props setValue:beacon.power forKey:@"power"];
     [props setValue:beacon.frequency forKey:@"frequency"];
     [props setValue:beacon.description forKey:@"description"];
     [props setValue:[NSNumber numberWithInteger:beacon.ibeacon.rssi] forKey:@"rssi"];
     [props setValue:[NSNumber numberWithDouble:beacon.ibeacon.accuracy] forKey:@"accuracy"];
     [props setValue:[NSNumber numberWithInt:beacon.ibeacon.proximity] forKey:@"proximity"];
+    [props setValue:beacon.ibeacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
     [props setValue:beacon.debugDescription forKey:@"debugDescription"];
     [props setValue:beacon.macAddress forKey:@"macAddress"];
     [props setValue:beacon.measuredPower forKey:@"measuredPower"];
@@ -140,10 +143,10 @@
              inRegion:(ESTBeaconRegion *)region
 {
     self.beacons = beacons;
-
-//  if(![closestBeacon isConnected]) {
-//      [closestBeacon connectToBeacon];
-//  }
+    
+    //  if(![closestBeacon isConnected]) {
+    //      [closestBeacon connectToBeacon];
+    //  }
 }
 
 // STRANGE CALLBACK-LIKE STUFF
@@ -159,9 +162,9 @@
 }
 
 - (void)beaconConnectionDidSucceeded {
-//    [self.closestBeacon updateBeaconFirmwareWithProgress:^(NSString *value, NSError *error) {
-//    } andCompletition:^(NSError *error) {
-//    }];
+    //    [self.closestBeacon updateBeaconFirmwareWithProgress:^(NSString *value, NSError *error) {
+    //    } andCompletition:^(NSError *error) {
+    //    }];
 }
 
 - (void)beaconDidDisconnectWithError:(NSError*)error {
