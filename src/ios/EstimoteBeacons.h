@@ -6,5 +6,7 @@
 
 @property NSArray *beacons;
 @property ESTBeaconRegion* currentRegion;
+@property NSString* connectionCallbackId;
+@property ESTBeacon* connectedBeacon;
 - (EstimoteBeacons*)pluginInitialize;
 @end

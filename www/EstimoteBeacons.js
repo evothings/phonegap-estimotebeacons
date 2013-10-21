@@ -70,6 +70,28 @@ EstimoteBeacons.prototype.getClosestBeacon = function(callback) {
     );
 };
 
+EstimoteBeacons.prototype.connectToBeacon = function(major, minor, callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "connectToBeacon",
+        [major, minor]
+    );
+};
+
+EstimoteBeacons.prototype.disconnectFromBeacon = function(callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "disconnectFromBeacon",
+        []
+    );
+};
+
 EstimoteBeacons.prototype.getBeacons = function(callback) {
     exec(callback,
         function(error){
