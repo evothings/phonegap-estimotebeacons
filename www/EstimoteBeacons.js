@@ -70,6 +70,17 @@ EstimoteBeacons.prototype.getClosestBeacon = function(callback) {
     );
 };
 
+EstimoteBeacons.prototype.getConnectedBeacon = function(callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "getConnectedBeacon",
+        []
+    );
+};
+
 EstimoteBeacons.prototype.connectToBeacon = function(major, minor, callback, errorCallback) {
     exec(callback,
         errorCallback || function(error){
@@ -78,6 +89,17 @@ EstimoteBeacons.prototype.connectToBeacon = function(major, minor, callback, err
         "EstimoteBeacons",
         "connectToBeacon",
         [major, minor]
+    );
+};
+
+EstimoteBeacons.prototype.connectToBeaconByMacAddress = function(macAddress, callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "connectToBeaconByMacAddress",
+        [macAddress]
     );
 };
 
@@ -90,6 +112,64 @@ EstimoteBeacons.prototype.disconnectFromBeacon = function(callback, errorCallbac
         "disconnectFromBeacon",
         []
     );
+};
+
+EstimoteBeacons.prototype.setFrequencyOfConnectedBeacon = function(frequency, callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "setFrequencyOfConnectedBeacon",
+        [frequency]
+    );
+};
+
+EstimoteBeacons.prototype.setPowerOfConnectedBeacon = function(power, callback, errorCallback) {
+    exec(callback,
+        errorCallback || function(error){
+            console.error("Error", error);
+        },
+        "EstimoteBeacons",
+        "setPowerOfConnectedBeacon",
+        [power]
+    );
+};
+
+EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function(progressCallback, successCallback, errorCallback) {
+    var progressInterval;
+
+    exec(function() {
+            if(progressInterval) {
+                clearInterval(progressInterval);
+            }
+
+            successCallback.apply(this, arguments);
+        },
+        function() {
+            if(progressInterval) {
+                clearInterval(progressInterval);
+            }
+
+            errorCallback.apply(this, arguments);
+        },
+        "EstimoteBeacons",
+        "updateFirmwareOfConnectedBeacon",
+        []
+    );
+
+    if(progressCallback) {
+        progressInterval = setInterval(function() {
+            exec(progressCallback,
+                function(error){
+                    console.error("Error", error);
+                },
+                "EstimoteBeacons",
+                "getFirmwareUpdateProgress",
+                []
+            );
+        }, 100);
+    }
 };
 
 EstimoteBeacons.prototype.getBeacons = function(callback) {

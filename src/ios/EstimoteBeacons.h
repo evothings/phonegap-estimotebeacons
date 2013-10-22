@@ -7,6 +7,7 @@
 @property NSArray *beacons;
 @property ESTBeaconRegion* currentRegion;
 @property NSString* connectionCallbackId;
+@property NSString* firmwareUpdateProgress;
 @property ESTBeacon* connectedBeacon;
 - (EstimoteBeacons*)pluginInitialize;
 @end
