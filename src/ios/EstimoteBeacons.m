@@ -245,7 +245,7 @@
         NSNumber* frequency = [command.arguments objectAtIndex:0];
         
         if(frequency != nil && [frequency intValue] >= 80 && [frequency intValue] <= 3200) {
-            [self.connectedBeacon writeBeaconFrequency:[frequency shortValue] withCompletition:^(unsigned int value, NSError *error) {
+            [self.connectedBeacon writeBeaconFrequency:[frequency shortValue] withCompletion:^(unsigned int value, NSError *error) {
                 if(error != nil) {
                     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription] callbackId:command.callbackId];
                 } else {
@@ -296,7 +296,7 @@
         }
         
         if(powerLevel || powerLevel == ESTBeaconPowerLevel7) {
-            [self.connectedBeacon writeBeaconPower:powerLevel withCompletition:^(unsigned int value, NSError *error) {
+            [self.connectedBeacon writeBeaconPower:powerLevel withCompletion:^(unsigned int value, NSError *error) {
                 if(error != nil) {
                     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription] callbackId:command.callbackId];
                 } else {
@@ -320,7 +320,7 @@
             if(error == nil) {
                 self.firmwareUpdateProgress = value;
             }
-        } andCompletition:^(NSError *error) {
+        } andCompletion:^(NSError *error) {
             if(error == nil) {
                 [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                      messageAsDictionary:[self beaconToDictionary:self.connectedBeacon]] callbackId:command.callbackId];
@@ -371,7 +371,6 @@
     [props setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
     [props setValue:major forKey:@"major"];
     [props setValue:minor forKey:@"minor"];
-    [props setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
     [props setValue:beacon.frequency forKey:@"frequency"];
     [props setValue:beacon.description forKey:@"description"];
     [props setValue:rssi forKey:@"rssi"];
@@ -379,6 +378,10 @@
     [props setValue:beacon.macAddress forKey:@"macAddress"];
     [props setValue:beacon.measuredPower forKey:@"measuredPower"];
     [props setValue:[NSNumber numberWithBool:beacon.isConnected] forKey:@"isConnected"];
+    
+    if(beacon.power != nil) {
+        [props setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
+    }
     
     if(beacon.ibeacon != nil) {
         [props setValue:[NSNumber numberWithDouble:beacon.ibeacon.accuracy] forKey:@"accuracy"];
