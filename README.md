@@ -5,6 +5,9 @@ Estimote Beacons PhoneGap plugin
 - *NOTE* This is work in progress, it's not even a beta version yet.
 - *NOTE* It's my first encounter with Objective-C and PhoneGap plugins. Therefore, code may be rubbish, however ATM it's just a proof of concept. I will appreciate all input.
 
+## Proof of concept app
+I was able to build an app on the top of this plugin: http://www.youtube.com/watch?v=-cgvEY4ywM8
+
 ## Build process
 What I'm doing now to build my app is:
 
@@ -29,26 +32,30 @@ What I'm doing now to build my app is:
 
 `EstimoteBeacons.prototype.connectToBeacon = function(major, minor, callback, errorCallback) ...`
 Allows you to connect to the beacon by providing major/minor of the beacon.
-*NOTE* Connected beacon goes 'invisible' for startRangingBeaconsInRegion untill you disconnect
-*NOTE* You can be connected only to one beacon at the time.
-*NOTE* You need to connect to the beacon to do any *write* opperatons (update software, change frequency etc.)
+
+- *NOTE* Connected beacon goes 'invisible' until it disconnects
+- *NOTE* You can be connected only to the one beacon at the time.
+- *NOTE* You need to connect to the beacon to do any *write* opperatons (update software, change frequency etc.)
 
 `EstimoteBeacons.prototype.connectToBeaconByMacAddress = function(macAddress, callback, errorCallback) ...`
 Allows you to connect to the beacon by providing its MAC Address. I used that to connect to the beacons with old software ( < v1.6 ).
-*NOTE* You have to use startEstimoteBeaconsDiscoveryForRegion to connect to the beacons with old software.
+
+- *NOTE* You have to use startEstimoteBeaconsDiscoveryForRegion to connect to the beacons with old software.
 
 `EstimoteBeacons.prototype.disconnectFromBeacon = function(callback, errorCallback)...`
 Disconnects you from the connected beacon. Since there can be only one, you don't have to provide major/minor or MAC.
 
 `EstimoteBeacons.prototype.setFrequencyOfConnectedBeacon = function(frequency, callback, errorCallback)...`
 Sets the frequency of the connected beacon. You can set anything between 80 and 3200.
-*NOTE* This will crash the app ATM if you send a non-numeric string.
+
+- *NOTE* This will crash the app ATM if you send a non-numeric string.
 
 `EstimoteBeacons.prototype.setPowerOfConnectedBeacon = function(power, callback, errorCallback) ...`
 Sets the power of the connected beacon. You can choose from -40, -20, -16, -12, -8, -4, 0, 4.
-*NOTE* This will crash the app ATM if you send a non-numeric string.
+
+- *NOTE* This will crash the app ATM if you send a non-numeric string.
 
 `EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function(progressCallback, successCallback, errorCallback) ..`
 Updates the softwere of connected beacon (if needed).
-*NOTE* I was able to succesfully upgrade 3 devices with that method so it's tested but still - use with caution! Make sure that beacon is near the phone, make sure that your phone has stable connection to the Internet and keep your fingers crossed.
 
+- *NOTE* I was able to succesfully upgrade 3 devices with that method so it's tested, but still - use it with caution! Make sure that beacon is near the phone, make sure that your phone has stable connection to the Internet and keep your fingers crossed.
