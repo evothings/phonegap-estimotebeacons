@@ -1,5 +1,4 @@
 #import <Cordova/CDV.h>
-#import "EstimoteBeacons.h"
 #import "ESTBeaconManager.h"
 
 @interface EstimoteBeacons : CDVPlugin
