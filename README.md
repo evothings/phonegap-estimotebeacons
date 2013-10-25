@@ -48,12 +48,17 @@ Disconnects you from the connected beacon. Since there can be only one, you don'
 `EstimoteBeacons.prototype.setFrequencyOfConnectedBeacon = function(frequency, callback, errorCallback)...`
 Sets the frequency of the connected beacon. You can set anything between 80 and 3200.
 
-- *NOTE* This will crash the app ATM if you send a non-numeric string.
-
 `EstimoteBeacons.prototype.setPowerOfConnectedBeacon = function(power, callback, errorCallback) ...`
 Sets the power of the connected beacon. You can choose from -40, -20, -16, -12, -8, -4, 0, 4.
 
-- *NOTE* This will crash the app ATM if you send a non-numeric string.
+`EstimoteBeacons.prototype.startVirtualBeacon = function (major, minor, id, successCallback) ...`
+Device starts advertising as a beacon with given major/minor and id.
+
+- *NOTE* You can't conect to the virtual beacon.
+- *NOTE* Device that acts as a virtual beacon can still see other beacons, but won't see itself.
+
+`EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) ...`
+Device stops advertising as a beacon.
 
 `EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function(progressCallback, successCallback, errorCallback) ..`
 Updates the softwere of connected beacon (if needed).
