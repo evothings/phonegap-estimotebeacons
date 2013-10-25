@@ -128,10 +128,28 @@
     }
 }
 
+- (void)startVirtualBeacon:(CDVInvokedUrlCommand*)command
+{
+    NSInteger major = [[command.arguments objectAtIndex:0] intValue];
+    NSInteger minor = [[command.arguments objectAtIndex:1] intValue];
+    NSString* beaconid = [command.arguments objectAtIndex:2];
+    
+    [self.beaconManager startAdvertisingWithMajor:major withMinor:minor withIdentifier:beaconid];
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
+- (void)stopVirtualBeacon:(CDVInvokedUrlCommand*)command
+{
+    [self.beaconManager stopAdvertising];
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
 - (void)connectToBeacon:(CDVInvokedUrlCommand*)command
 {
-    NSNumber* major = [NSNumber numberWithInt: [[command.arguments objectAtIndex:0] intValue]];
-    NSNumber* minor = [NSNumber numberWithInt: [[command.arguments objectAtIndex:1] intValue]];
+    NSInteger major = [[command.arguments objectAtIndex:0] intValue];
+    NSInteger minor = [[command.arguments objectAtIndex:1] intValue];
     ESTBeacon* foundBeacon = nil;
     
     if([self.beacons count] > 0)
@@ -153,7 +171,7 @@
                 continue;
             }
             
-            if([minor intValue] == [currentMinor intValue] && [major intValue] == [currentMajor intValue]) {
+            if(minor == [currentMinor intValue] && major == [currentMajor intValue]) {
                 foundBeacon = beacon;
             }
         }
@@ -222,21 +240,23 @@
 
 - (void)disconnectFromBeacon:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult* pluginResult = nil;
     
-    if(self.connectedBeacon != nil) {
-        [self.connectedBeacon disconnectBeacon];
+        if(self.connectedBeacon != nil) {
+            [self.connectedBeacon disconnectBeacon];
         
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                      messageAsDictionary:[self beaconToDictionary:self.connectedBeacon]];
         
-        self.connectedBeacon = nil;
-    } else {
-        //no connected beacons
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"There are no connected beacons."];
-    }
+            self.connectedBeacon = nil;
+        } else {
+            //no connected beacons
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"There are no connected beacons."];
+        }
     
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
 }
 
 - (void)setFrequencyOfConnectedBeacon:(CDVInvokedUrlCommand*)command
@@ -345,7 +365,6 @@
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No beacon is being updated right now."] callbackId:command.callbackId];
     }
 }
-
 
 // HELPERS
 
