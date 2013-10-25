@@ -77,6 +77,60 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (successCallback
     );
 };
 
+EstimoteBeacons.prototype.startMonitoringForRegion = function (major, minor, id, successCallback) {
+    if (!isInt(major)) {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: major must be a valid integer");
+        return;
+    }
+
+    if (!isInt(minor)) {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: minor must be a valid integer");
+        return;
+    }
+
+    if(!isString(id)) {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: id must be a string");
+        return;
+    }
+
+    if (typeof successCallback !== "function") {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: success callback parameter must be a function");
+        return;
+    }
+
+    exec(successCallback,
+        function () {
+        },
+        "EstimoteBeacons",
+        "startMonitoringForRegion",
+        [major, minor, id]
+    );
+};
+
+EstimoteBeacons.prototype.stopMonitoringForRegion = function (id, successCallback, errorCallback) {
+    if (errorCallback === null) {
+        errorCallback = function () {
+        }
+    }
+
+    if(!isString(id)) {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: id must be a string");
+        return;
+    }
+
+    if (typeof successCallback !== "function") {
+        console.error("EstimoteBeacons.stopMonitoringForRegion failure: success callback parameter must be a function");
+        return;
+    }
+
+    exec(successCallback,
+        errorCallback,
+        "EstimoteBeacons",
+        "stopMonitoringForRegion",
+        [id]
+    );
+};
+
 EstimoteBeacons.prototype.getBeaconByIdx = function (idx, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
@@ -362,22 +416,22 @@ EstimoteBeacons.prototype.getBeacons = function (successCallback) {
 
 EstimoteBeacons.prototype.startVirtualBeacon = function (major, minor, id, successCallback) {
     if (!isInt(major)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: major must be a valid integer");
+        console.error("EstimoteBeacons.connectToBeacon failure: major must be a valid integer");
         return;
     }
 
     if (!isInt(minor)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: minor must be a valid integer");
+        console.error("EstimoteBeacons.connectToBeacon failure: minor must be a valid integer");
         return;
     }
 
     if(!isString(id)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: id must be a string");
+        console.error("EstimoteBeacons.connectToBeacon failure: id must be a string");
         return;
     }
 
     if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: success callback parameter must be a function");
+        console.error("EstimoteBeacons.connectToBeacon failure: success callback parameter must be a function");
         return;
     }
 
@@ -391,7 +445,7 @@ EstimoteBeacons.prototype.startVirtualBeacon = function (major, minor, id, succe
 
 EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
     if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopVirtualBeacon failure: success callback parameter must be a function");
+        console.error("EstimoteBeacons.connectToBeacon failure: success callback parameter must be a function");
         return;
     }
 

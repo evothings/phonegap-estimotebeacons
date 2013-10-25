@@ -8,5 +8,6 @@
 @property NSString* connectionCallbackId;
 @property NSString* firmwareUpdateProgress;
 @property ESTBeacon* connectedBeacon;
+@property NSMutableDictionary* regionWatchers;
 - (EstimoteBeacons*)pluginInitialize;
 @end

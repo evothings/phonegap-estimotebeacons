@@ -24,9 +24,11 @@
     // create sample region object (you can additionaly pass major / minor values)
     self.currentRegion = [[ESTBeaconRegion alloc] initRegionWithIdentifier:@"EstimoteSampleRegion"];
     
+    // region watchers
+    self.regionWatchers = [[NSMutableDictionary alloc] init];
+    
     return self;
 }
-
 
 - (void)startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command {
     // stop existing discovery/ranging
@@ -66,6 +68,45 @@
     
     // respond to JS with OK
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
+- (void)startMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+    NSInteger major = [[command.arguments objectAtIndex:0] intValue];
+    NSInteger minor = [[command.arguments objectAtIndex:1] intValue];
+    NSString* regionid = [command.arguments objectAtIndex:2];
+    
+    if([self.regionWatchers objectForKey:regionid] != nil) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Region with given ID is already monitored."] callbackId:command.callbackId];
+    } else {
+        ESTBeaconRegion* region = [[ESTBeaconRegion alloc] initRegionWithMajor:major minor:minor identifier:regionid];
+
+        [self.beaconManager startMonitoringForRegion:region];
+        [self.beaconManager requestStateForRegion:region];
+    
+        [self.regionWatchers setObject:command.callbackId  forKey:regionid];
+    }
+}
+
+- (void)stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+    NSString* regionid = [command.arguments objectAtIndex:0];
+    ESTBeaconRegion* regionFound = nil;
+    
+//    for(ESTBeaconRegion* region in self.regionWatchers) {
+//        if([region.identifier compare:regionid]) {
+//            regionFound = region;
+//            break;
+//        }
+//    }
+//    
+//    if(regionFound != nil) {
+//        [self.beaconManager stopMonitoringForRegion:regionFound];
+//        
+//        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+//    } else {
+//        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Region with given ID not found."] callbackId:command.callbackId];
+//    }
 }
 
 - (void)getBeacons:(CDVInvokedUrlCommand*)command
@@ -236,7 +277,6 @@
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Beacon not found."] callbackId:command.callbackId];
     }
 }
-
 
 - (void)disconnectFromBeacon:(CDVInvokedUrlCommand*)command
 {
@@ -436,7 +476,6 @@
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                                  messageAsString:error.localizedDescription]
                                     callbackId:self.connectionCallbackId];
-        
     }
     
     self.connectionCallbackId = nil;
@@ -448,7 +487,6 @@
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                              messageAsDictionary:[self beaconToDictionary:self.connectedBeacon]]
                                     callbackId:self.connectionCallbackId];
-        
     }
     
     self.connectionCallbackId = nil;
@@ -457,6 +495,46 @@
 - (void)beaconDidDisconnectWithError:(NSError*)error {
     if(self.connectionCallbackId == nil) {
         self.connectedBeacon = nil;
+    }
+}
+
+-(void)beaconManager:(ESTBeaconManager *)manager
+      didEnterRegion:(ESTBeaconRegion *)region
+{
+    NSString* callbackId = [self.regionWatchers objectForKey:region.identifier];
+    
+    if(callbackId != nil) {
+        NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:4];
+        
+        [props setValue:region.identifier forKey:@"id"];
+        [props setValue:region.major forKey:@"major"];
+        [props setValue:region.minor forKey:@"minor"];
+        [props setValue:@"enter" forKey:@"action"];
+        
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:props];
+        [result setKeepCallback:[NSNumber numberWithBool:YES]];
+        
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    }
+}
+
+-(void)beaconManager:(ESTBeaconManager *)manager
+       didExitRegion:(ESTBeaconRegion *)region
+{
+    NSString* callbackId = [self.regionWatchers objectForKey:region.identifier];
+    
+    if(callbackId != nil) {
+        NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:4];
+        
+        [props setValue:region.identifier forKey:@"id"];
+        [props setValue:region.major forKey:@"major"];
+        [props setValue:region.minor forKey:@"minor"];
+        [props setValue:@"exit" forKey:@"action"];
+        
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:props];
+        [result setKeepCallback:[NSNumber numberWithBool:YES]];
+        
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     }
 }
 
