@@ -3,8 +3,8 @@ Estimote Beacons PhoneGap plugin
 - Just a wrapper around Estimote iOS SKD ( https://github.com/Estimote/iOS-SDK )
 - SDK not included, needs to be added in the build process
 - *NOTE* This is work in progress, it's not even a beta version yet. **Everything may change!**
-- *NOTE* It's my first encounter with Objective-C and PhoneGap plugins. Therefore, code may be rubbish, however ATM it's just a proof of concept. I will appreciate all input.
-- Please **do** ask questions and give feedback.
+- *NOTE* It's my first encounter with Objective-C and PhoneGap plugins. Therefore, code may be rubbish, however ATM it's just a proof of concept.
+- Please **do** ask questions and give feedback. I will appreciate all input.
 
 ## Proof of concept app
 I was able to build an app on the top of this plugin: http://www.youtube.com/watch?v=-cgvEY4ywM8
