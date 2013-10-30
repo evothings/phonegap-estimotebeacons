@@ -2,15 +2,12 @@
 #import "EstimoteBeacons.h"
 #import "ESTBeaconManager.h"
 
-@interface EstimoteBeacons () <ESTBeaconManagerDelegate>
+@interface EstimoteBeacons () <ESTBeaconManagerDelegate,ESTBeaconDelegate>
 
 @property (nonatomic, strong) ESTBeaconManager* beaconManager;
 
 @end
 
-@interface EstimoteBeacons () <ESTBeaconDelegate>
-
-@end
 
 @implementation EstimoteBeacons
 
@@ -406,7 +403,7 @@
     }
 }
 
-// HELPERS
+#pragma mark - Helpers
 
 - (NSMutableDictionary*)beaconToDictionary:(ESTBeacon*)beacon
 {
@@ -455,7 +452,8 @@
     return props;
 }
 
-// STRANGE CALLBACK-LIKE STUFF
+#pragma mark - Strange Callback-like stuff
+
 
 - (void)beaconManager:(ESTBeaconManager *)manager
    didDiscoverBeacons:(NSArray *)beacons
