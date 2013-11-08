@@ -314,7 +314,7 @@
         NSNumber* frequency = [command.arguments objectAtIndex:0];
         
         if(frequency != nil && [frequency intValue] >= 80 && [frequency intValue] <= 3200) {
-            [self.connectedBeacon writeBeaconFrequency:[frequency shortValue] withCompletition:^(unsigned int value, NSError *error){
+            [self.connectedBeacon writeBeaconFrequency:[frequency shortValue] withCompletion:^(unsigned int value, NSError *error){
                 if(error != nil) {
                     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription] callbackId:command.callbackId];
                 } else {
@@ -367,7 +367,7 @@
         }
         
         if(powerLevel || powerLevel == ESTBeaconPowerLevel7) {
-            [self.connectedBeacon writeBeaconPower:powerLevel withCompletition:^(unsigned int value, NSError *error){
+            [self.connectedBeacon writeBeaconPower:powerLevel withCompletion:^(unsigned int value, NSError *error){
                 if(error != nil) {
                     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription] callbackId:command.callbackId];
                 } else {
@@ -392,7 +392,7 @@
                 self.firmwareUpdateProgress = value;
             }
             
-        }andCompletition:^(NSError *error){
+        }andCompletion:^(NSError *error){
             if(error == nil) {
                 [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                                      messageAsDictionary:[self beaconToDictionary:self.connectedBeacon]] callbackId:command.callbackId];
