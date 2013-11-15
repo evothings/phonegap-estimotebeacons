@@ -437,7 +437,7 @@
         rssi = [NSNumber numberWithInt:beacon.ibeacon.rssi];
     }
     
-    [props setValue:beacon.baterryLevel forKey:@"baterryLevel"];
+    [props setValue:beacon.batteryLevel forKey:@"batteryLevel"];
     [props setValue:beacon.firmwareVersion forKey:@"firmwareVersion"];
     [props setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
     [props setValue:major forKey:@"major"];
@@ -483,7 +483,7 @@
     self.beacons = beacons;
 }
 
-- (void)beaconConnectionDidFail:(NSError*)error {
+- (void)beaconConnectionDidFail:(ESTBeacon *)beacon withError:(NSError *)error {
     if(self.connectionCallbackId != nil) {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                                  messageAsString:error.localizedDescription]
@@ -494,7 +494,7 @@
     self.connectedBeacon = nil;
 }
 
-- (void)beaconConnectionDidSucceeded {
+- (void)beaconConnectionDidSucceeded:(ESTBeacon *)beacon {
     if(self.connectionCallbackId != nil) {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                              messageAsDictionary:[self beaconToDictionary:self.connectedBeacon]]
