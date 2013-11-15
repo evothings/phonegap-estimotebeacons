@@ -55,16 +55,16 @@
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
+//Implemented the Beacon Region only with identifier, not necessary with major / minor
 - (void)startMonitoringForRegion:(CDVInvokedUrlCommand*)command
 {
-    NSInteger major = [[command.arguments objectAtIndex:0] intValue];
-    NSInteger minor = [[command.arguments objectAtIndex:1] intValue];
-    NSString* regionid = [command.arguments objectAtIndex:2];
+    NSString* regionid = [command.arguments objectAtIndex:0];
     
     if([self.regionWatchers objectForKey:regionid] != nil) {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Region with given ID is already monitored."] callbackId:command.callbackId];
     } else {
-        ESTBeaconRegion* region = [[ESTBeaconRegion alloc] initRegionWithMajor:major minor:minor identifier:regionid];
+        
+        ESTBeaconRegion* region = [[ESTBeaconRegion alloc] initRegionWithIdentifier:regionid];
         
         [self.beaconManager startMonitoringForRegion:region];
         [self.beaconManager requestStateForRegion:region];
