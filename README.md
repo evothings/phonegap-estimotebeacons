@@ -29,48 +29,8 @@ What I'm doing now to build my app is:
             });
         }, 1000);
     });
-    
-## Hello Beacons Phonegap Example
 
-Modify the Phonegap Hello World example to add beacon support.
-
-### index.html
-
-Add some divs to the page where we can display beacon properties.
-
-    <div id="beacon">
-		<div id="accuracy">accuracy</div>
-		<div id="debugDescription">debugDescription</div>
-		<div id="description">description</div>
-		<div id="isConnected">isConnected</div>
-		<div id="proximity">proximity</div>
-		<div id="proximityUUID">proximityUUID</div>
-		<div id="rssi">rssi</div>
-    </div>
-
-### index.js
-
-Add this code to index.js after deviceReady event is received from phonegap.
-
-    // start looking for beacons
-    window.EstimoteBeacons.startRangingBeaconsInRegion(function () {
-        // every 5 seconds get the list of beacons in range
-        setInterval(function () {
-            window.EstimoteBeacons.getBeacons(function (beacons) {
-				// TODO: Check for null beacon
-				
-				// display some properties from the first beacon in the array
-				var beacon = beacons[0];
-				document.getElementById("accuracy").innerHTML = beacon.accuracy.toString();
-				document.getElementById("debugDescription").innerHTML = beacon.debugDescription.toString();
-				document.getElementById("description").innerHTML = beacon.description.toString();
-				document.getElementById("isConnected").innerHTML = beacon.isConnected.toString();
-				document.getElementById("proximity").innerHTML = beacon.proximity.toString();
-				document.getElementById("proximityUUID").innerHTML = beacon.proximityUUID.toString();
-				document.getElementById("rssi").innerHTML = beacon.rssi.toString();
-            });
-        }, 5000);
-    });
+See [/examples](https://github.com/kdzwinel/phonegap-estimotebeacons/tree/master/examples) directory for sample PhoneGap application(s).
     
 ## Some other stuff that you can do
 
