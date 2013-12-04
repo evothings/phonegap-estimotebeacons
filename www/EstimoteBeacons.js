@@ -77,13 +77,23 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (successCallback
     );
 };
 
-EstimoteBeacons.prototype.startMonitoringForRegion = function (major, minor, id, successCallback) {
-    if (!isInt(major)) {
+EstimoteBeacons.prototype.startMonitoringForRegion = function (id, majorOrCallback, minorOrCallback, successCallback, errorCallback) {
+    var major = (typeof majorOrCallback === 'function') ? null : majorOrCallback;
+    var minor = (typeof minorOrCallback === 'function') ? null : minorOrCallback;
+    successCallback = (typeof majorOrCallback === 'function') ? majorOrCallback : successCallback;
+    errorCallback = (typeof minorOrCallback === 'function') ? minorOrCallback : errorCallback;
+
+    if (errorCallback === null) {
+        errorCallback = function () {
+        }
+    }
+
+    if (major !== null && !isInt(major)) {
         console.error("EstimoteBeacons.startMonitoringForRegion failure: major must be a valid integer");
         return;
     }
 
-    if (!isInt(minor)) {
+    if (minor !== null && !isInt(minor)) {
         console.error("EstimoteBeacons.startMonitoringForRegion failure: minor must be a valid integer");
         return;
     }
@@ -98,12 +108,16 @@ EstimoteBeacons.prototype.startMonitoringForRegion = function (major, minor, id,
         return;
     }
 
+    if (typeof errorCallback !== "function") {
+        console.error("EstimoteBeacons.startMonitoringForRegion failure: error callback parameter is not a function");
+        return;
+    }
+
     exec(successCallback,
-        function () {
-        },
+        errorCallback,
         "EstimoteBeacons",
         "startMonitoringForRegion",
-        [major, minor, id]
+        [id, major, minor]
     );
 };
 
@@ -114,7 +128,12 @@ EstimoteBeacons.prototype.stopMonitoringForRegion = function (id, successCallbac
     }
 
     if(!isString(id)) {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: id must be a string");
+        console.error("EstimoteBeacons.stopMonitoringForRegion failure: id must be a string");
+        return;
+    }
+
+    if (typeof errorCallback !== "function") {
+        console.error("EstimoteBeacons.stopMonitoringForRegion failure: error callback parameter is not a function");
         return;
     }
 
