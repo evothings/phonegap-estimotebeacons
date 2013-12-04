@@ -32,21 +32,34 @@ What I'm doing now to build my app is:
 
 See [/examples](https://github.com/kdzwinel/phonegap-estimotebeacons/tree/master/examples) directory for sample PhoneGap application(s).
     
-## Some other stuff that you can do
+## Available methods
+Not all methods are listed below, see [EstimoteBeacons.js](https://github.com/kdzwinel/phonegap-estimotebeacons/blob/master/www/EstimoteBeacons.js) for a full list.
+
+### startRangingBeaconsInRegion
+`EstimoteBeacons.startRangingBeaconsInRegion(successCallback) ...` Starts looking for beacons.
+
+### stopRangingBeaconsInRegion
+`EstimoteBeacons.stopRangingBeaconsInRegion(successCallback) ...` Stops looking for beacons.
+
+### getBeacons
+`EstimoteBeacons.getBeacons(successCallback) ... ` Returns latest list of beacons found by `startRangingBeaconsInRegion` or `startEstimoteBeaconsDiscoveryForRegion`. You have to call this method periodically to be up to date with latest results.
 
 ### connectToBeacon
 `EstimoteBeacons.connectToBeacon(major, minor, callback, errorCallback) ...`
 Allows you to connect to the beacon by providing major/minor of the beacon.
 
-- *NOTE* Connected beacon goes 'invisible' until it disconnects
+- *NOTE* Connected beacon stops broadcasting and goes 'invisible' until it's disconnected again.
 - *NOTE* You can be connected only to the one beacon at the time.
-- *NOTE* You need to connect to the beacon to do any *write* opperatons (update software, change frequency etc.)
+- *NOTE* You need to connect to the beacon to get some of its details (frequency, power, software version, etc.) and do any *write* opperatons (update software, change frequency etc.).
 
 ### connectToBeaconByMacAddress
 `EstimoteBeacons.connectToBeaconByMacAddress(macAddress, callback, errorCallback) ...`
 Allows you to connect to the beacon by providing its MAC Address. I used that to connect to the beacons with old software ( < v1.6 ).
 
 - *NOTE* You have to use `startEstimoteBeaconsDiscoveryForRegion` to connect to the beacons with old software.
+
+### getConnectedBeacon
+`EstimoteBeacons.getConnectedBeacon(successCallback, errorCallback) ...` Returns information about connected beacon. Data will contain beacon details such as: frequency, battery level, software version etc. These kind of details are not available via `getBeacons`.
 
 ### disconnectFromBeacon
 `EstimoteBeacons.disconnectFromBeacon(callback, errorCallback)...`
