@@ -51,12 +51,12 @@ var app = {
             var item = document.getElementById('beacon_' + beacon.major + '_' + beacon.minor);
 
             if(item) {
-                item.innerText = beacon.major + '/' + beacon.minor + ' - ' + formatAccuracy(beacon.accuracy);
+                item.innerText = beacon.major + '/' + beacon.minor + ' - ' + formatDistance(beacon.distance);
             }
         });
         beaconManager.on('added', function(beacon) {
             var item = document.createElement('li');
-            item.innerText = beacon.major + '/' + beacon.minor + ' - ' + formatAccuracy(beacon.accuracy);
+            item.innerText = beacon.major + '/' + beacon.minor + ' - ' + formatDistance(beacon.distance);
             item.id = 'beacon_' + beacon.major + '_' + beacon.minor;
 
             beaconsList.appendChild(item);
@@ -73,7 +73,7 @@ var app = {
     }
 };
 
-function formatAccuracy(meters) {
+function formatDistance(meters) {
     if(meters > 1) {
         return meters.toFixed(3) + ' m';
     } else {

@@ -65,9 +65,9 @@ Allows you to connect to the beacon by providing its MAC Address. I used that to
 `EstimoteBeacons.disconnectFromBeacon(callback, errorCallback)...`
 Disconnects you from the connected beacon. Since there can be only one, you don't have to provide major/minor or MAC.
 
-### setFrequencyOfConnectedBeacon
-`EstimoteBeacons.setFrequencyOfConnectedBeacon(frequency, callback, errorCallback)...`
-Sets the frequency of the connected beacon. You can set anything between 80 and 3200.
+### setAdvIntervalOfConnectedBeacon
+`EstimoteBeacons.setAdvIntervalOfConnectedBeacon(advInterval, callback, errorCallback)...`
+Sets the advertising interval (frequency) of the connected beacon. You can set anything between 80 and 3200.
 
 ### setPowerOfConnectedBeacon
 `EstimoteBeacons.setPowerOfConnectedBeacon(power, callback, errorCallback) ...`

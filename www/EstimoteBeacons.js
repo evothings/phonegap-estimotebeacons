@@ -309,32 +309,32 @@ EstimoteBeacons.prototype.disconnectFromBeacon = function (successCallback, erro
     );
 };
 
-EstimoteBeacons.prototype.setFrequencyOfConnectedBeacon = function (frequency, successCallback, errorCallback) {
+EstimoteBeacons.prototype.setAdvIntervalOfConnectedBeacon = function (advInterval, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
     }
 
-    if (!isInt(frequency)) {
-        console.error("EstimoteBeacons.setFrequencyOfConnectedBeacon failure: frequency must be a valid integer");
+    if (!isInt(advInterval)) {
+        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: advInterval must be a valid integer");
         return;
     }
 
     if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.setFrequencyOfConnectedBeacon failure: error callback parameter is not a function");
+        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: error callback parameter is not a function");
         return;
     }
 
     if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.setFrequencyOfConnectedBeacon failure: success callback parameter must be a function");
+        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: success callback parameter must be a function");
         return;
     }
 
     exec(successCallback,
         errorCallback,
         "EstimoteBeacons",
-        "setFrequencyOfConnectedBeacon",
-        [frequency]
+        "setAdvIntervalOfConnectedBeacon",
+        [advInterval]
     );
 };
 
