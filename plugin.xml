@@ -18,5 +18,6 @@
         </config-file>
         <header-file src="src/ios/EstimoteBeacons.h" />
         <source-file src="src/ios/EstimoteBeacons.m" />
+		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
     </platform>
 </plugin>
