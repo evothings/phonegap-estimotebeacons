@@ -16,8 +16,13 @@
                 <param name="ios-package" value="EstimoteBeacons" />
             </feature>
         </config-file>
+		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
+		<header-file src="src/ios/ESTBeacon.h" />
+		<header-file src="src/ios/ESTBeaconDefinitions.h" />
+		<header-file src="src/ios/ESTBeaconManager.h" />
+		<header-file src="src/ios/ESTBeaconRegion.h" />
+		<header-file src="src/ios/ESTBeaconUpdateInfo.h" />
         <header-file src="src/ios/EstimoteBeacons.h" />
         <source-file src="src/ios/EstimoteBeacons.m" />
-		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
     </platform>
 </plugin>
