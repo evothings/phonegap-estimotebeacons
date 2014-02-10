@@ -1,21 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
     id="pl.makingwaves.estimotebeacons"
     version="0.1.0">
     <name>EstimoteBeacons</name>
+	<description>todo</description>
+	<license>todo</license>
+	<keywords>todo</keywords>
+    <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
+        <clobbers target="EstimoteBeacons" />
+    </js-module>
     <!-- ios -->
-    <platform name="ios">    
-        <config-file target="config.xml" parent="/*">
-            <feature name="EstimoteBeacons">
-                <param name="ios-package" value="EstimoteBeacons" />
-                <param name="onload" value="true" />
-            </feature>
-        </config-file>
-        <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
-            <clobbers target="EstimoteBeacons" />
-        </js-module>
+    <platform name="ios">     
+		<framework src="CoreBluetooth.framework" />
+		<framework src="CoreLocation.framework" />
+		<framework src="SystemConfiguration.framework" />
+		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
+		<header-file src="src/ios/ESTBeacon.h" />
+		<header-file src="src/ios/ESTBeaconDefinitions.h" />
+		<header-file src="src/ios/ESTBeaconManager.h" />
+		<header-file src="src/ios/ESTBeaconRegion.h" />
+		<header-file src="src/ios/ESTBeaconUpdateInfo.h" />
         <header-file src="src/ios/EstimoteBeacons.h" />
         <source-file src="src/ios/EstimoteBeacons.m" />
-    </platform>
+
+    	<config-file target="config.xml" parent="/*">
+            <feature name="EstimoteBeacons">
+                <param name="ios-package" value="EstimoteBeacons" />
+            </feature>
+        </config-file>
+	</platform>
 </plugin>
