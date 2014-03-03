@@ -3,11 +3,13 @@
 
 @interface EstimoteBeacons : CDVPlugin
 
-@property NSArray *beacons;
-@property ESTBeaconRegion* currentRegion;
-@property NSString* connectionCallbackId;
-@property NSString* firmwareUpdateProgress;
-@property ESTBeacon* connectedBeacon;
-@property NSMutableDictionary* regionWatchers;
+@property (nonatomic, strong) NSArray *beacons;
+@property (nonatomic, strong) ESTBeaconRegion* currentRegion;
+@property (nonatomic, strong) NSString* connectionCallbackId;
+@property (nonatomic, strong) NSString* firmwareUpdateProgress;
+@property (nonatomic, strong) ESTBeacon* connectedBeacon;
+@property (nonatomic, strong) NSMutableDictionary* regionWatchers;
+
 - (EstimoteBeacons*)pluginInitialize;
+
 @end
