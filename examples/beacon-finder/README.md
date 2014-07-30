@@ -23,3 +23,6 @@ If app isn't working, make sure that following text is present in your `config.x
     </feature>
 
 It's not? Add it.
+
+## Still not working?
+Try the [troubleshooting guide](https://github.com/kdzwinel/phonegap-estimotebeacons/wiki/Troubleshooting-guide).
