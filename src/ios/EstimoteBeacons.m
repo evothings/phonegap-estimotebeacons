@@ -1,6 +1,6 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
-#import "ESTBeaconManager.h"
+//#import "Headers/ESTBeaconManager.h"
 
 @interface EstimoteBeacons () <ESTBeaconManagerDelegate,ESTBeaconDelegate>
 

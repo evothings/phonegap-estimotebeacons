@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
     id="pl.makingwaves.estimotebeacons"
-    version="0.1.0">
+    version="0.2.0">
     <name>EstimoteBeacons</name>
-	<description>todo</description>
-	<license>todo</license>
-	<keywords>todo</keywords>
+	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
+	<license>MIT</license>
+	<keywords>Estimote, Beacons</keywords>
     <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
         <clobbers target="EstimoteBeacons" />
     </js-module>
     <!-- ios -->
-    <platform name="ios">     
+    <platform name="ios">
 		<framework src="CoreBluetooth.framework" />
 		<framework src="CoreLocation.framework" />
 		<framework src="SystemConfiguration.framework" />
 		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
-		<header-file src="src/ios/ESTBeacon.h" />
-		<header-file src="src/ios/ESTBeaconDefinitions.h" />
-		<header-file src="src/ios/ESTBeaconManager.h" />
-		<header-file src="src/ios/ESTBeaconRegion.h" />
-		<header-file src="src/ios/ESTBeaconUpdateInfo.h" />
+		<header-file src="src/ios/Headers/ESTBeacon.h" />
+		<header-file src="src/ios/Headers/ESTBeaconDefinitions.h" />
+		<header-file src="src/ios/Headers/ESTBeaconManager.h" />
+		<header-file src="src/ios/Headers/ESTBeaconRegion.h" />
+		<header-file src="src/ios/Headers/ESTBeaconFirmwareInfoVO.h" />
+		<header-file src="src/ios/Headers/ESTBeaconFirmwareVO.h" />
+		<header-file src="src/ios/Headers/ESTBeaconVO.h" />
         <header-file src="src/ios/EstimoteBeacons.h" />
         <source-file src="src/ios/EstimoteBeacons.m" />
 
