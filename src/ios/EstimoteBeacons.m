@@ -1,51 +1,270 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
-//#import "Headers/ESTBeaconManager.h"
 
 @interface EstimoteBeacons () <ESTBeaconManagerDelegate,ESTBeaconDelegate>
 
 @property (nonatomic, strong) ESTBeaconManager* beaconManager;
+@property NSString* callbackId_startEstimoteBeaconsDiscoveryForRegion;
 
 @end
 
 @implementation EstimoteBeacons
 
+#pragma mark - Initialization
+
 - (EstimoteBeacons*)pluginInitialize
 {
-    // craete manager instance
-    self.beaconManager = [[ESTBeaconManager alloc] init];
-    self.beaconManager.delegate = self;
-    self.beaconManager.avoidUnknownStateBeacons = YES;
+	NSLog(@"OBJC EstimoteBeacons pluginInitialize");
 
-    // create sample region object (you can additionaly pass major / minor values)
-	//TODO: miki How is the sample region used?
-    self.currentRegion = [[ESTBeaconRegion alloc]
-		initWithProximityUUID:ESTIMOTE_PROXIMITY_UUID
-		identifier:@"EstimoteSampleRegion"];
+    // Crete beacon manager instance.
+    self.beaconManager = [ESTBeaconManager new];
+    self.beaconManager.delegate = self;
+    // TODO: Uncomment: self.beaconManager.avoidUnknownStateBeacons = YES;
+
+	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
 
     // region watchers
+	// TOD0: How is this used?
     self.regionWatchers = [[NSMutableDictionary alloc] init];
 
     return self;
 }
 
-#pragma mark - Start monitoring methods
+#pragma mark - Helper methods
 
-- (void)startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
+/**
+ * Don't worry, the curly placement is just a joke ;-)
+ */
+- (ESTBeaconRegion*) createRegionFromDict: (NSDictionary*) regionDict {
+	// Default values for the region object.
+	NSUUID* uuid = ESTIMOTE_PROXIMITY_UUID;
+	NSString* identifier = @"EstimoteSampleRegion";
+	CLBeaconMajorValue major = 0;
+	CLBeaconMinorValue minor = 0;
+	BOOL majorIsDefined = NO;
+	BOOL minorIsDefined = NO;
+
+	// Get region values.
+	for (id key in regionDict) {
+		NSString* value = regionDict[key];
+		if ([key isEqualToString:@"uuid"]) {
+			uuid = [[NSUUID alloc] initWithUUIDString: value]; }
+		else
+		if ([key isEqualToString:@"id"]) {
+			identifier = value; }
+		else
+		if ([key isEqualToString:@"major"]) {
+			major = [value integerValue];
+			majorIsDefined = YES; }
+		else
+		if ([key isEqualToString:@"minor"]) {
+			minor = [value integerValue];
+			minorIsDefined = YES; } }
+
+	// Create a beacon region object.
+	if (majorIsDefined && minorIsDefined) {
+		return [[ESTBeaconRegion alloc]
+			initWithProximityUUID: uuid
+			major: major
+			minor: minor
+			identifier: identifier]; }
+	else if (majorIsDefined) {
+		return [[ESTBeaconRegion alloc]
+			initWithProximityUUID: uuid
+			major: major
+			identifier:identifier];	}
+	else {
+		return [[ESTBeaconRegion alloc]
+			initWithProximityUUID: uuid
+			identifier: identifier]; } }
+
+/**
+ * Create a dictionary from a beacon object (used to pass
+ * beacon data back to JavaScript).
+ */
+- (NSMutableDictionary*)beaconToDictionary:(ESTBeacon*)beacon
 {
-    // stop existing discovery/ranging
-    [self.beaconManager stopEstimoteBeaconDiscovery];
-    [self.beaconManager stopRangingBeaconsInRegion:self.currentRegion];
+    NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:32];
 
-    // start discovery
-    [self.beaconManager startEstimoteBeaconsDiscoveryForRegion:self.currentRegion];
+	// Properties always available.
+    [props setValue:beacon.major forKey:@"major"];
+    [props setValue:beacon.minor forKey:@"minor"];
+    [props setValue:[NSNumber numberWithInteger:beacon.color] forKey:@"color"];
+    [props setValue:[NSNumber numberWithInteger:beacon.rssi] forKey:@"rssi"];
+    [props setValue:[NSNumber numberWithInteger:beacon.connectionStatus] forKey:@"connectionStatus"];
 
-    // respond to JS with OK
-    [self.commandDelegate
-		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-		callbackId:command.callbackId];
+	// Properties available after CoreLocation based scan.
+	[props setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
+	[props setValue:beacon.distance forKey:@"distance"];
+	[props setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
+
+	// Properties available after CoreBluetooth based scan.
+    [props setValue:beacon.macAddress forKey:@"macAddress"];
+    [props setValue:beacon.measuredPower forKey:@"measuredPower"];
+    [props setValue:[NSNumber numberWithInt:beacon.firmwareState] forKey:@"firmwareState"];
+
+	// Properties available after connecting.
+/*
+      name property
+      motionProximityUUID property
+      power property
+      advInterval property
+      batteryLevel property
+      remainingLifetime property
+      batteryType property
+      hardwareVersion property
+      firmwareVersion property
+      firmwareUpdateInfo property
+      isMoving property
+      isAccelerometerAvailable property
+      isAccelerometerEditAvailable property
+      accelerometerEnabled property
+      basicPowerMode property
+      smartPowerMode property
+
+    [props setValue:beacon.batteryLevel forKey:@"batteryLevel"];
+    [props setValue:beacon.firmwareVersion forKey:@"firmwareVersion"];
+    [props setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
+    [props setValue:major forKey:@"major"];
+    [props setValue:minor forKey:@"minor"];
+    [props setValue:beacon.advInterval forKey:@"advInterval"];
+    [props setValue:beacon.description forKey:@"description"];
+    [props setValue:beacon.debugDescription forKey:@"debugDescription"];
+    [props setValue:[NSNumber numberWithBool:beacon.connectionStatus] forKey:@"connectionStatus"];
+    [props setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
+*/
+
+    return props;
 }
 
+#pragma mark - CoreBluetooth discovery
+
+/**
+ * Start CoreBluetooth discovery.
+ */
+- (void)startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC startEstimoteBeaconsDiscoveryForRegion ");
+
+	// Get region dictionary passed from JavaScript and
+	// create a beacon region object.
+    NSDictionary* regionDict = [command argumentAtIndex:0];
+    ESTBeaconRegion* region = [self createRegionFromDict: regionDict];
+
+    // Stop any ongoing discovery/ranging.
+    [self stopEstimoteBeaconDiscovery: nil];
+    //TODO: remove: [self.beaconManager stopRangingBeaconsInRegion: region];
+
+	// Save callback id.
+	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = command.callbackId;
+
+    // Start discovery.
+    [self.beaconManager startEstimoteBeaconsDiscoveryForRegion:region];
+}
+
+/**
+ * Stop CoreBluetooth discovery.
+ */
+- (void)stopEstimoteBeaconDiscovery:(CDVInvokedUrlCommand*)command
+{
+    // Stop existing discovery/ranging.
+    [self.beaconManager stopEstimoteBeaconDiscovery];
+
+	// Clear any existing callback.
+	if (self.callbackId_startEstimoteBeaconsDiscoveryForRegion)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus:CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool:NO];
+		[self.commandDelegate
+			sendPluginResult:result
+			callbackId:self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+
+		// Clear callback id.
+		self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
+	}
+
+	// Respond to JavaScript with OK if there is a Cordova command object.
+	if (command)
+	{
+    	[self.commandDelegate
+			sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
+			callbackId:command.callbackId];
+	}
+}
+
+/**
+ * CoreBluetooth discovery event.
+ */
+- (void)beaconManager:(ESTBeaconManager*)manager
+	didDiscoverBeacons:(NSArray*)beacons
+	inRegion:(ESTBeaconRegion*)region
+{
+	NSLog(@"OBJC didDiscoverBeacons %i", (int)[beacons count]);
+
+	if ([beacons count] > 0)
+	{
+		NSMutableArray* beaconArray = [NSMutableArray array];
+
+		// Convert beacons to a an array of property-value objects.
+		for (ESTBeacon* beacon in beacons)
+		{
+			[beaconArray addObject:[self beaconToDictionary:beacon]];
+		}
+
+		// Pass result to JavaScript callback.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsArray: beaconArray];
+		[result setKeepCallbackAsBool: YES];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+	}
+}
+
+/**
+ * CoreBluetooth discovery error event.
+ */
+- (void)beaconManager:(ESTBeaconManager *)manager
+	didFailDiscoveryInRegion:(ESTBeaconRegion *)region
+{
+	// Pass error to JavaScript.
+    if (self.callbackId_startEstimoteBeaconsDiscoveryForRegion != nil)
+	{
+        [self.commandDelegate
+			sendPluginResult:[CDVPluginResult
+				resultWithStatus:CDVCommandStatus_ERROR
+				messageAsString:@"didFailDiscoveryInRegion"]
+			callbackId:self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+    }
+}
+
+/*
+Above code is tested using these snippets in Evothings Studio:
+
+EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
+    {},
+    function(beacons){console.log('success ' + beacons[0].major + ' ' + beacons[0].minor)},
+    function(){console.log('error')}
+    )
+
+EstimoteBeacons.stopEstimoteBeaconDiscovery(
+    function(){console.log('success')},
+    function(){console.log('error')}
+    )
+
+Use JavaScript tools to evaluate in Evothings Workbench.
+Requires a Cordova app built with the plugin to test.
+Make the app connect to the Workbench by entering
+the Workbench ip-address/port as the Cordova main URL.
+Example: http://192.168.0.101:4042
+*/
+
+// TODO: Rewrite methods below to use callbacks.
+
+#pragma mark - Start monitoring methods
 
 - (void)startRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
 {
@@ -107,17 +326,6 @@
 }
 
 #pragma mark - Stop monitoring methods
-
-- (void)stopEsimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
-{
-    // stop existing discovery/ranging
-    [self.beaconManager stopEstimoteBeaconDiscovery];
-
-    // respond to JS with OK
-    [self.commandDelegate
-		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-		callbackId:command.callbackId];
-}
 
 - (void)stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
 {
@@ -593,70 +801,7 @@
 */
 }
 
-#pragma mark - Helpers
-
-- (NSMutableDictionary*)beaconToDictionary:(ESTBeacon*)beacon
-{
-    NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:16];
-    NSNumber* major = beacon.major;
-    NSNumber* minor = beacon.minor;
-    NSNumber* rssi = [NSNumber numberWithInt:beacon.rssi];
-
-    if (major == nil)
-	{
-        major = beacon.major;
-    }
-    if (minor == nil)
-	{
-        minor = beacon.minor;
-    }
-    if (rssi == nil)
-	{
-        rssi = [NSNumber numberWithInt:beacon.rssi];
-    }
-
-    [props setValue:beacon.batteryLevel forKey:@"batteryLevel"];
-    [props setValue:beacon.firmwareVersion forKey:@"firmwareVersion"];
-    [props setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
-    [props setValue:major forKey:@"major"];
-    [props setValue:minor forKey:@"minor"];
-    [props setValue:beacon.advInterval forKey:@"advInterval"];
-    [props setValue:beacon.description forKey:@"description"];
-    [props setValue:rssi forKey:@"rssi"];
-    [props setValue:beacon.debugDescription forKey:@"debugDescription"];
-    [props setValue:beacon.macAddress forKey:@"macAddress"];
-    [props setValue:beacon.measuredPower forKey:@"measuredPower"];
-
-	// TODO: Implement in an alternative way, e.g. keep track of connected beacons.
-    // [props setValue:[NSNumber numberWithBool:beacon.isConnected] forKey:@"isConnected"];
-
-    if (beacon.power != nil)
-	{
-        [props setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
-    }
-
-    if (beacon != nil)
-	{
-        [props setValue:beacon.distance forKey:@"distance"];
-        [props setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
-
-        if(beacon.proximityUUID != nil)
-		{
-            [props setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
-        }
-    }
-
-    return props;
-}
-
 #pragma mark - Beacon Manager delegate methods.
-
-- (void)beaconManager:(ESTBeaconManager *)manager
-   didDiscoverBeacons:(NSArray *)beacons
-             inRegion:(ESTBeaconRegion *)region
-{
-    self.beacons = beacons;
-}
 
 -(void)beaconManager:(ESTBeaconManager *)manager
      didRangeBeacons:(NSArray *)beacons

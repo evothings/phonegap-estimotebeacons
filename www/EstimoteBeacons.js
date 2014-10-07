@@ -3,46 +3,65 @@ var exec = require('cordova/exec');
 /**
  * Helpers
  */
-function isString(value) {
+function isString(value)
+{
     return (typeof value == 'string' || value instanceof String);
 }
 
-function isInt(value) {
+function isInt(value)
+{
     return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
+}
+
+function checkRegionSuccessFail(region, success, fail)
+{
 }
 
 /**
  * Constructor
  */
-function EstimoteBeacons() {
+function EstimoteBeacons()
+{
 }
 
-EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
+EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (region, success, fail)
+{
+/*    if (typeof success !== "function") {
         console.error("EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion failure: success callback parameter must be a function");
         return;
     }
-
-    exec(successCallback,
-        function () {
-        },
+*/
+    exec(success,
+        fail,
         "EstimoteBeacons",
         "startEstimoteBeaconsDiscoveryForRegion",
+        [region]
+    );
+};
+
+EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, fail)
+{
+/*
+    if (typeof successCallback !== "function") {
+        console.error("EstimoteBeacons.stopEstimoteBeaconDiscovery failure: success callback parameter must be a function");
+        return;
+    }
+*/
+    exec(success,
+        fail,
+        "EstimoteBeacons",
+        "stopEstimoteBeaconDiscovery",
         []
     );
 };
 
-EstimoteBeacons.prototype.stopEstimoteBeaconsDiscoveryForRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopEstimoteBeaconsDiscoveryForRegion failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        function () {
-        },
+/*
+EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, success, fail)
+{
+    exec(success,
+        fail,
         "EstimoteBeacons",
-        "stopEstimoteBeaconsDiscoveryForRegion",
+        "startRangingBeaconsInRegion",
         []
     );
 };
@@ -476,6 +495,7 @@ EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
         []
     );
 };
+*/
 
 var estimoteBeacons = new EstimoteBeacons();
 module.exports = estimoteBeacons;
