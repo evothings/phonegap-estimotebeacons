@@ -27,6 +27,12 @@
  */
 @property NSMutableDictionary* callbackIds_startRangingBeaconsInRegion;
 
+/**
+ * Dictionary of callback ids for startRangingBeaconsInRegion.
+ * Region identifiers are used as keys.
+ */
+@property NSMutableDictionary* callbackIds_startMonitoringForRegion;
+
 @end
 
 @implementation EstimoteBeacons
@@ -46,6 +52,7 @@
 	// Variables that track callback ids.
 	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
 	self.callbackIds_startRangingBeaconsInRegion = [NSMutableDictionary new];
+	self.callbackIds_startMonitoringForRegion = [NSMutableDictionary new];
 
     return self;
 }
@@ -112,6 +119,18 @@
 	[dict setValue:region.minor forKey:@"minor"];
 
     return dict;
+}
+
+/**
+ * Create a dictionary key for a region.
+ */
+- (NSString*)regionDictionaryKey:(ESTBeaconRegion*)region
+{
+	NSString* uuid = region.proximityUUID.UUIDString;
+	int major = nil != region.major ? [region.major intValue] : 0;
+	int minor = nil != region.minor ? [region.minor intValue] : 0;
+
+    return [NSString stringWithFormat: @"%@-%i-%i", uuid, major, minor];
 }
 
 /**
@@ -320,8 +339,8 @@ Example: http://192.168.0.101:4042
 
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
-    NSDictionary* regionDict = [command argumentAtIndex:0];
-    ESTBeaconRegion* region = [self createRegionFromDictionary:regionDict];
+    NSDictionary* regionDictionary = [command argumentAtIndex:0];
+    ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
     // Stop any ongoing ranging for the given region.
     [self helper_stopRangingBeaconsInRegion:region];
@@ -329,7 +348,7 @@ Example: http://192.168.0.101:4042
 	// Save callback id for the region.
 	[self.callbackIds_startRangingBeaconsInRegion
 		setObject:command.callbackId
-		forKey:region.identifier];
+		forKey:[self regionDictionaryKey:region]];
 
     // Start ranging.
     [self.beaconManager startRangingBeaconsInRegion:region];
@@ -361,7 +380,7 @@ Example: http://192.168.0.101:4042
 
 	// Clear any existing callback.
 	NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
-		objectForKey:region.identifier];
+		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
 		// Clear callback on the JS side.
@@ -374,7 +393,7 @@ Example: http://192.168.0.101:4042
 
 		// Clear callback id.
 		[self.callbackIds_startRangingBeaconsInRegion
-			removeObjectForKey:region.identifier];
+			removeObjectForKey:[self regionDictionaryKey:region]];
 	}
 }
 
@@ -391,7 +410,7 @@ Example: http://192.168.0.101:4042
 	if ([beacons count] > 0)
 	{
 		NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
-			objectForKey:region.identifier];
+			objectForKey:[self regionDictionaryKey:region]];
 		if (nil != callbackId)
 		{
 			// Create dictionary with result.
@@ -418,8 +437,9 @@ Example: http://192.168.0.101:4042
 	rangingBeaconsDidFailForRegion:(ESTBeaconRegion*)region
 	withError:(NSError*)error
 {
+	// Send error message before callback is cleared.
 	NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
-		objectForKey:region.identifier];
+		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
 		// Pass error to JavaScript.
@@ -429,131 +449,168 @@ Example: http://192.168.0.101:4042
 				messageAsString: error.localizedDescription]
 			callbackId: callbackId];
     }
+
+	// Stop ranging and clear callback.
+	[self helper_stopRangingBeaconsInRegion:region];
 }
 
-
-// TODO: Rewrite methods below to use callbacks.
-
-/*
 #pragma mark - CoreLocation monitoring
 
+/**
+ * Start CoreLocation monitoring.
+ */
 - (void)startMonitoringForRegion:(CDVInvokedUrlCommand*)command
 {
-    NSString* regionid = [command argumentAtIndex:0];
-    id major = [command argumentAtIndex:1];
-    id minor = [command argumentAtIndex:2];
-	BOOL notifyEntryStateOnDisplay = [[command argumentAtIndex:3] boolValue];
+	NSLog(@"OBJC startMonitoringForRegion");
 
-    if ([self.regionWatchers objectForKey:regionid] != nil)
-	{
-        [self.commandDelegate
-			sendPluginResult:[CDVPluginResult
-				resultWithStatus:CDVCommandStatus_ERROR
-				messageAsString:@"Region with given ID is already monitored."]
-			callbackId:command.callbackId];
-    }
-	else
-	{
-        ESTBeaconRegion* region;
+	// Get region dictionary passed from JavaScript and
+	// create a beacon region object.
+    NSDictionary* regionDictionary = [command argumentAtIndex:0];
+    ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
-        if ((NSNull*)major == [NSNull null] || (NSNull*)minor == [NSNull null])
-		{
-            region = [[ESTBeaconRegion alloc]
-				initWithProximityUUID:ESTIMOTE_PROXIMITY_UUID
-				identifier:regionid];
+    // Stop any ongoing monitoring for the given region.
+    [self helper_stopMonitoringForRegion:region];
 
-        }
-		else
-		{
-            region = [[ESTBeaconRegion alloc]
-				initWithProximityUUID:ESTIMOTE_PROXIMITY_UUID
-				major:[major intValue]
-				minor:[minor intValue]
-				identifier:regionid];
-        }
+	// Save callback id for the region.
+	[self.callbackIds_startMonitoringForRegion
+		setObject:command.callbackId
+		forKey:[self regionDictionaryKey:region]];
 
-        region.notifyEntryStateOnDisplay = notifyEntryStateOnDisplay;
-
-        [self.beaconManager startMonitoringForRegion:region];
-        [self.beaconManager requestStateForRegion:region];
-
-        [self.regionWatchers setObject:command.callbackId  forKey:regionid];
-    }
+    // Start monitoring.
+    [self.beaconManager startMonitoringForRegion:region];
+	//[self.beaconManager requestStateForRegion:region];
 }
 
+/**
+ * Stop CoreLocation monitoring.
+ */
 - (void)stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
 {
-    NSString* regionid = [command.arguments objectAtIndex:0];
-    ESTBeaconRegion* regionFound = nil;
+	// Get region dictionary passed from JavaScript and
+	// create a beacon region object.
+    NSDictionary* regionDictionary = [command argumentAtIndex:0];
+    ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
-    for (ESTBeaconRegion* region in self.regionWatchers)
-	{
-        if ([region.identifier compare:regionid])
-		{
-            regionFound = region;
-            break;
-        }
-    }
+    // Stop monitoring.
+    [self helper_stopMonitoringForRegion:region];
 
-    if (regionFound != nil)
-	{
-        [self.beaconManager stopMonitoringForRegion:regionFound];
-
-        [self.commandDelegate
-			sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-			callbackId:command.callbackId];
-    }
-	else
-	{
-        [self.commandDelegate
-			sendPluginResult:[CDVPluginResult
-				resultWithStatus:CDVCommandStatus_ERROR
-				messageAsString:@"Region with given ID not found."]
-			callbackId:command.callbackId];
-    }
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
+		callbackId:command.callbackId];
 }
 
+- (void)helper_stopMonitoringForRegion:(ESTBeaconRegion*)region
+{
+    // Stop monitoring the region.
+	[self.beaconManager stopMonitoringForRegion:region];
+
+	// Clear any existing callback.
+	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+		objectForKey:[self regionDictionaryKey:region]];
+	if (nil != callbackId)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus:CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool:NO];
+		[self.commandDelegate
+			sendPluginResult:result
+			callbackId:callbackId];
+
+		// Clear callback id.
+		[self.callbackIds_startMonitoringForRegion
+			removeObjectForKey:[self regionDictionaryKey:region]];
+	}
+}
+
+- (void)beaconManager:(ESTBeaconManager *)manager
+	didStartMonitoringForRegion:(ESTBeaconRegion *)region
+{
+	// Not used.
+}
+
+- (void)beaconManager:(ESTBeaconManager *)manager
+	didEnterRegion:(ESTBeaconRegion *)region
+{
+	// Not used.
+}
+
+- (void)beaconManager:(ESTBeaconManager *)manager
+	didExitRegion:(ESTBeaconRegion *)region
+{
+	// Not used.
+}
+
+/**
+ * CoreLocation monitoring event.
+ */
 - (void)beaconManager:(ESTBeaconManager *)manager
 	didDetermineState:(CLRegionState)state
 	forRegion:(ESTBeaconRegion *)region
 {
-    NSString *result = nil;
-
+	// Create state string.
+    NSString* stateString;
     switch (state)
 	{
-        case CLRegionStateUnknown:
-            result = @"unknown";
-            break;
         case CLRegionStateInside:
-            result = @"enter";
+            stateString = @"inside";
             break;
         case CLRegionStateOutside:
-            result = @"exit";
+            stateString = @"outside";
             break;
+        case CLRegionStateUnknown:
         default:
-            result = @"unknown";
+            stateString = @"unknown";
     }
 
-    NSString* callbackId = [self.regionWatchers objectForKey:region.identifier];
-
-    if (callbackId != nil)
+	// Send result to JavaScript.
+	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+		objectForKey:[self regionDictionaryKey:region]];
+    if (nil != callbackId)
 	{
-        NSMutableDictionary* props = [NSMutableDictionary dictionaryWithCapacity:4];
+		// Create result object.
+        NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:8];
+        [dict setValue:region.proximityUUID.UUIDString forKey:@"uuid"];
+        [dict setValue:region.identifier forKey:@"identifier"];
+        [dict setValue:region.major forKey:@"major"];
+        [dict setValue:region.minor forKey:@"minor"];
+        [dict setValue:stateString forKey:@"state"];
 
-        [props setValue:region.identifier forKey:@"id"];
-        [props setValue:region.major forKey:@"major"];
-        [props setValue:region.minor forKey:@"minor"];
-        [props setValue:result forKey:@"action"];
-
+		// Send result.
         CDVPluginResult* result = [CDVPluginResult
-			resultWithStatus:CDVCommandStatus_OK messageAsDictionary:props];
+			resultWithStatus:CDVCommandStatus_OK
+			messageAsDictionary:dict];
         [result setKeepCallback:[NSNumber numberWithBool:YES]];
-
         [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     }
 }
 
-*/
+/**
+ * CoreLocation monitoring error event.
+ */
+- (void)beaconManager:(ESTBeaconManager *)manager
+	monitoringDidFailForRegion:(ESTBeaconRegion *)region
+	withError:(NSError *)error
+{
+	// Send error message before callback is cleared.
+	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+		objectForKey:[self regionDictionaryKey:region]];
+	if (nil != callbackId)
+	{
+		// Pass error to JavaScript.
+        [self.commandDelegate
+			sendPluginResult:[CDVPluginResult
+				resultWithStatus:CDVCommandStatus_ERROR
+				messageAsString: error.localizedDescription]
+			callbackId: callbackId];
+    }
+
+	// Stop monitoring and clear callback.
+	[self helper_stopMonitoringForRegion:region];
+}
+
+// TODO: Rewrite methods below to use callbacks.
 
 /*
 #pragma mark - Get beacons methods
