@@ -1,51 +1,48 @@
-cordova.define("pl.makingwaves.estimotebeacons.EstimoteBeacons", function(require, exports, module) {
-var exec = require('cordova/exec');
-
 /**
  * Helpers
  */
 function isString(value)
 {
-    return (typeof value == 'string' || value instanceof String);
+	return (typeof value == 'string' || value instanceof String);
 }
 
 function isInt(value)
 {
-    return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
+	return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
 }
 
 function checkExecParamsRegionSuccessError(region, success, error)
 {
 	var caller = checkExecParamsRegionSuccessError.caller.name
 
-    if (typeof region != "object") {
-        console.error("Error: region parameter is not an object in: " + caller);
-        return false;
-    }
+	if (typeof region != "object") {
+		console.error("Error: region parameter is not an object in: " + caller);
+		return false;
+	}
 
-    if (typeof success != "function") {
-        console.error("Error: success parameter is not a function in: " + caller);
-        return false;
-    }
+	if (typeof success != "function") {
+		console.error("Error: success parameter is not a function in: " + caller);
+		return false;
+	}
 
-    if (typeof error != "function") {
-        console.error("Error: error parameter is not a function in: " + caller);
-        return false;
-    }
+	if (typeof error != "function") {
+		console.error("Error: error parameter is not a function in: " + caller);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 function checkExecParamsRegion(region)
 {
 	var caller = checkExecParamsRegion.caller.name
 
-    if (typeof region != "object") {
-        console.error("Error: region parameter is not an object in: " + caller);
-        return false;
-    }
+	if (typeof region != "object") {
+		console.error("Error: region parameter is not an object in: " + caller);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 /**
@@ -54,6 +51,23 @@ function checkExecParamsRegion(region)
 function EstimoteBeacons()
 {
 }
+
+/**
+ * Beacon colours.
+ */
+EstimoteBeacons.prototype.BeaconColorUnknown = 0;
+EstimoteBeacons.prototype.BeaconColorMint = 1;
+EstimoteBeacons.prototype.BeaconColorIce = 2;
+EstimoteBeacons.prototype.BeaconColorBlueberry = 3;
+EstimoteBeacons.prototype.BeaconColorWhite = 4;
+EstimoteBeacons.prototype.BeaconColorTransparent = 5;
+
+/**
+ * Region states.
+ */
+EstimoteBeacons.prototype.RegionStateUnknown = "unknown";
+EstimoteBeacons.prototype.RegionStateOutside = "outside";
+EstimoteBeacons.prototype.RegionStateInside = "inside";
 
 /**
  * Print an object. Use for debugging. Example calls:
@@ -65,16 +79,16 @@ EstimoteBeacons.prototype.printObject = function(obj, printFun)
 	if (!printFun) { printFun = console.log; }
 	function print(obj, level)
 	{
-		var indent = new Array(level + 1).join('  ');
+		var indent = new Array(level + 1).join("  ");
 		for (var prop in obj) {
 			if (obj.hasOwnProperty(prop)) {
 				var value = obj[prop];
-				if (typeof value == 'object') {
-					printFun(indent + prop + ':');
+				if (typeof value == "object") {
+					printFun(indent + prop + ":");
 					print(value, level + 1);
 				}
 				else {
-					printFun(indent + prop + ': ' + value);
+					printFun(indent + prop + ": " + value);
 				}
 			}
 		}
@@ -127,18 +141,18 @@ EstimoteBeacons.prototype.printObject = function(obj, printFun)
  */
 EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
 {
-    if (!checkExecParamsRegionSuccessError(region, success, error)) {
-        return false;
-    }
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
 
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "startEstimoteBeaconsDiscoveryForRegion",
-        [region]
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startEstimoteBeaconsDiscoveryForRegion",
+		[region]
+	);
 
-    return true;
+	return true;
 };
 
 /**
@@ -158,14 +172,14 @@ EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (reg
  */
 EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, error)
 {
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "stopEstimoteBeaconDiscovery",
-        []
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopEstimoteBeaconDiscovery",
+		[]
+	);
 
-    return true;
+	return true;
 };
 
 /**
@@ -197,18 +211,18 @@ EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, error
  */
 EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, success, error)
 {
-    if (!checkExecParamsRegionSuccessError(region, success, error)) {
-        return false;
-    }
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
 
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "startRangingBeaconsInRegion",
-        [region]
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startRangingBeaconsInRegion",
+		[region]
+	);
 
-    return true;
+	return true;
 };
 
 /**
@@ -229,18 +243,18 @@ EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, succes
  */
 EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success, error)
 {
-    if (!checkExecParamsRegion(region)) {
-        return false;
-    }
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
 
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "stopRangingBeaconsInRegion",
-        [region]
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopRangingBeaconsInRegion",
+		[region]
+	);
 
-    return true;
+	return true;
 };
 
 /**
@@ -279,18 +293,18 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success
  */
 EstimoteBeacons.prototype.startMonitoringForRegion = function (region, success, error)
 {
-    if (!checkExecParamsRegionSuccessError(region, success, error)) {
-        return false;
-    }
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
 
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "startMonitoringForRegion",
-        [region]
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startMonitoringForRegion",
+		[region]
+	);
 
-    return true;
+	return true;
 };
 
 /**
@@ -311,18 +325,18 @@ EstimoteBeacons.prototype.startMonitoringForRegion = function (region, success, 
  */
 EstimoteBeacons.prototype.stopMonitoringForRegion = function (region, success, error)
 {
-    if (!checkExecParamsRegion(region)) {
-        return false;
-    }
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
 
-    exec(success,
-        error,
-        "EstimoteBeacons",
-        "stopMonitoringForRegion",
-        [region]
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopMonitoringForRegion",
+		[region]
+	);
 
-    return true;
+	return true;
 };
 
 /*
@@ -655,5 +669,3 @@ EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
 
 var estimoteBeacons = new EstimoteBeacons();
 module.exports = estimoteBeacons;
-
-});

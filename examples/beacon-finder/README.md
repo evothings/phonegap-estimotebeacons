@@ -1,28 +1,23 @@
-Example application: Beacon Finder
-========================
-Beacon Finder shows a dynamic list of available beacons with approximate distances from the phone.
+# Example application: Beacon Finder
 
-![Beacon finder in action](http://i.imgur.com/JhiMyvA.png)
+Beacon Finder is an example app that finds and displays beacons.
+
+## Discovery methods
+
+There are three methods of discovery:
+
+* Scanning - beacon data (distance not available, uses CoreBluetooth discovery)
+* Ranging - beacon data including distance (uses CoreLocation ranging)
+* Monitoring - region data (uses CoreLocation monitoring)
+
+Different data are available depending on the method used. Monitoring displays region data.
+
+## Screenshot
+
+![Beacon Finder screenshot](beacon-finder-screenshot.png)
 
 ## How to run it?
 
-This app is based on default PhoneGap application. In order to run it please:
-- create new PhoneGap application
-- override (not replace!) default contents of `www` folder with files from this folder
-- add iBeacons PhoneGap plugin
-- `phonegap local build ios`
-- run the app
+This app is meant to be built using Cordova or PhoneGap.
 
-## Problems?
-
-If app isn't working, make sure that following text is present in your `config.xml`:
-
-    <feature name="EstimoteBeacons">
-        <param name="ios-package" value="EstimoteBeacons" />
-        <param name="onload" value="true" />
-    </feature>
-
-It's not? Add it.
-
-## Still not working?
-Try the [troubleshooting guide](https://github.com/kdzwinel/phonegap-estimotebeacons/wiki/Troubleshooting-guide).
+TODO: Add build instructions.
