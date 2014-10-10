@@ -11,32 +11,34 @@
 	<body>
 		<div id="id-screen-home" class="style-screen">
 			<div class="style-heading-big style-color-purple">Beacon Finder</div>
-			<div class="style-button style-color-blueberry-dark"
+			<div class="style-button style-color-blueberry"
 				ontouchend="app.startScanning()">Scan Beacons</div>
 			<div class="style-button style-color-yellow"
 				ontouchend="app.startRanging()">Range Beacons</div>
 			<div class="style-button style-color-pink"
 				ontouchend="app.startMonitoring()">Monitor Beacons</div>
+			<div class="style-button-back style-color-blueberry"
+				ontouchend="history.back()">Back</div>
 		</div>
 
 		<div id="id-screen-scan" class="style-screen">
 			<div class="style-heading-small style-color-purple">Scanning</div>
-			<div class="style-button-back style-color-blueberry-dark"
+			<div class="style-button-back style-color-blueberry"
 				ontouchend="app.stopScanning()">Back</div>
 			<div class="style-beacon-list"></div>
 		</div>
 
 		<div id="id-screen-range" class="style-screen">
 			<div class="style-heading-small style-color-purple">Ranging</div>
-			<div class="style-button-back style-color-blueberry-dark"
+			<div class="style-button-back style-color-blueberry"
 				ontouchend="app.stopRanging()">Back</div>
 			<div class="style-beacon-list"></div>
 		</div>
 
 		<div id="id-screen-monitor" class="style-screen">
 			<div class="style-heading-small style-color-purple">Monitoring</div>
-			<div class="style-button-back style-color-blueberry-dark"
-			ontouchend="app.stopMonitoring()">Back</div>
+			<div class="style-button-back style-color-blueberry"
+				ontouchend="app.stopMonitoring()">Back</div>
 			<div class="style-beacon-list"></div>
 		</div>
 

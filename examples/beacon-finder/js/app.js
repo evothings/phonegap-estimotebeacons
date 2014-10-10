@@ -7,12 +7,12 @@ var app = (function()
 	app.deviceIsReady = false;
 	app.currentScreenId = null;
 	app.beaconColorStyles = [
-		'style-color-unknown',
-		'style-color-mint',
-		'style-color-ice',
-		'style-color-blueberry',
-		'style-color-white',
-		'style-color-transparent'];
+		'style-color-unknown style-color-unknown-text',
+		'style-color-mint style-color-mint-text',
+		'style-color-ice style-color-ice-text',
+		'style-color-blueberry-dark style-color-blueberry-dark-text',
+		'style-color-white style-color-white-text',
+		'style-color-transparent style-color-transparent-text'];
 	app.proximityNames = [
 		'unknown',
 		'immediate',
@@ -106,8 +106,14 @@ var app = (function()
 
 		function displayBeconInfo(beaconInfo)
 		{
+			// Clear beacon HTML items.
 			$('#id-screen-scan .style-beacon-list').empty();
 
+			// Sort beacons by signal strength.
+			beaconInfo.beacons.sort(function(beacon1, beacon2) {
+				return beacon1.rssi > beacon2.rssi; });
+
+			// Generate HTML for beacons.
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
 				var element = $(createBeaconHTML(beacon));
@@ -117,8 +123,8 @@ var app = (function()
 
 		function createBeaconHTML(beacon)
 		{
-			var color = beaconColorStyle(beacon.color);
-			htm = '<div class="' + color + '">'
+			var colorClasses = beaconColorStyle(beacon.color);
+			htm = '<div class="' + colorClasses + '">'
 				+ '<table><tr><td>Major</td><td>' + beacon.major
 				+ '</td></tr><tr><td>Minor</td><td>' + beacon.minor
 				+ '</td></tr><tr><td>RSSI</td><td>' + beacon.rssi
@@ -156,8 +162,14 @@ var app = (function()
 
 		function displayBeconInfo(beaconInfo)
 		{
+			// Clear beacon HTML items.
 			$('#id-screen-range .style-beacon-list').empty();
 
+			// Sort beacons by distance.
+			beaconInfo.beacons.sort(function(beacon1, beacon2) {
+				return beacon1.distance > beacon2.distance; });
+
+			// Generate HTML for beacons.
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
 				var element = $(createBeaconHTML(beacon));
@@ -167,8 +179,8 @@ var app = (function()
 
 		function createBeaconHTML(beacon)
 		{
-			var color = beaconColorStyle(beacon.color);
-			htm = '<div class="' + color + '">'
+			var colorClasses = beaconColorStyle(beacon.color);
+			htm = '<div class="' + colorClasses + '">'
 				+ '<table><tr><td>Major</td><td>' + beacon.major
 				+ '</td></tr><tr><td>Minor</td><td>' + beacon.minor
 				+ '</td></tr><tr><td>RSSI</td><td>' + beacon.rssi

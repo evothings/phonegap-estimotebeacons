@@ -23,14 +23,34 @@ html,body
 	background: rgb(255,255,255);
 }
 
+.style-color-white-text,
+.style-color-unknown-text,
+.style-color-transparent-text
+{
+	color: rgb(0,0,0) !important;
+}
+
 .style-color-mint
 {
-	background: #98c6a7;
+	/*background: #98c6a7;*/
+	background: rgb(215,228,177);
+}
+
+.style-color-mint-text
+{
+	color: rgb(0,0,0) !important;
 }
 
 .style-color-ice
 {
-	background: #9fddf9;
+	/*background: #9fddf9;*/
+	/*background: rgb(200,238,248);*/
+	background: rgb(165,213,209);
+}
+
+.style-color-ice-text
+{
+	color: rgb(0,0,0) !important;
 }
 
 .style-color-blueberry
@@ -38,9 +58,19 @@ html,body
 	background: #5c58a7;
 }
 
+.style-color-blueberry-text
+{
+	color: rgb(0,0,0) !important;
+}
+
 .style-color-blueberry-dark
 {
 	background: #2d2756;
+}
+
+.style-color-blueberry-dark-text
+{
+	color: rgb(255,255,255) !important;
 }
 
 .style-color-purple
@@ -110,7 +140,7 @@ html,body
 {
 	margin: 1.5%;
 	padding: 1% 2%;
-	color: black;
+	color: white;
 	font-size: 100%;
 	font-weight: bold;
 }
