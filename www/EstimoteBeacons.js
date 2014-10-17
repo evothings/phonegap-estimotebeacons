@@ -1,3 +1,6 @@
+
+var exec = cordova.require('cordova/exec');
+
 /**
  * Helpers
  */

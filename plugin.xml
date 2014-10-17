@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
-    id="pl.makingwaves.estimotebeacons"
-    version="0.2.0">
-    <name>EstimoteBeacons</name>
+	id="pl.makingwaves.estimotebeacons"
+	version="0.3.0">
+
+	<name>EstimoteBeacons</name>
 	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
 	<license>MIT</license>
 	<keywords>Estimote, Beacons</keywords>
-    <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
-        <clobbers target="EstimoteBeacons" />
-    </js-module>
-    <!-- ios -->
-    <platform name="ios">
+
+	<js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
+		<clobbers target="EstimoteBeacons" />
+	</js-module>
+
+	<platform name="android">
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="EstimoteBeacons" >
+				<param name="android-package" value="com.evothings.EstimoteBeacons"/>
+			</feature>
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.BLUETOOTH" />
+			<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<service android:name="com.estimote.sdk.service.BeaconService" android:exported="false"/>
+		</config-file>
+
+		<source-file src="src/android/EstimoteBeacons.java" target-dir="src/com/evothings" />
+		<source-file src="src/android/estimote-sdk-preview.jar" target-dir="libs" />
+	</platform>
+
+	<platform name="ios">
 		<framework src="CoreBluetooth.framework" />
 		<framework src="CoreLocation.framework" />
 		<framework src="SystemConfiguration.framework" />
@@ -22,13 +42,13 @@
 		<header-file src="src/ios/Headers/ESTBeaconFirmwareInfoVO.h" />
 		<header-file src="src/ios/Headers/ESTBeaconFirmwareVO.h" />
 		<header-file src="src/ios/Headers/ESTBeaconVO.h" />
-        <header-file src="src/ios/EstimoteBeacons.h" />
-        <source-file src="src/ios/EstimoteBeacons.m" />
+		<header-file src="src/ios/EstimoteBeacons.h" />
+		<source-file src="src/ios/EstimoteBeacons.m" />
 
-    	<config-file target="config.xml" parent="/*">
-            <feature name="EstimoteBeacons">
-                <param name="ios-package" value="EstimoteBeacons" />
-            </feature>
-        </config-file>
+		<config-file target="config.xml" parent="/*">
+			<feature name="EstimoteBeacons">
+				<param name="ios-package" value="EstimoteBeacons" />
+			</feature>
+		</config-file>
 	</platform>
 </plugin>

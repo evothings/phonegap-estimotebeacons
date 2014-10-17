@@ -48,6 +48,9 @@ var app = (function()
 
 	function beaconColorStyle(color)
 	{
+		if(color === undefined)
+			color = 0;
+
 		// Eliminate bad values (just in case).
 		color = Math.max(0, color);
 		color = Math.min(5, color);
@@ -96,6 +99,7 @@ var app = (function()
 
 		function onScan(beaconInfo)
 		{
+			console.log('onScan');
 			displayBeconInfo(beaconInfo);
 		}
 
@@ -106,6 +110,7 @@ var app = (function()
 
 		function displayBeconInfo(beaconInfo)
 		{
+			console.log('displayBeconInfo');
 			// Clear beacon HTML items.
 			$('#id-screen-scan .style-beacon-list').empty();
 
@@ -114,15 +119,23 @@ var app = (function()
 				return beacon1.rssi > beacon2.rssi; });
 
 			// Generate HTML for beacons.
+			var html = '';
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
+				/*	// jQuery doesn't work.
 				var element = $(createBeaconHTML(beacon));
 				$('#id-screen-scan .style-beacon-list').append(element);
+				*/
+				html += createBeaconHTML(beacon);
 			});
+			var list = document.getElementById('id-screen-scan-list');
+			list.innerHtml = html;
+			console.log('added to: '+list);
 		};
 
 		function createBeaconHTML(beacon)
 		{
+			console.log('beacon: '+beacon.major+' '+beacon.minor+', '+beacon.rssi+' ('+beacon.measuredPower+')');
 			var colorClasses = beaconColorStyle(beacon.color);
 			htm = '<div class="' + colorClasses + '">'
 				+ '<table><tr><td>Major</td><td>' + beacon.major
@@ -134,6 +147,7 @@ var app = (function()
 			return htm;
 		};
 
+		console.log("startEstimoteBeaconsDiscoveryForRegion")
 		EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
 			{}, // Empty region matches all beacons.
 			onScan,
@@ -142,6 +156,7 @@ var app = (function()
 
 	app.stopScanning = function()
 	{
+		console.log("stopEstimoteBeaconDiscovery")
 		EstimoteBeacons.stopEstimoteBeaconDiscovery();
 		app.showHomeScreen();
 	};
@@ -152,6 +167,7 @@ var app = (function()
 
 		function onRange(beaconInfo)
 		{
+			console.log('onRange');
 			displayBeconInfo(beaconInfo);
 		}
 

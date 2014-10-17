@@ -7,6 +7,15 @@
 			initial-scale=1, maximum-scale=1, minimum-scale=1" />
 		<link rel="stylesheet" href="css/app.css" />
 		<title>Beacon Finder</title>
+		<script>
+		if (window.hyper) { console.log = hyper.log; }
+
+		window.onerror = function(msg, url, line)
+		{
+			console.log(msg + ": " + url + ":" + line);
+		};
+		console.log("Hello World!")
+		</script>
 	</head>
 	<body>
 		<div id="id-screen-home" class="style-screen">
@@ -25,7 +34,7 @@
 			<div class="style-heading-small style-color-purple">Scanning</div>
 			<div class="style-button-back style-color-blueberry"
 				ontouchend="app.stopScanning()">Back</div>
-			<div class="style-beacon-list"></div>
+			<div id="id-screen-scan-list" class="style-beacon-list"></div>
 		</div>
 
 		<div id="id-screen-range" class="style-screen">
