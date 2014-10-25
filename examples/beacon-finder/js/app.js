@@ -2,9 +2,15 @@
 // change its visible name, if that would be needed.
 var app = (function()
 {
+	// Application object.
 	var app = {};
 
-	app.deviceIsReady = false;
+	// Touch event state.
+	var touchIsActive = false
+	var touchStartX = 0
+	var touchStartY = 0
+
+	// Application data.
 	app.currentScreenId = null;
 	app.beaconColorStyles = [
 		'style-color-unknown style-color-unknown-text',
@@ -19,9 +25,18 @@ var app = (function()
 		'near',
 		'far'];
 
+	// ------------- Private helper functions ------------- //
+
 	function onDeviceReady()
 	{
-		app.deviceIsReady = true;
+		// TODO: Add functionality if needed.
+	}
+
+	function checkTouchActive()
+	{
+		var active = touchIsActive;
+		touchIsActive = false;
+		return active;
 	}
 
 	function formatDistance(meters)
@@ -48,8 +63,10 @@ var app = (function()
 
 	function beaconColorStyle(color)
 	{
-		if(color === undefined)
+		if (!color)
+		{
 			color = 0;
+		}
 
 		// Eliminate bad values (just in case).
 		color = Math.max(0, color);
@@ -58,6 +75,8 @@ var app = (function()
 		// Return style class for color.
 		return app.beaconColorStyles[color];
 	}
+
+	// ------------- Public application functions ------------- //
 
 	app.showScreen = function(screenId)
 	{
@@ -99,7 +118,7 @@ var app = (function()
 
 		function onScan(beaconInfo)
 		{
-			console.log('onScan');
+			//console.log('onScan');
 			displayBeconInfo(beaconInfo);
 		}
 
@@ -110,7 +129,7 @@ var app = (function()
 
 		function displayBeconInfo(beaconInfo)
 		{
-			console.log('displayBeconInfo');
+			//console.log('displayBeconInfo');
 			// Clear beacon HTML items.
 			$('#id-screen-scan .style-beacon-list').empty();
 
@@ -122,15 +141,10 @@ var app = (function()
 			var html = '';
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
-				/*	// jQuery doesn't work.
+				// jQuery doesn't work.
 				var element = $(createBeaconHTML(beacon));
 				$('#id-screen-scan .style-beacon-list').append(element);
-				*/
-				html += createBeaconHTML(beacon);
 			});
-			var list = document.getElementById('id-screen-scan-list');
-			list.innerHtml = html;
-			console.log('added to: '+list);
 		};
 
 		function createBeaconHTML(beacon)
@@ -269,9 +283,86 @@ var app = (function()
 		app.showHomeScreen();
 	};
 
+	// ------------- Public touch event functions ------------- //
+
+	app.onStartScanning = function()
+	{
+		console.log('app.onStartScanning1');
+		if (!checkTouchActive()) { return }
+		console.log('app.onStartScanning2');
+		app.startScanning();
+	};
+
+	app.onStopScanning = function()
+	{
+		if (!checkTouchActive()) { return }
+		app.stopScanning();
+	};
+
+	app.onStartRanging = function()
+	{
+		if (!checkTouchActive()) { return }
+		app.startRanging();
+	};
+
+	app.onStopRanging = function()
+	{
+		if (!checkTouchActive()) { return }
+		app.stopRanging();
+	};
+
+	app.onStartMonitoring = function()
+	{
+		if (!checkTouchActive()) { return }
+		app.startMonitoring();
+	};
+
+	app.onStopMonitoring = function()
+	{
+		if (!checkTouchActive()) { return }
+		app.stopMonitoring();
+	};
+
+	app.onNavigateBack = function()
+	{
+		if (!checkTouchActive()) { return }
+		history.back();
+	};
+
+	app.onTouchStart = function(event)
+	{
+		var changedTouch = event.changedTouches[0];
+		touchStartX = changedTouch.screenX
+		touchStartY = changedTouch.screenY;
+		touchIsActive = true;
+	};
+
+	app.onTouchMove = function(event)
+	{
+		if (touchIsActive)
+		{
+			var changedTouch = event.changedTouches[0];
+			var touchDeltaX = Math.abs(changedTouch.screenX - touchStartX);
+			var touchDeltaY = Math.abs(changedTouch.screenY - touchStartY);
+			if (touchDeltaX > 5 || touchDeltaY > 5)
+			{
+				touchIsActive = false;
+			}
+		}
+	};
+
+	app.onTouchCancel = function(event)
+	{
+		touchIsActive = false;
+	};
+
+	// ------------- Initialisation ------------- //
+
 	document.addEventListener('deviceready', onDeviceReady, false);
 
 	app.showHomeScreen();
+
+	// ------------- Return application object ------------- //
 
 	return app;
 

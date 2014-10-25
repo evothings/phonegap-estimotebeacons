@@ -100,6 +100,86 @@ EstimoteBeacons.prototype.printObject = function(obj, printFun)
 };
 
 /**
+ * Ask the user for permission to use location services
+ * while the app is in the foreground.
+ * You need to call this function or requestAlwaysAuthorization
+ * on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (optional).
+ * @param error Function called on error (optional).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.requestWhenInUseAuthorization()
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, error)
+{
+};
+
+/**
+ * Ask the user for permission to use location services
+ * whenever the app is running.
+ * You need to call this function or requestWhenInUseAuthorization
+ * on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (optional).
+ * @param error Function called on error (optional).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.requestAlwaysAuthorization()
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
+{
+};
+
+/**
+ * Get the current location authorization status.
+ * Implemented on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(result)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.authorizationStatus(function(result) {
+ *       console.log('Location authorization status: ' + result) },
+ *     function(errorMessage) {
+ *       console.log('Error: ' + errorMessage) }
+ *   )
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.authorizationStatus = function (success, error)
+{
+};
+
+/**
  * Start scanning for beacons using CoreBluetooth.
  *
  * @param region Dictionary with region properties (mandatory).
