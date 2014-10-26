@@ -35,3 +35,7 @@ Documentation of available functions and their use are found in file:
 [EstimoteBeacons.js](https://github.com/divineprog/phonegap-estimotebeacons/blob/master/www/EstimoteBeacons.js)
 
 (A more readable documentation is planned! Sorry for the inconvenience.)
+
+For iOS 8, please remember to update your Info.plist file with usage descriptions for locations services, see article [Estimote SDK and iOS 8 Location Services](https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services) for further details.
+
+
