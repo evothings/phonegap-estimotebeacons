@@ -627,6 +627,73 @@ Example: http://192.168.0.101:4042
 	[self helper_stopMonitoringForRegion:region];
 }
 
+#pragma mark - CoreLocation authorization
+
+/**
+ * Request authorisation for use when app is in foreground.
+ */
+- (void)requestWhenInUseAuthorization:(CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC requestWhenInUseAuthorization");
+
+    // Only applicable on iOS 8 and above.
+    if (IsAtLeastiOSVersion(@"8.0"))
+	{
+		[self.beaconManager requestWhenInUseAuthorization];
+	}
+
+	// Return OK to JavaScript.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult
+			resultWithStatus:CDVCommandStatus_OK]
+		callbackId:command.callbackId];
+}
+
+/**
+ * Request authorisation for use also when app is in background.
+ */
+- (void)requestAlwaysAuthorization:(CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC requestAlwaysAuthorization");
+
+    // Only applicable on iOS 8 and above.
+    if (IsAtLeastiOSVersion(@"8.0"))
+	{
+		[self.beaconManager requestAlwaysAuthorization];
+	}
+
+	// Return OK to JavaScript.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult
+			resultWithStatus:CDVCommandStatus_OK]
+		callbackId:command.callbackId];
+}
+
+/**
+ * Request authorisation for use also when app is in background.
+ */
+- (void)authorizationStatus:(CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC authorizationStatus");
+
+	// Default value.
+	// TODO: Should we use the real value also on iOS 7? Is it available?
+	CLAuthorizationStatus status = kCLAuthorizationStatusNotDetermined;
+
+    // Only available on iOS 8 and above.
+    if (IsAtLeastiOSVersion(@"8.0"))
+	{
+		status = [ESTBeaconManager authorizationStatus];
+	}
+
+	// Return status value to JavaScript.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult
+			resultWithStatus:CDVCommandStatus_OK
+			messageAsInt:status]
+		callbackId:command.callbackId];
+}
+
 // TODO: Rewrite methods below to use callbacks.
 
 /*

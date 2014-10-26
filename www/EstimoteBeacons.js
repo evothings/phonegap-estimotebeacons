@@ -36,6 +36,23 @@ function checkExecParamsRegionSuccessError(region, success, error)
 	return true;
 }
 
+function checkExecParamsSuccessError(success, error)
+{
+	var caller = checkExecParamsSuccessError.caller.name
+
+	if (typeof success != "function") {
+		console.error("Error: success parameter is not a function in: " + caller);
+		return false;
+	}
+
+	if (typeof error != "function") {
+		console.error("Error: error parameter is not a function in: " + caller);
+		return false;
+	}
+
+	return true;
+}
+
 function checkExecParamsRegion(region)
 {
 	var caller = checkExecParamsRegion.caller.name
@@ -123,6 +140,14 @@ EstimoteBeacons.prototype.printObject = function(obj, printFun)
  */
 EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, error)
 {
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"requestWhenInUseAuthorization",
+		[]
+	);
+
+	return true;
 };
 
 /**
@@ -149,6 +174,14 @@ EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, err
  */
 EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
 {
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"requestAlwaysAuthorization",
+		[]
+	);
+
+	return true;
 };
 
 /**
@@ -166,7 +199,8 @@ EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
  *   error(errorMessage)
  *
  * Example:
- *   EstimoteBeacons.authorizationStatus(function(result) {
+ *   EstimoteBeacons.authorizationStatus(
+ *     function(result) {
  *       console.log('Location authorization status: ' + result) },
  *     function(errorMessage) {
  *       console.log('Error: ' + errorMessage) }
@@ -177,6 +211,18 @@ EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
  */
 EstimoteBeacons.prototype.authorizationStatus = function (success, error)
 {
+	if (!checkExecParamsSuccessError(success, error)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"authorizationStatus",
+		[]
+	);
+
+	return true;
 };
 
 /**

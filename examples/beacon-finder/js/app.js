@@ -41,6 +41,8 @@ var app = (function()
 
 	function formatDistance(meters)
 	{
+		if (!meters) { return 'Unknown'; }
+
 		if (meters > 1)
 		{
 			return meters.toFixed(3) + ' m';
@@ -53,6 +55,8 @@ var app = (function()
 
 	function formatProximity(proximity)
 	{
+		if (!proximity) { return 'Unknown'; }
+
 		// Eliminate bad values (just in case).
 		proximity = Math.max(0, proximity);
 		proximity = Math.min(3, proximity);
@@ -114,8 +118,6 @@ var app = (function()
 
 	app.startScanning = function()
 	{
-		app.showScanScreen();
-
 		function onScan(beaconInfo)
 		{
 			//console.log('onScan');
@@ -161,7 +163,10 @@ var app = (function()
 			return htm;
 		};
 
+		app.showScanScreen();
+
 		console.log("startEstimoteBeaconsDiscoveryForRegion")
+
 		EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
 			{}, // Empty region matches all beacons.
 			onScan,
@@ -177,8 +182,6 @@ var app = (function()
 
 	app.startRanging = function()
 	{
-		app.showRangeScreen();
-
 		function onRange(beaconInfo)
 		{
 			console.log('onRange');
@@ -214,13 +217,23 @@ var app = (function()
 				+ '<table><tr><td>Major</td><td>' + beacon.major
 				+ '</td></tr><tr><td>Minor</td><td>' + beacon.minor
 				+ '</td></tr><tr><td>RSSI</td><td>' + beacon.rssi
-				+ '</td></tr><tr><td>Proximity</td><td>'
-				+ formatProximity(beacon.proximity)
-				+ '</td></tr><tr><td>Distance</td><td>'
-				+ formatDistance(beacon.distance)
-				+ '</td></tr></table></div>';
+			if (beacon.proximity)
+			{
+				htm += '</td></tr><tr><td>Proximity</td><td>'
+					+ formatProximity(beacon.proximity)
+			}
+			if (beacon.distance)
+			{
+				htm += '</td></tr><tr><td>Distance</td><td>'
+					+ formatDistance(beacon.distance)
+			}
+			htm += '</td></tr></table></div>';
 			return htm;
 		};
+
+		app.showRangeScreen();
+
+		EstimoteBeacons.requestWhenInUseAuthorization();
 
 		EstimoteBeacons.startRangingBeaconsInRegion(
 			{}, // Empty region matches all beacons.
@@ -236,8 +249,6 @@ var app = (function()
 
 	app.startMonitoring = function()
 	{
-		app.showMonitorScreen();
-
 		function onMonitor(regionState)
 		{
 			displayRegionInfo(regionState);
@@ -270,6 +281,10 @@ var app = (function()
 				+ '</td></tr></table></div>';
 			return htm;
 		};
+
+		app.showMonitorScreen();
+
+		EstimoteBeacons.requestWhenInUseAuthorization();
 
 		EstimoteBeacons.startMonitoringForRegion(
 			{}, // Empty region matches all beacons.
