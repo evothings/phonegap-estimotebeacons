@@ -233,7 +233,7 @@ var app = (function()
 
 		app.showRangeScreen();
 
-		EstimoteBeacons.requestWhenInUseAuthorization();
+		EstimoteBeacons.requestAlwaysAuthorization();
 
 		EstimoteBeacons.startRangingBeaconsInRegion(
 			{}, // Empty region matches all beacons.
@@ -284,7 +284,7 @@ var app = (function()
 
 		app.showMonitorScreen();
 
-		EstimoteBeacons.requestWhenInUseAuthorization();
+		EstimoteBeacons.requestAlwaysAuthorization();
 
 		EstimoteBeacons.startMonitoringForRegion(
 			{}, // Empty region matches all beacons.
