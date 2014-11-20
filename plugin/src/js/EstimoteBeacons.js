@@ -73,6 +73,14 @@ function EstimoteBeacons()
 }
 
 /**
+ * Proximity values.
+ */
+EstimoteBeacons.prototype.ProximityUnknown = 0;
+EstimoteBeacons.prototype.ProximityImmediate = 1;
+EstimoteBeacons.prototype.ProximityNear = 2;
+EstimoteBeacons.prototype.ProximityFar = 3;
+
+/**
  * Beacon colours.
  */
 EstimoteBeacons.prototype.BeaconColorUnknown = 0;

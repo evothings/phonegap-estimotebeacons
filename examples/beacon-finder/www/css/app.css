@@ -16,15 +16,23 @@ html,body
 	-webkit-user-select: none;
 }
 
+.style-color-unknown
+{
+	background: #d6d422;
+}
+
+.style-color-unknown-text
+{
+	color: rgb(255,255,255) !important;
+}
+
 .style-color-white,
-.style-color-unknown,
 .style-color-transparent
 {
 	background: rgb(255,255,255);
 }
 
 .style-color-white-text,
-.style-color-unknown-text,
 .style-color-transparent-text
 {
 	color: rgb(0,0,0) !important;

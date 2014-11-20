@@ -24,13 +24,15 @@
 
 		<div id="id-screen-home" class="style-screen">
 			<div class="style-heading-big style-color-purple">Beacon Finder</div>
-			<div class="style-button style-color-blueberry"
+			<div id="id-screen-home-button-scan"
+				class="style-button style-color-blueberry"
 				ontouchend="app.onStartScanning()">Scan Beacons</div>
 			<div class="style-button style-color-yellow"
 				ontouchend="app.onStartRanging()">Range Beacons</div>
 			<div class="style-button style-color-pink"
 				ontouchend="app.onStartMonitoring()">Monitor Beacons</div>
-			<div class="style-button-back style-color-blueberry"
+			<div id="id-screen-home-button-back"
+				class="style-button-back style-color-blueberry"
 				ontouchend="app.onNavigateBack()">Back</div>
 		</div>
 
@@ -58,5 +60,23 @@
 		<script src="cordova.js"></script>
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/app.js"></script>
+		<script>
+		// Hide back button if we referrer is empty.
+		var hasReferrer = document.referrer && document.referrer != '';
+		if (!hasReferrer)
+		{
+      		$('#id-screen-home-button-back').hide();
+      	}
+
+		// Hide scan button on Android.
+		var isAndroid =
+			navigator.userAgent.match(/Android/) ||
+			navigator.userAgent.match(/android/);
+		if (isAndroid)
+		{
+      		$('#id-screen-home-button-scan').hide();
+      	}
+      </script>
+
 	</body>
 </html>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="pl.makingwaves.estimotebeacons"
-	version="0.3.0">
+	version="0.5.0">
 
 	<name>EstimoteBeacons</name>
 	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
 	<license>MIT</license>
 	<keywords>Estimote, Beacons</keywords>
 
-	<js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
+	<js-module src="src/js/EstimoteBeacons.js" name="EstimoteBeacons">
 		<clobbers target="EstimoteBeacons" />
 	</js-module>
 
