@@ -66,8 +66,6 @@ On iOS 8 your app should ask for permission to use location services (required f
         successCallback,
         errorCallback)
 
-For iOS 8, also remember to update your Info.plist file with usage descriptions for locations services, see article [Estimote SDK and iOS 8 Location Services](https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services) for further details.
-
 ## How to access beacon data
 
 When you use ranging or scanning, you have access to a variety of beacon properties. Different properties are available depending on whether ranging or scanning is used. (Note that during monitoring you don’t get data for individual beacons, rather you get data about regions entered and exited.)

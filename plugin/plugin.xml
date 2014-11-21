@@ -34,6 +34,7 @@
 		<framework src="CoreBluetooth.framework" />
 		<framework src="CoreLocation.framework" />
 		<framework src="SystemConfiguration.framework" />
+
 		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
 		<header-file src="src/ios/Headers/ESTBeacon.h" />
 		<header-file src="src/ios/Headers/ESTBeaconDefinitions.h" />
@@ -50,5 +51,18 @@
 				<param name="ios-package" value="EstimoteBeacons" />
 			</feature>
 		</config-file>
+
+        <config-file parent="/*" target="config.xml">
+            <feature name="LocationManager">
+                <param name="ios-package" value="CDVLocationManager"/>
+            </feature>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+            <string>This app would like to scan for Estimote Beacons also when in the background.</string>
+        </config-file>
+        <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
+            <string>This app would like to scan for Estimote Beacons while it is in use.</string>
+        </config-file>
 	</platform>
 </plugin>
