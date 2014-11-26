@@ -400,8 +400,22 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success
  * @param region Dictionary with region properties (mandatory).
  * @param success Function called when beacons are enter/exit the region (mandatory).
  * @param error Function called on error (mandatory).
+ * @param notifyEntryStateOnDisplay Set to true to detect if you
+ * are inside a region when the user turns display on (optional,
+ * defaults to false, iOS only).
  *
  * See function startEstimoteBeaconsDiscoveryForRegion for region format.
+ *
+ * Details regarding parameter notifyEntryStateOnDisplay from the iOS documentation:
+ *
+ * "When set to YES, the location manager sends beacon notifications when
+ * the user turns on the display and the device is already inside the region.
+ * These notifications are sent even if your app is not running. In that
+ * situation, the system launches your app into the background so that it
+ * can handle the notifications. In both situations, the location manager
+ * calls the locationManager:didDetermineState:forRegion: method of its
+ * delegate object.
+ * The default value for this property is NO."
  *
  * success callback format:
  *   success(regionState)
@@ -428,7 +442,8 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success
  *       console.log('Monitoring error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.prototype.startMonitoringForRegion = function (region, success, error)
+EstimoteBeacons.prototype.startMonitoringForRegion = function (
+	region, success, error, notifyEntryStateOnDisplay)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -438,7 +453,7 @@ EstimoteBeacons.prototype.startMonitoringForRegion = function (region, success, 
 		error,
 		"EstimoteBeacons",
 		"startMonitoringForRegion",
-		[region]
+		[region, !!notifyEntryStateOnDisplay]
 	);
 
 	return true;

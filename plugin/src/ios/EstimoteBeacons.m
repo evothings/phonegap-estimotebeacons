@@ -47,8 +47,9 @@ TODO: Remove.
 	// Crete beacon manager instance.
 	self.beaconManager = [ESTBeaconManager new];
 	self.beaconManager.delegate = self;
-	// TODO: Uncomment if needed.
-	//self.beaconManager.avoidUnknownStateBeacons = YES;
+
+	// This will skip beacons with proximity CLProximityUnknown when ranging.
+	self.beaconManager.avoidUnknownStateBeacons = YES;
 
 	// Variables that track callback ids.
 	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
@@ -253,10 +254,13 @@ TODO: Remove.
 	// Stop discovery.
 	[self helper_stopEstimoteBeaconDiscovery];
 
-	// Respond to JavaScript with OK.
-	[self.commandDelegate
-		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-		callbackId:command.callbackId];
+	// Respond to JavaScript with OK if a Cordova command object was passed.
+	if (nil != command)
+	{
+		[self.commandDelegate
+			sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
+			callbackId:command.callbackId];
+	}
 }
 
 - (void) helper_stopEstimoteBeaconDiscovery
@@ -480,6 +484,9 @@ Example: http://192.168.0.101:4042
 	// create a beacon region object.
 	NSDictionary* regionDictionary = [command argumentAtIndex:0];
 	ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
+
+	// Set region notification when display is activated.
+	region.notifyEntryStateOnDisplay = [command argumentAtIndex:1];
 
 	// Stop any ongoing monitoring for the given region.
 	[self helper_stopMonitoringForRegion:region];
