@@ -5,6 +5,10 @@
 * Currently scanning, ranging and monitoring is implemented
 * Connecting to beacons and and reading/writing data is planned to be implemented as the next step
 
+## Updated API
+
+The JavaScript API has been updated. Please note that the new API is not backwards compatible. The original API is available in the branch "0.1.0".
+
 ## Example app
 
 Try out the Beacon Finder example app. It is available in the examples folder in this repository.
