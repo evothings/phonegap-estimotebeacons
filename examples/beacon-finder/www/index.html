@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="format-detection" content="telephone=no" />
+		<meta name="viewport" content="width=device-width, user-scalable=no,
+			initial-scale=1, maximum-scale=1, minimum-scale=1" />
+		<link rel="stylesheet" href="css/app.css" />
+		<title>Beacon Finder</title>
+		<script>
+		if (window.hyper) { console.log = hyper.log; }
+
+		window.onerror = function(msg, url, line)
+		{
+			console.log(msg + ": " + url + ":" + line);
+		};
+		console.log("Hello World!")
+		</script>
+	</head>
+	<body
+		ontouchstart="app.onTouchStart(event)"
+		ontouchmove="app.onTouchMove(event)"
+		ontouchcancel="app.onTouchCancel(event)">
+
+		<div id="id-screen-home" class="style-screen">
+			<div class="style-heading-big style-color-purple">Beacon Finder</div>
+			<div id="id-screen-home-button-scan"
+				class="style-button style-color-blueberry"
+				ontouchend="app.onStartScanning()">Scan Beacons</div>
+			<div class="style-button style-color-yellow"
+				ontouchend="app.onStartRanging()">Range Beacons</div>
+			<div class="style-button style-color-pink"
+				ontouchend="app.onStartMonitoring()">Monitor Beacons</div>
+			<div id="id-screen-home-button-back"
+				class="style-button-back style-color-blueberry"
+				ontouchend="app.onNavigateBack()">Back</div>
+		</div>
+
+		<div id="id-screen-scan" class="style-screen">
+			<div class="style-heading-small style-color-purple">Scanning</div>
+			<div class="style-button-back style-color-blueberry"
+				ontouchend="app.onStopScanning()">Back</div>
+			<div class="style-beacon-list"></div>
+		</div>
+
+		<div id="id-screen-range" class="style-screen">
+			<div class="style-heading-small style-color-purple">Ranging</div>
+			<div class="style-button-back style-color-blueberry"
+				ontouchend="app.onStopRanging()">Back</div>
+			<div class="style-beacon-list"></div>
+		</div>
+
+		<div id="id-screen-monitor" class="style-screen">
+			<div class="style-heading-small style-color-purple">Monitoring</div>
+			<div class="style-button-back style-color-blueberry"
+				ontouchend="app.onStopMonitoring()">Back</div>
+			<div class="style-beacon-list"></div>
+		</div>
+
+		<script src="cordova.js"></script>
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/app.js"></script>
+		<script>
+		// Hide back button if we referrer is empty.
+		var hasReferrer = document.referrer && document.referrer != '';
+		if (!hasReferrer)
+		{
+      		$('#id-screen-home-button-back').hide();
+      	}
+
+		// Hide scan button on Android.
+		var isAndroid =
+			navigator.userAgent.match(/Android/) ||
+			navigator.userAgent.match(/android/);
+		if (isAndroid)
+		{
+      		$('#id-screen-home-button-scan').hide();
+      	}
+      </script>
+
+	</body>
+</html>

@@ -1,0 +1,163 @@
+
+* {
+	/* make transparent link selection, adjust last value opacity 0 to 1.0 */
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+html,body
+{
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	background: white;
+	font-family: Helvetica, Arial, sans-serif;
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	-webkit-user-select: none;
+}
+
+.style-color-unknown
+{
+	background: #d6d422;
+}
+
+.style-color-unknown-text
+{
+	color: rgb(255,255,255) !important;
+}
+
+.style-color-white,
+.style-color-transparent
+{
+	background: rgb(255,255,255);
+}
+
+.style-color-white-text,
+.style-color-transparent-text
+{
+	color: rgb(0,0,0) !important;
+}
+
+.style-color-mint
+{
+	/*background: #98c6a7;*/
+	background: rgb(215,228,177);
+}
+
+.style-color-mint-text
+{
+	color: rgb(0,0,0) !important;
+}
+
+.style-color-ice
+{
+	/*background: #9fddf9;*/
+	/*background: rgb(200,238,248);*/
+	background: rgb(165,213,209);
+}
+
+.style-color-ice-text
+{
+	color: rgb(0,0,0) !important;
+}
+
+.style-color-blueberry
+{
+	background: #5c58a7;
+}
+
+.style-color-blueberry-text
+{
+	color: rgb(0,0,0) !important;
+}
+
+.style-color-blueberry-dark
+{
+	background: #2d2756;
+}
+
+.style-color-blueberry-dark-text
+{
+	color: rgb(255,255,255) !important;
+}
+
+.style-color-purple
+{
+	background: #872369;
+}
+
+.style-color-yellow
+{
+	background: #d6d422;
+}
+
+.style-color-pink
+{
+	background: #e88ab4;
+}
+
+.style-color-black
+{
+	background: rgb(0,0,0);
+}
+
+.style-screen
+{
+	display: none;
+}
+
+.style-heading-big,
+.style-heading-small
+{
+	margin: 0px;
+	padding: 10% 6%;
+	color: white;
+	font-size: 300%;
+	font-weight: bold;
+}
+
+.style-button
+{
+	margin: 0px;
+	padding: 10% 10%;
+	color: white;
+	font-size: 175%;
+	font-weight: bold;
+}
+
+.style-button:active
+{
+	opacity: 0.9;
+}
+
+.style-button-back
+{
+	margin: 0px;
+	padding: 4% 6%;
+	color: white;
+	font-size: 140%;
+	font-weight: bold;
+}
+
+.style-button-back:active
+{
+	opacity: 0.9;
+}
+
+.style-beacon-list div
+{
+	margin: 1.5%;
+	padding: 1% 2%;
+	color: white;
+	font-size: 100%;
+	font-weight: bold;
+}
+
+.style-beacon-data
+{
+	margin: 0px;
+	padding: 4% 10%;
+	color: white;
+	font-size: 140%;
+	font-weight: bold;
+}

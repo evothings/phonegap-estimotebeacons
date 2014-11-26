@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+	id="pl.makingwaves.estimotebeacons"
+	version="0.5.0">
+
+	<name>EstimoteBeacons</name>
+	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
+	<license>MIT</license>
+	<keywords>Estimote, Beacons</keywords>
+
+	<js-module src="src/js/EstimoteBeacons.js" name="EstimoteBeacons">
+		<clobbers target="EstimoteBeacons" />
+	</js-module>
+
+	<platform name="android">
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="EstimoteBeacons" >
+				<param name="android-package" value="com.evothings.EstimoteBeacons"/>
+			</feature>
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.BLUETOOTH" />
+			<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<service android:name="com.estimote.sdk.service.BeaconService" android:exported="false"/>
+		</config-file>
+
+		<source-file src="src/android/EstimoteBeacons.java" target-dir="src/com/evothings" />
+		<source-file src="src/android/estimote-sdk-preview.jar" target-dir="libs" />
+	</platform>
+
+	<platform name="ios">
+		<framework src="CoreBluetooth.framework" />
+		<framework src="CoreLocation.framework" />
+		<framework src="SystemConfiguration.framework" />
+
+		<source-file src="src/ios/libEstimoteSDK.a" framework="true" />
+		<header-file src="src/ios/Headers/ESTBeacon.h" />
+		<header-file src="src/ios/Headers/ESTBeaconDefinitions.h" />
+		<header-file src="src/ios/Headers/ESTBeaconManager.h" />
+		<header-file src="src/ios/Headers/ESTBeaconRegion.h" />
+		<header-file src="src/ios/Headers/ESTBeaconFirmwareInfoVO.h" />
+		<header-file src="src/ios/Headers/ESTBeaconFirmwareVO.h" />
+		<header-file src="src/ios/Headers/ESTBeaconVO.h" />
+		<header-file src="src/ios/EstimoteBeacons.h" />
+		<source-file src="src/ios/EstimoteBeacons.m" />
+
+		<config-file target="config.xml" parent="/*">
+			<feature name="EstimoteBeacons">
+				<param name="ios-package" value="EstimoteBeacons" />
+			</feature>
+		</config-file>
+
+        <config-file parent="/*" target="config.xml">
+            <feature name="LocationManager">
+                <param name="ios-package" value="CDVLocationManager"/>
+            </feature>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+            <string>This app would like to scan for Estimote Beacons also when in the background.</string>
+        </config-file>
+        <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
+            <string>This app would like to scan for Estimote Beacons while it is in use.</string>
+        </config-file>
+	</platform>
+</plugin>
