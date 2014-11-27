@@ -486,7 +486,7 @@ Example: http://192.168.0.101:4042
 	ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
 	// Set region notification when display is activated.
-	region.notifyEntryStateOnDisplay = [command argumentAtIndex:1];
+	region.notifyEntryStateOnDisplay = (BOOL)[command argumentAtIndex:1];
 
 	// Stop any ongoing monitoring for the given region.
 	[self helper_stopMonitoringForRegion:region];
