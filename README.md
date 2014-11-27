@@ -21,6 +21,18 @@ Check out the [README file](examples/beacon-finder/README.md) and the example so
 
 See the instructions in the Beacon Finder example app [README file](examples/beacon-finder/README.md).
 
+## Note about plugin.xml and plugin directory structure
+
+Because the way Cordova plugin folders are structured, there are two versions of plugin.xml, one in the root directory and one in the `plugin` directory.
+
+The plugin.xml in the `plugin` folder is there to make it possible to build the example app without moving the example app directory out of the root directory. This is needed because of how the `cordova plugin add` command works (it does not work to install a plugin for an app located in a subdirectory of the directory where plugin.xml is located). A cleaner long-term solution could be to use a separate repository for the example app.
+
+To build the example app, reference the plugin directory when adding the plugin. Otherwise Cordova will fail to add it. Instructions are given in the example app [README file](examples/beacon-finder/README.md).
+
+When installing the plugin from GitHub with the following command, the plugin.xml file in the root directly is used:
+
+    cordova plugin add https://github.com/evothings/phonegap-estimotebeacons.git
+
 ## Documentation
 
 The file [documentation.md](documentation.md) contains an overview of the plugin API.
