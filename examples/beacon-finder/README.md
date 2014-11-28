@@ -16,7 +16,7 @@ Different beacon properties are displayed depending on the method used. Monitori
 
 ![Beacon Finder screenshot](beacon-finder-screenshot.png)
 
-## How to run it?
+## How to build and run it?
 
 This app has been tested with Apache Cordova. Start by installing Cordova on your computer. Installation instructions can be found in the [Cordova documentation](http://cordova.apache.org/docs/en/4.0.0/guide_cli_index.md.html#The%20Command-Line%20Interface), and the [Evothings Cordova documentation](http://evothings.com/doc/build/build-overview.html) contains detailed step-by-step instructions.
 
@@ -28,7 +28,7 @@ Open a command window and go to the examples/beacon-finder directory, e.g.:
 
 Add the Estimote plugin, this just needs to be done once:
 
-    cordova plugin add ../../plugin
+    cordova plugin add https://github.com/evothings/phonegap-estimotebeacons.git
 
 Add the platforms you wish to use (Android, iOS), this also only needs to be done once:
 
