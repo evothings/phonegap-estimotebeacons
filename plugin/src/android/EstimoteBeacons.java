@@ -30,7 +30,10 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
 
 	private BeaconManager mBeaconManager;
+
 	private boolean mIsConnected = false;
+
+	// Maps that keep track of Cordova callbacks.
 	private HashMap<String, CallbackContext> mRangingCallbackContexts =
 		new HashMap<String, CallbackContext>();
 	private HashMap<String, CallbackContext> mMonitoringCallbackContexts =
@@ -65,7 +68,11 @@ public class EstimoteBeacons extends CordovaPlugin
 	@Override
 	public void onReset() {
 		Log.i(LOGTAG, "onReset");
+
 		disconnectBeaconManager();
+
+		mRangingCallbackContexts = new HashMap<String, CallbackContext>();
+		mMonitoringCallbackContexts = new HashMap<String, CallbackContext>();
 	}
 
 	/**
@@ -286,6 +293,7 @@ public class EstimoteBeacons extends CordovaPlugin
 			callbackContext.error("startMonitoring RemoteException");
 		}
 	}
+
 	/**
 	 * Stop monitoring for region.
 	 */
