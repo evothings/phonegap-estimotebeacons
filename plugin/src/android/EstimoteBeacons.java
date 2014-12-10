@@ -398,12 +398,28 @@ public class EstimoteBeacons extends CordovaPlugin
 	{
 		JSONArray jsonArray = new JSONArray();
 		for (Beacon b : beacons) {
+			// Compute proximity value.
+			Utils.Proximity proximityValue = Utils.computeProximity(b);
+			int proximity = 0; // Unknown.
+			if (Utils.Proximity.IMMEDIATE == proximityValue) { proximity = 1; }
+			else if (Utils.Proximity.NEAR == proximityValue) { proximity = 2; }
+			else if (Utils.Proximity.FAR == proximityValue) { proximity = 3; }
+
+			// Compute distance value.
+			double distance = Utils.computeAccuracy(b);
+
+			// Normalize UUID.
+			String uuid = Utils.normalizeProximityUUID(b.getProximityUUID());
+
+			// Construct JSON object for beacon.
 			JSONObject json = new JSONObject();
 			json.put("major", b.getMajor());
 			json.put("minor", b.getMinor());
 			json.put("rssi", b.getRssi());
 			json.put("measuredPower", b.getMeasuredPower());
-			json.put("proximityUUID", b.getProximityUUID());
+			json.put("proximityUUID", uuid);
+			json.put("proximity", proximity);
+			json.put("distance", distance);
 			json.put("name", b.getName());
 			json.put("macAddress", b.getMacAddress());
 			jsonArray.put(json);
