@@ -36,13 +36,31 @@
 		<framework src="SystemConfiguration.framework" />
 
 		<source-file src="plugin/src/ios/libEstimoteSDK.a" framework="true" />
+
 		<header-file src="plugin/src/ios/Headers/ESTBeacon.h" />
 		<header-file src="plugin/src/ios/Headers/ESTBeaconDefinitions.h" />
+		<header-file src="plugin/src/ios/Headers/ESTBeaconFirmwareVO.h" />
 		<header-file src="plugin/src/ios/Headers/ESTBeaconManager.h" />
 		<header-file src="plugin/src/ios/Headers/ESTBeaconRegion.h" />
-		<header-file src="plugin/src/ios/Headers/ESTBeaconFirmwareInfoVO.h" />
-		<header-file src="plugin/src/ios/Headers/ESTBeaconFirmwareVO.h" />
+		<header-file src="plugin/src/ios/Headers/ESTBeaconUpdateConfig.h" />
+		<header-file src="plugin/src/ios/Headers/ESTBeaconUpdateInfo.h" />
 		<header-file src="plugin/src/ios/Headers/ESTBeaconVO.h" />
+		<header-file src="plugin/src/ios/Headers/ESTBulkUpdater.h" />
+		<header-file src="plugin/src/ios/Headers/ESTConfig.h" />
+		<header-file src="plugin/src/ios/Headers/ESTDateRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTDefinitions.h" />
+		<header-file src="plugin/src/ios/Headers/ESTFirmwareInfoVO.h" />
+		<header-file src="plugin/src/ios/Headers/ESTMotionRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTNearable.h" />
+		<header-file src="plugin/src/ios/Headers/ESTNearableManager.h" />
+		<header-file src="plugin/src/ios/Headers/ESTNearableRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTOrientationRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTProximityRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTTemperatureRule.h" />
+		<header-file src="plugin/src/ios/Headers/ESTTrigger.h" />
+		<header-file src="plugin/src/ios/Headers/ESTTriggerManager.h" />
+
 		<header-file src="plugin/src/ios/EstimoteBeacons.h" />
 		<source-file src="plugin/src/ios/EstimoteBeacons.m" />
 

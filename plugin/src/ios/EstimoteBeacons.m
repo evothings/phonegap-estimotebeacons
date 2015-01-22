@@ -178,7 +178,7 @@ TODO: Remove.
 	[dict setValue:[NSNumber numberWithInt:beacon.firmwareState] forKey:@"firmwareState"];
 
 	// Properties available after connecting.
-	if (ESTBeaconConnectionStatusConnected == beacon.connectionStatus) {
+	if (ESTConnectionStatusConnected == beacon.connectionStatus) {
 		[dict setValue:beacon.name forKey:@"name"];
 		[dict setValue:beacon.motionProximityUUID.UUIDString forKey:@"name"]; // TODO: Check nil value?
 		[dict setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
