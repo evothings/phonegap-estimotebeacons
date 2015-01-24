@@ -1,14 +1,30 @@
 # JavaScript API guide for the Estimote Beacons Cordova plugin
 
+## Notice
+
+The JS API has been updated and now consists of two modules ,"estimote.beacons" and "estimote.nearables", with support for Estimote Beacons and Estimote Stickers. "EstimoteBeacons" is kept for backwards compatibility, and points to "estimote.beacons".
+
+See file [changelog.md](changelog.md) for a list of all updates.
+
 ## Basic usage
 
-Ranging example:
+Beacon ranging example:
 
-    EstimoteBeacons.startRangingBeaconsInRegion(
+    estimote.beacons.startRangingBeaconsInRegion(
         {}, // Empty region matches all beacons.
         function(result) {
             console.log('*** Beacons ranged ***')
-            EstimoteBeacons.printObject(result) },
+            estimote.beacons.printObject(result) },
+        function(errorMessage) {
+            console.log('Ranging error: ' + errorMessage) })
+
+Stickers ranging example:
+
+	estimote.nearables.startRangingForType(
+		estimote.nearables.ESTNearableTypeAll,
+		function(nearables) {
+            console.log('*** Stickers ranged ***')
+            estimote.beacons.printObject(nearables) },
         function(errorMessage) {
             console.log('Ranging error: ' + errorMessage) })
 
@@ -18,74 +34,92 @@ The plugin currently supports:
 
 * Monitoring beacons (iOS and Android)
 * Ranging for beacons (iOS and Android)
-* Scanning for beacons using CoreBluetooth (iOS only)
+* Scanning for beacons using CoreBluetooth (iOS)
+* Ranging for nearables (Estimote Stickers)  (iOS)
 
 Scanning is similar to ranging but uses a different underlying implementation than ranging does.
 
-### Start and stop monitoring (iOS and Android)
+### Start and stop monitoring beacons (iOS and Android)
 
-    EstimoteBeacons.startMonitoringForRegion(
+    estimote.beacons.startMonitoringForRegion(
        region,
         successCallback,
         errorCallback)
 
-    EstimoteBeacons.stopMonitoringForRegion(
+    estimote.beacons.stopMonitoringForRegion(
         region,
         successCallback,
         errorCallback)
 
-### Start and stop ranging (iOS and Android)
+### Start and stop ranging beacons (iOS and Android)
 
-    EstimoteBeacons.startRangingBeaconsInRegion(
+    estimote.beacons.startRangingBeaconsInRegion(
         region,
         successCallback,
         errorCallback)
 
-    EstimoteBeacons.stopRangingBeaconsInRegion(
+    estimote.beacons.stopRangingBeaconsInRegion(
         region,
         successCallback,
         errorCallback)
 
-### Start and stop scanning (iOS only)
+### Start and stop scanning beacons (iOS only)
 
-    EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
+    estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
         region,
         successCallback,
         errorCallback)
 
-    EstimoteBeacons.stopEstimoteBeaconDiscovery(
+    estimote.beacons.stopEstimoteBeaconDiscovery(
         region,
         successCallback,
-    errorCallback)
+		errorCallback)
+
+### Start and stop ranging nearables (iOS only)
+
+    estimote.nearables.startRangingForType(
+		estimote.nearables.ESTNearableTypeAll,
+        successCallback,
+        errorCallback)
+
+    estimote.nearables.stopRangingForType(
+		estimote.nearables.ESTNearableTypeAll,
+        successCallback,
+    	errorCallback)
+
+	// Stop all ongoing nearable ranging
+    estimote.nearables.stopRanging()
 
 ### iOS 8 considerations
 
-On iOS 8 your app should ask for permission to use location services (required for monitoring and ranging - on Android and iOS 7 this does nothing):
+On iOS 8 your app should ask for permission to use location services (required for monitoring and ranging on iOS 8 - on Android and iOS 7 this function does nothing):
 
-    EstimoteBeacons.requestAlwaysAuthorization(
+    estimote.beacons.requestAlwaysAuthorization(
         successCallback,
         errorCallback)
+
+Note that this is not needed for the Nearables API (Estimote Stickers).
 
 ## How to access beacon data
 
 When you use ranging or scanning, you have access to a variety of beacon properties. Different properties are available depending on whether ranging or scanning is used. (Note that during monitoring you don’t get data for individual beacons, rather you get data about regions entered and exited.)
 
-### Properties available on iOS
+### Beacon properties available on iOS
 
 Properties available both during ranging and scanning:
 
 * major - major value of the beacon
 * minor - minor value of the beacon
-* color - one of EstimoteBeacons.BeaconColorUnknown, EstimoteBeacons.BeaconColorMint, EstimoteBeacons.BeaconColorIce, EstimoteBeacons.BeaconColorBlueberry, EstimoteBeacons.BeaconColorWhite, EstimoteBeacons.BeaconColorTransparent
+* color - one of estimote.beacons.BeaconColorUnknown, estimote.beacons.BeaconColorMint, estimote.beacons.BeaconColorIce, estimote.beacons.BeaconColorBlueberry, estimote.beacons.BeaconColorWhite, estimote.beacons.BeaconColorTransparent
 * rssi - number representing the Received Signal Strength Indication
 
-Properties available only when ranging:
+Beacon properties available only when ranging:
 
 * proximityUUID - UUID of the beacon
 * distance - estimated distance from the beacon in meters
-* proximity - one of EstimoteBeacons.ProximityUnknown, EstimoteBeacons.ProximityImmediate, EstimoteBeacons.ProximityNear, EstimoteBeacons.ProximityFar
+* proximity - one of estimote.beacons.ProximityUnknown, estimote.beacons.ProximityImmediate, estimote.beacons.ProximityNear, estimote.beacons.ProximityFar
 
-Properties available only when scanning:
+Beacon properties available only when scanning:
 
 * macAddress
 * measuredPower
@@ -93,9 +127,9 @@ Properties available only when scanning:
 The full set of properties available on iOS are documented in the Estimote iOS SDK:
 http://estimote.github.io/iOS-SDK/Classes/ESTBeacon.html
 
-### Properties available on Android
+### Beacon properties available on Android
 
-Properties available when ranging:
+Beacon properties available when ranging:
 
 * proximityUUID - UUID of the beacon
 * major - major value of the beacon
@@ -107,13 +141,36 @@ Properties available when ranging:
 
 The properties available on Android are documented in the [Estimote Android SDK](http://estimote.github.io/Android-SDK/JavaDocs/index.html?com/estimote/sdk/Beacon.html)
 
-## Code example
+### Nearable properties available on iOS
+
+* type: number
+* nameForType: string
+* identifier: string
+* hardwareVersion: string
+* firmwareVersion: string
+* rssi: number
+* zone: number
+* idleBatteryVoltage: number
+* stressBatteryVoltage: number
+* currentMotionStateDuration: number
+* previousMotionStateDuration: number
+* isMoving: bool
+* orientation: number
+* xAcceleration: number
+* yAcceleration: number
+* zAcceleration: number
+* temperature: number
+* txPower: number
+* channel: number
+* firmwareState: number
+
+## Beacon code example
 
 Using the above data you can do all sorts of things, identify which beacons are close, how far they are, if they are close, and so on. Here is an example of how to access the beacon distance property:
 
     var region = { identifier: 'MyRegion' }
 
-    EstimoteBeacons.startRangingBeaconsInRegion(
+    estimote.beacons.startRangingBeaconsInRegion(
         region,
         onBeaconsRanged,
         onError)

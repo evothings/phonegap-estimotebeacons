@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="pl.makingwaves.estimotebeacons"
-	version="0.5.1">
+	version="0.6.0">
 
 	<name>EstimoteBeacons</name>
 	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
@@ -9,7 +9,7 @@
 	<keywords>Estimote, Beacons</keywords>
 
 	<js-module src="plugin/src/js/EstimoteBeacons.js" name="EstimoteBeacons">
-		<clobbers target="EstimoteBeacons" />
+		<clobbers target="estimote" />
 	</js-module>
 
 	<platform name="android">
@@ -81,6 +81,12 @@
         </config-file>
         <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
             <string>This app would like to scan for Estimote Beacons while it is in use.</string>
+        </config-file>
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+        	<array>
+            	<string>bluetooth-central</string>
+            	<string>bluetooth-peripheral</string>
+    		</array>
         </config-file>
 	</platform>
 </plugin>

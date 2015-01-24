@@ -5,11 +5,6 @@ var app = (function()
 	// Application object.
 	var app = {};
 
-	// Touch event state.
-	var touchIsActive = false
-	var touchStartX = 0
-	var touchStartY = 0
-
 	// Application data.
 	app.currentScreenId = null;
 	app.beaconColorStyles = [
@@ -30,13 +25,6 @@ var app = (function()
 	function onDeviceReady()
 	{
 		// TODO: Add functionality if needed.
-	}
-
-	function checkTouchActive()
-	{
-		var active = touchIsActive;
-		touchIsActive = false;
-		return active;
 	}
 
 	function formatDistance(meters)
@@ -101,26 +89,30 @@ var app = (function()
 		app.showScreen('id-screen-home');
 	};
 
-	app.showScanScreen = function()
+	app.showScanBeaconsScreen = function()
 	{
-		app.showScreen('id-screen-scan');
+		app.showScreen('id-screen-scan-beacons');
 	};
 
-	app.showRangeScreen = function()
+	app.showRangeBeaconsScreen = function()
 	{
-		app.showScreen('id-screen-range');
+		app.showScreen('id-screen-range-beacons');
 	};
 
-	app.showMonitorScreen = function()
+	app.showMonitorRegionsScreen = function()
 	{
-		app.showScreen('id-screen-monitor');
+		app.showScreen('id-screen-monitor-regions');
 	};
 
-	app.startScanning = function()
+	app.showRangeNearablesScreen = function()
+	{
+		app.showScreen('id-screen-range-nearables');
+	};
+
+	app.startScanningBeacons = function()
 	{
 		function onScan(beaconInfo)
 		{
-			//console.log('onScan');
 			displayBeconInfo(beaconInfo);
 		}
 
@@ -131,9 +123,8 @@ var app = (function()
 
 		function displayBeconInfo(beaconInfo)
 		{
-			//console.log('displayBeconInfo');
 			// Clear beacon HTML items.
-			$('#id-screen-scan .style-beacon-list').empty();
+			$('#id-screen-scan-beacons .style-beacon-list').empty();
 
 			// Sort beacons by signal strength.
 			beaconInfo.beacons.sort(function(beacon1, beacon2) {
@@ -145,13 +136,12 @@ var app = (function()
 			{
 				// jQuery doesn't work.
 				var element = $(createBeaconHTML(beacon));
-				$('#id-screen-scan .style-beacon-list').append(element);
+				$('#id-screen-scan-beacons .style-beacon-list').append(element);
 			});
 		};
 
 		function createBeaconHTML(beacon)
 		{
-			console.log('beacon: '+beacon.major+' '+beacon.minor+', '+beacon.rssi+' ('+beacon.measuredPower+')');
 			var colorClasses = beaconColorStyle(beacon.color);
 			htm = '<div class="' + colorClasses + '">'
 				+ '<table><tr><td>Major</td><td>' + beacon.major
@@ -163,28 +153,24 @@ var app = (function()
 			return htm;
 		};
 
-		app.showScanScreen();
+		app.showScanBeaconsScreen();
 
-		console.log("startEstimoteBeaconsDiscoveryForRegion")
-
-		EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
+		estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
 			{}, // Empty region matches all beacons.
 			onScan,
 			onError);
 	};
 
-	app.stopScanning = function()
+	app.stopScanningBeacons = function()
 	{
-		console.log("stopEstimoteBeaconDiscovery")
-		EstimoteBeacons.stopEstimoteBeaconDiscovery();
+		estimote.beacons.stopEstimoteBeaconDiscovery();
 		app.showHomeScreen();
 	};
 
-	app.startRanging = function()
+	app.startRangingBeacons = function()
 	{
 		function onRange(beaconInfo)
 		{
-			console.log('onRange');
 			displayBeconInfo(beaconInfo);
 		}
 
@@ -196,7 +182,7 @@ var app = (function()
 		function displayBeconInfo(beaconInfo)
 		{
 			// Clear beacon HTML items.
-			$('#id-screen-range .style-beacon-list').empty();
+			$('#id-screen-range-beacons .style-beacon-list').empty();
 
 			// Sort beacons by distance.
 			beaconInfo.beacons.sort(function(beacon1, beacon2) {
@@ -206,7 +192,7 @@ var app = (function()
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
 				var element = $(createBeaconHTML(beacon));
-				$('#id-screen-range .style-beacon-list').append(element);
+				$('#id-screen-range-beacons .style-beacon-list').append(element);
 			});
 		};
 
@@ -231,23 +217,23 @@ var app = (function()
 			return htm;
 		};
 
-		app.showRangeScreen();
+		app.showRangeBeaconsScreen();
 
-		EstimoteBeacons.requestAlwaysAuthorization();
+		estimote.beacons.requestAlwaysAuthorization();
 
-		EstimoteBeacons.startRangingBeaconsInRegion(
+		estimote.beacons.startRangingBeaconsInRegion(
 			{}, // Empty region matches all beacons.
 			onRange,
 			onError);
 	};
 
-	app.stopRanging = function()
+	app.stopRangingBeacons = function()
 	{
-		EstimoteBeacons.stopRangingBeaconsInRegion({});
+		estimote.beacons.stopRangingBeaconsInRegion({});
 		app.showHomeScreen();
 	};
 
-	app.startMonitoring = function()
+	app.startMonitoringRegions = function()
 	{
 		function onMonitor(regionState)
 		{
@@ -263,10 +249,10 @@ var app = (function()
 		// one region will be displayed.
 		function displayRegionInfo(regionState)
 		{
-			$('#id-screen-monitor .style-beacon-list').empty();
+			$('#id-screen-monitor-regions .style-beacon-list').empty();
 
 			var element = $(createRegionStateHTML(regionState));
-			$('#id-screen-monitor .style-beacon-list').append(element);
+			$('#id-screen-monitor-regions .style-beacon-list').append(element);
 		};
 
 		function createRegionStateHTML(regionState)
@@ -282,93 +268,124 @@ var app = (function()
 			return htm;
 		};
 
-		app.showMonitorScreen();
+		app.showMonitorRegionsScreen();
 
-		EstimoteBeacons.requestAlwaysAuthorization();
+		estimote.beacons.requestAlwaysAuthorization();
 
-		EstimoteBeacons.startMonitoringForRegion(
+		estimote.beacons.startMonitoringForRegion(
 			{}, // Empty region matches all beacons.
 			onMonitor,
 			onError);
 	};
 
-	app.stopMonitoring = function()
+	app.stopMonitoringRegions = function()
 	{
-		EstimoteBeacons.stopMonitoringForRegion({});
+		estimote.beacons.stopMonitoringForRegion({});
+		app.showHomeScreen();
+	};
+
+	app.startRangingNearables = function()
+	{
+		function onRange(nearables)
+		{
+			displayNearablesInfo(nearables);
+		}
+
+		function onError(errorMessage)
+		{
+			console.log('Range error: ' + errorMessage);
+		}
+
+		function displayNearablesInfo(nearables)
+		{
+			// Clear HTML list.
+			$('#id-screen-range-nearables .style-beacon-list').empty();
+
+			// Generate HTML for nearables.
+			$.each(nearables, function(i, nearable)
+			{
+				var element = $(createNearableHTML(nearable));
+				$('#id-screen-range-nearables .style-beacon-list').append(element);
+			});
+		};
+
+		function createNearableHTML(nearable)
+		{
+			var colorClasses = 'style-color-blueberry-dark style-color-blueberry-dark-text';
+			htm = '<div class="' + colorClasses + '">'
+				+ '<table><tr><td>Type</td><td>' + nearable.nameForType
+				+ '</td></tr><tr><td>Identifier</td><td>' + nearable.identifier
+				+ '</td></tr><tr><td>Zone</td><td>' + nearable.zone
+				+ '</td></tr><tr><td>RSSI</td><td>' + nearable.rssi
+				+ '</td></tr><tr><td>Temperature</td><td>' + nearable.temperature
+				+ '</td></tr><tr><td>Is moving</td><td>' + (nearable.isMoving ? 'Yes' : 'No')
+				+ '</td></tr><tr><td>xAcceleration</td><td>' + nearable.xAcceleration
+				+ '</td></tr><tr><td>yAcceleration</td><td>' + nearable.yAcceleration
+				+ '</td></tr><tr><td>zAcceleration</td><td>' + nearable.zAcceleration
+				;
+			htm += '</td></tr></table></div>';
+			return htm;
+		};
+
+		app.showRangeNearablesScreen();
+
+		estimote.nearables.startRangingForType(
+			estimote.nearables.ESTNearableTypeAll,
+			onRange,
+			onError);
+	};
+
+	app.stopRangingNearables = function()
+	{
+		estimote.nearables.stopRanging();
 		app.showHomeScreen();
 	};
 
 	// ------------- Public touch event functions ------------- //
 
-	app.onStartScanning = function()
+	app.onStartScanningBeacons = function()
 	{
-		console.log('app.onStartScanning1');
-		if (!checkTouchActive()) { return }
-		console.log('app.onStartScanning2');
-		app.startScanning();
+		app.startScanningBeacons();
 	};
 
-	app.onStopScanning = function()
+	app.onStopScanningBeacons = function()
 	{
-		if (!checkTouchActive()) { return }
-		app.stopScanning();
+		app.stopScanningBeacons();
 	};
 
-	app.onStartRanging = function()
+	app.onStartRangingBeacons = function()
 	{
-		if (!checkTouchActive()) { return }
-		app.startRanging();
+		app.startRangingBeacons();
 	};
 
-	app.onStopRanging = function()
+	app.onStopRangingBeacons = function()
 	{
-		if (!checkTouchActive()) { return }
-		app.stopRanging();
+		app.stopRangingBeacons();
 	};
 
-	app.onStartMonitoring = function()
+	app.onStartMonitoringRegions = function()
 	{
-		if (!checkTouchActive()) { return }
-		app.startMonitoring();
+		app.startMonitoringRegions();
 	};
 
-	app.onStopMonitoring = function()
+	app.onStopMonitoringRegions = function()
 	{
-		if (!checkTouchActive()) { return }
-		app.stopMonitoring();
+		app.stopMonitoringRegions();
+	};
+
+	app.onStartRangingNearables = function()
+	{
+		app.startRangingNearables();
+	};
+
+	app.onStopRangingNearables = function()
+	{
+		app.stopRangingNearables();
 	};
 
 	app.onNavigateBack = function()
 	{
-		if (!checkTouchActive()) { return }
 		history.back();
-	};
-
-	app.onTouchStart = function(event)
-	{
-		var changedTouch = event.changedTouches[0];
-		touchStartX = changedTouch.screenX
-		touchStartY = changedTouch.screenY;
-		touchIsActive = true;
-	};
-
-	app.onTouchMove = function(event)
-	{
-		if (touchIsActive)
-		{
-			var changedTouch = event.changedTouches[0];
-			var touchDeltaX = Math.abs(changedTouch.screenX - touchStartX);
-			var touchDeltaY = Math.abs(changedTouch.screenY - touchStartY);
-			if (touchDeltaX > 5 || touchDeltaY > 5)
-			{
-				touchIsActive = false;
-			}
-		}
-	};
-
-	app.onTouchCancel = function(event)
-	{
-		touchIsActive = false;
 	};
 
 	// ------------- Initialisation ------------- //

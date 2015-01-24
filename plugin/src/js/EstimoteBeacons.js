@@ -1,5 +1,15 @@
-
 var exec = cordova.require('cordova/exec');
+
+/*
+	Contents of this file:
+	* Common Helper Functions
+	* Estimote Beacon Functions
+	* Estimote Stickers Functions
+*/
+
+/*********************************************************/
+/**************** Common Helper Functions ****************/
+/*********************************************************/
 
 /**
  * Helpers
@@ -65,44 +75,46 @@ function checkExecParamsRegion(region)
 	return true;
 }
 
+/*********************************************************/
+/*************** Estimote Beacon Functions ***************/
+/*********************************************************/
+
 /**
- * Function object that holds other functions.
+ * Object that holds beacon functions.
  */
-function EstimoteBeacons()
-{
-}
+var EstimoteBeacons = {}
 
 /**
  * Proximity values.
  */
-EstimoteBeacons.prototype.ProximityUnknown = 0;
-EstimoteBeacons.prototype.ProximityImmediate = 1;
-EstimoteBeacons.prototype.ProximityNear = 2;
-EstimoteBeacons.prototype.ProximityFar = 3;
+EstimoteBeacons.ProximityUnknown = 0;
+EstimoteBeacons.ProximityImmediate = 1;
+EstimoteBeacons.ProximityNear = 2;
+EstimoteBeacons.ProximityFar = 3;
 
 /**
  * Beacon colours.
  */
-EstimoteBeacons.prototype.BeaconColorUnknown = 0;
-EstimoteBeacons.prototype.BeaconColorMint = 1;
-EstimoteBeacons.prototype.BeaconColorIce = 2;
-EstimoteBeacons.prototype.BeaconColorBlueberry = 3;
-EstimoteBeacons.prototype.BeaconColorWhite = 4;
-EstimoteBeacons.prototype.BeaconColorTransparent = 5;
+EstimoteBeacons.BeaconColorUnknown = 0;
+EstimoteBeacons.BeaconColorMint = 1;
+EstimoteBeacons.BeaconColorIce = 2;
+EstimoteBeacons.BeaconColorBlueberry = 3;
+EstimoteBeacons.BeaconColorWhite = 4;
+EstimoteBeacons.BeaconColorTransparent = 5;
 
 /**
  * Region states.
  */
-EstimoteBeacons.prototype.RegionStateUnknown = "unknown";
-EstimoteBeacons.prototype.RegionStateOutside = "outside";
-EstimoteBeacons.prototype.RegionStateInside = "inside";
+EstimoteBeacons.RegionStateUnknown = "unknown";
+EstimoteBeacons.RegionStateOutside = "outside";
+EstimoteBeacons.RegionStateInside = "inside";
 
 /**
  * Print an object. Use for debugging. Example calls:
  *   EstimoteBeacons.printObject(obj);
  *   EstimoteBeacons.printObject(obj, console.log);
  */
-EstimoteBeacons.prototype.printObject = function(obj, printFun)
+EstimoteBeacons.printObject = function(obj, printFun)
 {
 	if (!printFun) { printFun = console.log; }
 	function print(obj, level)
@@ -146,12 +158,12 @@ EstimoteBeacons.prototype.printObject = function(obj, printFun)
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, error)
+EstimoteBeacons.requestWhenInUseAuthorization = function (success, error)
 {
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"requestWhenInUseAuthorization",
+		"beacons_requestWhenInUseAuthorization",
 		[]
 	);
 
@@ -180,12 +192,12 @@ EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, err
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
+EstimoteBeacons.requestAlwaysAuthorization = function (success, error)
 {
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"requestAlwaysAuthorization",
+		"beacons_requestAlwaysAuthorization",
 		[]
 	);
 
@@ -217,7 +229,7 @@ EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.prototype.authorizationStatus = function (success, error)
+EstimoteBeacons.authorizationStatus = function (success, error)
 {
 	if (!checkExecParamsSuccessError(success, error)) {
 		return false;
@@ -226,7 +238,7 @@ EstimoteBeacons.prototype.authorizationStatus = function (success, error)
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"authorizationStatus",
+		"beacons_authorizationStatus",
 		[]
 	);
 
@@ -276,7 +288,7 @@ EstimoteBeacons.prototype.authorizationStatus = function (success, error)
  *       console.log('Discovery error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
+EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -285,7 +297,7 @@ EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (reg
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"startEstimoteBeaconsDiscoveryForRegion",
+		"beacons_startEstimoteBeaconsDiscoveryForRegion",
 		[region]
 	);
 
@@ -307,12 +319,12 @@ EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (reg
  * Example that stops discovery:
  *   EstimoteBeacons.stopEstimoteBeaconDiscovery()
  */
-EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, error)
+EstimoteBeacons.stopEstimoteBeaconDiscovery = function (success, error)
 {
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"stopEstimoteBeaconDiscovery",
+		"beacons_stopEstimoteBeaconDiscovery",
 		[]
 	);
 
@@ -346,7 +358,7 @@ EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, error
  *       console.log('Ranging error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, success, error)
+EstimoteBeacons.startRangingBeaconsInRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -355,7 +367,7 @@ EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, succes
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"startRangingBeaconsInRegion",
+		"beacons_startRangingBeaconsInRegion",
 		[region]
 	);
 
@@ -378,7 +390,7 @@ EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, succes
  * Example that stops ranging:
  *   EstimoteBeacons.stopRangingBeaconsInRegion({})
  */
-EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success, error)
+EstimoteBeacons.stopRangingBeaconsInRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegion(region)) {
 		return false;
@@ -387,7 +399,7 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"stopRangingBeaconsInRegion",
+		"beacons_stopRangingBeaconsInRegion",
 		[region]
 	);
 
@@ -442,7 +454,7 @@ EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success
  *       console.log('Monitoring error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.prototype.startMonitoringForRegion = function (
+EstimoteBeacons.startMonitoringForRegion = function (
 	region, success, error, notifyEntryStateOnDisplay)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
@@ -452,7 +464,7 @@ EstimoteBeacons.prototype.startMonitoringForRegion = function (
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"startMonitoringForRegion",
+		"beacons_startMonitoringForRegion",
 		[region, !!notifyEntryStateOnDisplay]
 	);
 
@@ -475,7 +487,7 @@ EstimoteBeacons.prototype.startMonitoringForRegion = function (
  * Example that stops monitoring:
  *   EstimoteBeacons.stopMonitoringForRegion({})
  */
-EstimoteBeacons.prototype.stopMonitoringForRegion = function (region, success, error)
+EstimoteBeacons.stopMonitoringForRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegion(region)) {
 		return false;
@@ -484,15 +496,231 @@ EstimoteBeacons.prototype.stopMonitoringForRegion = function (region, success, e
 	exec(success,
 		error,
 		"EstimoteBeacons",
-		"stopMonitoringForRegion",
+		"beacons_stopMonitoringForRegion",
 		[region]
 	);
 
 	return true;
 };
 
+
+/*********************************************************/
+/************** Estimote Stickers Functions **************/
+/*********************************************************/
+
+
+/**
+ * Object that holds nearable functions.
+ */
+var EstimoteNearables = {}
+
+/**
+ * Nearable types.
+ */
+EstimoteNearables.ESTNearableTypeUnknown = 0;
+EstimoteNearables.ESTNearableTypeDog = 1;
+EstimoteNearables.ESTNearableTypeCar = 2;
+EstimoteNearables.ESTNearableTypeFridge = 3;
+EstimoteNearables.ESTNearableTypeBag = 4;
+EstimoteNearables.ESTNearableTypeBike = 5;
+EstimoteNearables.ESTNearableTypeChair = 6;
+EstimoteNearables.ESTNearableTypeBed = 7;
+EstimoteNearables.ESTNearableTypeDoor = 8;
+EstimoteNearables.ESTNearableTypeShoe = 9;
+EstimoteNearables.ESTNearableTypeGeneric = 10;
+EstimoteNearables.ESTNearableTypeAll = 11;
+
+/**
+ * Start ranging for Nearable with the given identifier.
+ *
+ * @param identifier String with Nearable id (mandatory).
+ * @param success Function called when the nearable with the given id is ranged (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(nearable)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * nearable format:
+ *   {
+ *     type: number,
+ *     nameForType: string,
+ *     identifier: string,
+ *     hardwareVersion: string,
+ *     firmwareVersion: string,
+ *     rssi: number,
+ *     zone: number,
+ *     idleBatteryVoltage: number,
+ *     stressBatteryVoltage: number,
+ *     currentMotionStateDuration: number,
+ *     previousMotionStateDuration: number,
+ *     isMoving: bool,
+ *     orientation: number,
+ *     xAcceleration: number,
+ *     yAcceleration: number,
+ *     zAcceleration: number,
+ *     temperature: number,
+ *     txPower: number,
+ *     channel: number,
+ *     firmwareState: number
+ *   }
+ *
+ * For detailed specification of Nearable properties see:
+ * http://estimote.github.io/iOS-SDK/Classes/ESTNearable.html
+ *
+ * Example that prints ranged nearable:
+ *   EstimoteNearables.startRangingForIdentifier(
+ *     '12e31',
+ *     function(nearable) {
+ *       console.log('*** Nearable ranged ***')
+ *       EstimoteBeacons.printObject(nearable) },
+ *     function(errorMessage) {
+ *       console.log('Ranging error: ' + errorMessage) }
+ *   )
+ */
+EstimoteNearables.startRangingForIdentifier = function (identifier, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_startRangingForIdentifier",
+		[identifier]
+	);
+
+	return true;
+};
+
+/**
+ * Stop ranging for Nearable with the given identifier.
+ *
+ * @param identifier String with Nearable id (mandatory).
+ * @param success Function called when ranging is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops ranging:
+ *   EstimoteNearables.stopRangingForIdentifier(identifier)
+ */
+EstimoteNearables.stopRangingForIdentifier = function (identifier, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopRangingForIdentifier",
+		[identifier]
+	);
+
+	return true;
+};
+
+
+/**
+ * Start ranging for Nearables of the given type.
+ *
+ * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
+ * @param success Function called when the nearable with the given id is ranged (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(nearables)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * nearables format: array of nearable
+ *
+ * nearable format: see function EstimoteNearables.startRangingForIdentifier
+ *
+ * Example that prints all ranged nearables:
+ *   EstimoteNearables.startRangingForType(
+ *     EstimoteNearables.ESTNearableTypeAll,
+ *     function(nearables) {
+ *       console.log('*** Nearables ranged ***')
+ *       EstimoteBeacons.printObject(nearables) },
+ *     function(errorMessage) {
+ *       console.log('Ranging error: ' + errorMessage) }
+ *   )
+ */
+EstimoteNearables.startRangingForType = function (type, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_startRangingForType",
+		[type]
+	);
+
+	return true;
+};
+
+/**
+ * Stop ranging for Nearables of the given type.
+ *
+ * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
+ * @param success Function called when ranging is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops ranging:
+ *   EstimoteNearables.stopRangingForType(EstimoteNearables.ESTNearableTypeAll)
+ */
+EstimoteNearables.stopRangingForType = function (type, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopRangingForType",
+		[type]
+	);
+
+	return true;
+};
+
+/**
+ * Stop ranging all Nearables.
+ *
+ * @param success Function called when ranging is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops ranging:
+ *   EstimoteNearables.stopRanging()
+ */
+EstimoteNearables.stopRanging = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopRanging",
+		[]
+	);
+
+	return true;
+};
+
+/*********************************************************/
+/************** Unused/Old Beacon Functions **************/
+/*********************************************************/
+
 /*
-EstimoteBeacons.prototype.getBeaconByIdx = function (idx, successCallback, errorCallback) {
+EstimoteBeacons.getBeaconByIdx = function (idx, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -521,7 +749,7 @@ EstimoteBeacons.prototype.getBeaconByIdx = function (idx, successCallback, error
     );
 };
 
-EstimoteBeacons.prototype.getClosestBeacon = function (successCallback, errorCallback) {
+EstimoteBeacons.getClosestBeacon = function (successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -545,7 +773,7 @@ EstimoteBeacons.prototype.getClosestBeacon = function (successCallback, errorCal
     );
 };
 
-EstimoteBeacons.prototype.getConnectedBeacon = function (successCallback, errorCallback) {
+EstimoteBeacons.getConnectedBeacon = function (successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -569,7 +797,7 @@ EstimoteBeacons.prototype.getConnectedBeacon = function (successCallback, errorC
     );
 };
 
-EstimoteBeacons.prototype.connectToBeacon = function (major, minor, successCallback, errorCallback) {
+EstimoteBeacons.connectToBeacon = function (major, minor, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -603,7 +831,7 @@ EstimoteBeacons.prototype.connectToBeacon = function (major, minor, successCallb
     );
 };
 
-EstimoteBeacons.prototype.connectToBeaconByMacAddress = function (macAddress, successCallback, errorCallback) {
+EstimoteBeacons.connectToBeaconByMacAddress = function (macAddress, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -627,7 +855,7 @@ EstimoteBeacons.prototype.connectToBeaconByMacAddress = function (macAddress, su
     );
 };
 
-EstimoteBeacons.prototype.disconnectFromBeacon = function (successCallback, errorCallback) {
+EstimoteBeacons.disconnectFromBeacon = function (successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -651,7 +879,7 @@ EstimoteBeacons.prototype.disconnectFromBeacon = function (successCallback, erro
     );
 };
 
-EstimoteBeacons.prototype.setAdvIntervalOfConnectedBeacon = function (advInterval, successCallback, errorCallback) {
+EstimoteBeacons.setAdvIntervalOfConnectedBeacon = function (advInterval, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -680,7 +908,7 @@ EstimoteBeacons.prototype.setAdvIntervalOfConnectedBeacon = function (advInterva
     );
 };
 
-EstimoteBeacons.prototype.setPowerOfConnectedBeacon = function (power, successCallback, errorCallback) {
+EstimoteBeacons.setPowerOfConnectedBeacon = function (power, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -709,7 +937,7 @@ EstimoteBeacons.prototype.setPowerOfConnectedBeacon = function (power, successCa
     );
 };
 
-EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function (progressCallback, successCallback, errorCallback) {
+EstimoteBeacons.updateFirmwareOfConnectedBeacon = function (progressCallback, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
         }
@@ -760,7 +988,7 @@ EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function (progressCa
     }
 };
 
-EstimoteBeacons.prototype.getBeacons = function (successCallback) {
+EstimoteBeacons.getBeacons = function (successCallback) {
     if (typeof successCallback !== "function") {
         console.error("EstimoteBeacons.getBeacons failure: success callback parameter must be a function");
         return;
@@ -775,7 +1003,7 @@ EstimoteBeacons.prototype.getBeacons = function (successCallback) {
     );
 };
 
-EstimoteBeacons.prototype.startVirtualBeacon = function (major, minor, id, successCallback) {
+EstimoteBeacons.startVirtualBeacon = function (major, minor, id, successCallback) {
     if (!isInt(major)) {
         console.error("EstimoteBeacons.startVirtualBeacon failure: major must be a valid integer");
         return;
@@ -804,7 +1032,7 @@ EstimoteBeacons.prototype.startVirtualBeacon = function (major, minor, id, succe
     );
 };
 
-EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
+EstimoteBeacons.stopVirtualBeacon = function(successCallback) {
     if (typeof successCallback !== "function") {
         console.error("EstimoteBeacons.stopVirtualBeacon failure: success callback parameter must be a function");
         return;
@@ -819,5 +1047,12 @@ EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
 };
 */
 
-var estimoteBeacons = new EstimoteBeacons();
-module.exports = estimoteBeacons;
+// Object that is exported. Holds two modules, beacons and nearables.
+var estimote = {};
+estimote.beacons = EstimoteBeacons;
+estimote.nearables = EstimoteNearables;
+
+// For backwards compatibility.
+window.EstimoteBeacons = estimote.beacons;
+
+module.exports = estimote;

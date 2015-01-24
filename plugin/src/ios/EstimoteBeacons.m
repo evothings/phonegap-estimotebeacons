@@ -1,16 +1,10 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
 
-@interface EstimoteBeacons () <ESTBeaconManagerDelegate,ESTBeaconDelegate>
-
-/*
-TODO: Remove.
-@property NSArray *beacons;
-@property ESTBeaconRegion* currentRegion;
-@property NSString* connectionCallbackId;
-@property NSString* firmwareUpdateProgress;
-@property ESTBeacon* connectedBeacon;
-*/
+@interface EstimoteBeacons ()
+<	ESTBeaconManagerDelegate,
+	ESTBeaconDelegate,
+	ESTNearableManagerDelegate >
 
 /**
  * The beacon manager in the Estimote API.
@@ -20,41 +14,51 @@ TODO: Remove.
 /**
  * Callback id for startEstimoteBeaconsDiscoveryForRegion.
  */
-@property NSString* callbackId_startEstimoteBeaconsDiscoveryForRegion;
+@property NSString* callbackId_beaconsDiscovery;
 
 /**
  * Dictionary of callback ids for startRangingBeaconsInRegion.
  * Region identifiers are used as keys.
  */
-@property NSMutableDictionary* callbackIds_startRangingBeaconsInRegion;
+@property NSMutableDictionary* callbackIds_beaconsRanging;
 
 /**
  * Dictionary of callback ids for startRangingBeaconsInRegion.
  * Region identifiers are used as keys.
  */
-@property NSMutableDictionary* callbackIds_startMonitoringForRegion;
+@property NSMutableDictionary* callbackIds_beaconsMonitoring;
+
+/**
+ * The nearable manager in the Estimote API.
+ */
+@property (nonatomic, strong) ESTNearableManager* nearableManager;
+
+/**
+ * Dictionary of callback ids for startRangingForIdentifier.
+ * Nearable identifiers are used as keys.
+ */
+@property NSMutableDictionary* callbackIds_nearablesRangingIdentifier;
+
+/**
+ * Dictionary of callback ids for startRangingForType.
+ * Nearable types are used as keys.
+ */
+@property NSMutableDictionary* callbackIds_nearablesRangingType;
 
 @end
 
 @implementation EstimoteBeacons
 
+/*********************************************************/
+/****************** Initialise/Reset *********************/
+/*********************************************************/
+
 #pragma mark - Initialization
 
 - (EstimoteBeacons*)pluginInitialize
 {
-	NSLog(@"OBJC EstimoteBeacons pluginInitialize");
-
-	// Crete beacon manager instance.
-	self.beaconManager = [ESTBeaconManager new];
-	self.beaconManager.delegate = self;
-
-	// This will skip beacons with proximity CLProximityUnknown when ranging.
-	self.beaconManager.avoidUnknownStateBeacons = YES;
-
-	// Variables that track callback ids.
-	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
-	self.callbackIds_startRangingBeaconsInRegion = [NSMutableDictionary new];
-	self.callbackIds_startMonitoringForRegion = [NSMutableDictionary new];
+	[self beacons_pluginInitialize];
+	[self nearables_pluginInitialize];
 
 	return self;
 }
@@ -65,15 +69,42 @@ TODO: Remove.
  */
 - (void) onReset
 {
+	[self beacons_onReset];
+	[self nearables_onReset];
+}
+
+/*********************************************************/
+/************ Estimote Beacons Implementation ************/
+/*********************************************************/
+
+- (void) beacons_pluginInitialize
+{
+	//NSLog(@"OBJC EstimoteBeacons pluginInitialize");
+
+	// Crete beacon manager instance.
+	self.beaconManager = [ESTBeaconManager new];
+	self.beaconManager.delegate = self;
+
+	// This will skip beacons with proximity CLProximityUnknown when ranging.
+	self.beaconManager.avoidUnknownStateBeacons = YES;
+
+	// Variables that track callback ids.
+	self.callbackId_beaconsDiscovery = nil;
+	self.callbackIds_beaconsRanging = [NSMutableDictionary new];
+	self.callbackIds_beaconsMonitoring = [NSMutableDictionary new];
+}
+
+- (void) beacons_onReset
+{
 	// Reset callback variables.
-	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
-	self.callbackIds_startRangingBeaconsInRegion = [NSMutableDictionary new];
-	self.callbackIds_startMonitoringForRegion = [NSMutableDictionary new];
+	self.callbackId_beaconsDiscovery = nil;
+	self.callbackIds_beaconsRanging = [NSMutableDictionary new];
+	self.callbackIds_beaconsMonitoring = [NSMutableDictionary new];
 
 	// Stop any ongoing scanning.
 	[self.beaconManager stopEstimoteBeaconDiscovery];
 
-	// TODO: Stop any ongiong ranging or monitoring.
+	// TODO: Stop any ongoing ranging or monitoring.
 }
 
 #pragma mark - Helper methods
@@ -128,7 +159,7 @@ TODO: Remove.
 /**
  * Create a dictionary object from a region.
  */
-- (NSDictionary*)regionToDictionary:(ESTBeaconRegion*)region
+- (NSDictionary*) regionToDictionary:(ESTBeaconRegion*)region
 {
 	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:4];
 
@@ -143,7 +174,7 @@ TODO: Remove.
 /**
  * Create a dictionary key for a region.
  */
-- (NSString*)regionDictionaryKey:(ESTBeaconRegion*)region
+- (NSString*) regionDictionaryKey:(ESTBeaconRegion*)region
 {
 	NSString* uuid = region.proximityUUID.UUIDString;
 	int major = nil != region.major ? [region.major intValue] : 0;
@@ -156,7 +187,7 @@ TODO: Remove.
  * Create a dictionary from a beacon object (used to
  * pass beacon data back to JavaScript).
  */
-- (NSDictionary*)beaconToDictionary:(ESTBeacon*)beacon
+- (NSDictionary*) beaconToDictionary:(ESTBeacon*)beacon
 {
 	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:32];
 
@@ -203,7 +234,7 @@ TODO: Remove.
 /**
  * Create a dictionary object from a region.
  */
-- (NSDictionary*)dictionaryWithRegion:(ESTBeaconRegion*)region
+- (NSDictionary*) dictionaryWithRegion:(ESTBeaconRegion*)region
 	andBeacons:(NSArray*)beacons
 {
 	// Convert beacons to a an array of property-value objects.
@@ -226,21 +257,20 @@ TODO: Remove.
 /**
  * Start CoreBluetooth discovery.
  */
-- (void)startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC startEstimoteBeaconsDiscoveryForRegion ");
+	//NSLog(@"OBJC startEstimoteBeaconsDiscoveryForRegion ");
 
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
 	NSDictionary* regionDictionary = [command argumentAtIndex:0];
 	ESTBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
-	// Stop any ongoing discovery/ranging.
-	[self stopEstimoteBeaconDiscovery: nil];
-	//TODO: remove: [self.beaconManager stopRangingBeaconsInRegion: region];
+	// Stop any ongoing discovery.
+	[self helper_stopEstimoteBeaconDiscovery];
 
 	// Save callback id.
-	self.callbackId_startEstimoteBeaconsDiscoveryForRegion = command.callbackId;
+	self.callbackId_beaconsDiscovery = command.callbackId;
 
 	// Start discovery.
 	[self.beaconManager startEstimoteBeaconsDiscoveryForRegion:region];
@@ -249,7 +279,7 @@ TODO: Remove.
 /**
  * Stop CoreBluetooth discovery.
  */
-- (void)stopEstimoteBeaconDiscovery:(CDVInvokedUrlCommand*)command
+- (void) beacons_stopEstimoteBeaconDiscovery:(CDVInvokedUrlCommand*)command
 {
 	// Stop discovery.
 	[self helper_stopEstimoteBeaconDiscovery];
@@ -269,7 +299,7 @@ TODO: Remove.
 	[self.beaconManager stopEstimoteBeaconDiscovery];
 
 	// Clear any existing callback.
-	if (self.callbackId_startEstimoteBeaconsDiscoveryForRegion)
+	if (self.callbackId_beaconsDiscovery)
 	{
 		// Clear callback on the JS side.
 		CDVPluginResult* result = [CDVPluginResult
@@ -277,22 +307,22 @@ TODO: Remove.
 		[result setKeepCallbackAsBool:NO];
 		[self.commandDelegate
 			sendPluginResult:result
-			callbackId:self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+			callbackId:self.callbackId_beaconsDiscovery];
 
 		// Clear callback id.
-		self.callbackId_startEstimoteBeaconsDiscoveryForRegion = nil;
+		self.callbackId_beaconsDiscovery = nil;
 	}
 }
 
 /**
  * CoreBluetooth discovery event.
  */
-- (void)beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(ESTBeaconManager*)manager
 	didDiscoverBeacons:(NSArray*)beacons
 	inRegion:(ESTBeaconRegion*)region
 {
 	if ([beacons count] > 0
-		&& nil != self.callbackId_startEstimoteBeaconsDiscoveryForRegion)
+		&& nil != self.callbackId_beaconsDiscovery)
 	{
 		// Create dictionary with result.
 		NSDictionary* resultDictionary = [self
@@ -306,24 +336,24 @@ TODO: Remove.
 		[result setKeepCallbackAsBool: YES];
 		[self.commandDelegate
 			sendPluginResult:result
-			callbackId:self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+			callbackId:self.callbackId_beaconsDiscovery];
 	}
 }
 
 /**
  * CoreBluetooth discovery error event.
  */
-- (void)beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(ESTBeaconManager*)manager
 	didFailDiscoveryInRegion:(ESTBeaconRegion*)region
 {
 	// Pass error to JavaScript.
-	if (self.callbackId_startEstimoteBeaconsDiscoveryForRegion != nil)
+	if (self.callbackId_beaconsDiscovery != nil)
 	{
 		[self.commandDelegate
 			sendPluginResult:[CDVPluginResult
 				resultWithStatus:CDVCommandStatus_ERROR
 				messageAsString:@"didFailDiscoveryInRegion"]
-			callbackId:self.callbackId_startEstimoteBeaconsDiscoveryForRegion];
+			callbackId:self.callbackId_beaconsDiscovery];
 	}
 }
 
@@ -353,9 +383,9 @@ Example: http://192.168.0.101:4042
 /**
  * Start CoreLocation ranging.
  */
-- (void)startRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_startRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC startRangingBeaconsInRegion");
+	//NSLog(@"OBJC startRangingBeaconsInRegion");
 
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -366,7 +396,7 @@ Example: http://192.168.0.101:4042
 	[self helper_stopRangingBeaconsInRegion:region];
 
 	// Save callback id for the region.
-	[self.callbackIds_startRangingBeaconsInRegion
+	[self.callbackIds_beaconsRanging
 		setObject:command.callbackId
 		forKey:[self regionDictionaryKey:region]];
 
@@ -377,7 +407,7 @@ Example: http://192.168.0.101:4042
 /**
  * Stop CoreLocation ranging.
  */
-- (void)stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
 {
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -393,13 +423,13 @@ Example: http://192.168.0.101:4042
 		callbackId:command.callbackId];
 }
 
-- (void)helper_stopRangingBeaconsInRegion:(ESTBeaconRegion*)region
+- (void) helper_stopRangingBeaconsInRegion:(ESTBeaconRegion*)region
 {
 	// Stop ranging the region.
 	[self.beaconManager stopRangingBeaconsInRegion:region];
 
 	// Clear any existing callback.
-	NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
+	NSString* callbackId = [self.callbackIds_beaconsRanging
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
@@ -412,7 +442,7 @@ Example: http://192.168.0.101:4042
 			callbackId:callbackId];
 
 		// Clear callback id.
-		[self.callbackIds_startRangingBeaconsInRegion
+		[self.callbackIds_beaconsRanging
 			removeObjectForKey:[self regionDictionaryKey:region]];
 	}
 }
@@ -420,13 +450,13 @@ Example: http://192.168.0.101:4042
 /**
  * CoreLocation ranging event.
  */
-- (void)beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(ESTBeaconManager*)manager
 	didRangeBeacons:(NSArray*)beacons
 	inRegion:(ESTBeaconRegion*)region
 {
 	if ([beacons count] > 0)
 	{
-		NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
+		NSString* callbackId = [self.callbackIds_beaconsRanging
 			objectForKey:[self regionDictionaryKey:region]];
 		if (nil != callbackId)
 		{
@@ -450,12 +480,12 @@ Example: http://192.168.0.101:4042
 /**
  * CoreLocation ranging error event.
  */
-- (void)beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(ESTBeaconManager*)manager
 	rangingBeaconsDidFailForRegion:(ESTBeaconRegion*)region
 	withError:(NSError*)error
 {
 	// Send error message before callback is cleared.
-	NSString* callbackId = [self.callbackIds_startRangingBeaconsInRegion
+	NSString* callbackId = [self.callbackIds_beaconsRanging
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
@@ -476,9 +506,9 @@ Example: http://192.168.0.101:4042
 /**
  * Start CoreLocation monitoring.
  */
-- (void)startMonitoringForRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_startMonitoringForRegion:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC startMonitoringForRegion");
+	//NSLog(@"OBJC startMonitoringForRegion");
 
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -492,7 +522,7 @@ Example: http://192.168.0.101:4042
 	[self helper_stopMonitoringForRegion:region];
 
 	// Save callback id for the region.
-	[self.callbackIds_startMonitoringForRegion
+	[self.callbackIds_beaconsMonitoring
 		setObject:command.callbackId
 		forKey:[self regionDictionaryKey:region]];
 
@@ -506,7 +536,7 @@ Example: http://192.168.0.101:4042
 /**
  * Stop CoreLocation monitoring.
  */
-- (void)stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
 {
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -522,13 +552,13 @@ Example: http://192.168.0.101:4042
 		callbackId:command.callbackId];
 }
 
-- (void)helper_stopMonitoringForRegion:(ESTBeaconRegion*)region
+- (void) helper_stopMonitoringForRegion:(ESTBeaconRegion*)region
 {
 	// Stop monitoring the region.
 	[self.beaconManager stopMonitoringForRegion:region];
 
 	// Clear any existing callback.
-	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+	NSString* callbackId = [self.callbackIds_beaconsMonitoring
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
@@ -541,24 +571,24 @@ Example: http://192.168.0.101:4042
 			callbackId:callbackId];
 
 		// Clear callback id.
-		[self.callbackIds_startMonitoringForRegion
+		[self.callbackIds_beaconsMonitoring
 			removeObjectForKey:[self regionDictionaryKey:region]];
 	}
 }
 
-- (void)beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(ESTBeaconManager *)manager
 	didStartMonitoringForRegion:(ESTBeaconRegion *)region
 {
 	// Not used.
 }
 
-- (void)beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(ESTBeaconManager *)manager
 	didEnterRegion:(ESTBeaconRegion *)region
 {
 	// Not used.
 }
 
-- (void)beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(ESTBeaconManager *)manager
 	didExitRegion:(ESTBeaconRegion *)region
 {
 	// Not used.
@@ -567,11 +597,11 @@ Example: http://192.168.0.101:4042
 /**
  * CoreLocation monitoring event.
  */
-- (void)beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(ESTBeaconManager *)manager
 	didDetermineState:(CLRegionState)state
 	forRegion:(ESTBeaconRegion *)region
 {
-	NSLog(@"OBJC didDetermineStateforRegion");
+	//NSLog(@"OBJC didDetermineStateforRegion");
 
 	// Create state string.
 	NSString* stateString;
@@ -589,7 +619,7 @@ Example: http://192.168.0.101:4042
 	}
 
 	// Send result to JavaScript.
-	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+	NSString* callbackId = [self.callbackIds_beaconsMonitoring
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
@@ -613,12 +643,12 @@ Example: http://192.168.0.101:4042
 /**
  * CoreLocation monitoring error event.
  */
-- (void)beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(ESTBeaconManager *)manager
 	monitoringDidFailForRegion:(ESTBeaconRegion *)region
 	withError:(NSError *)error
 {
 	// Send error message before callback is cleared.
-	NSString* callbackId = [self.callbackIds_startMonitoringForRegion
+	NSString* callbackId = [self.callbackIds_beaconsMonitoring
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
@@ -639,9 +669,9 @@ Example: http://192.168.0.101:4042
 /**
  * Request authorisation for use when app is in foreground.
  */
-- (void)requestWhenInUseAuthorization:(CDVInvokedUrlCommand*)command
+- (void) beacons_requestWhenInUseAuthorization:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC requestWhenInUseAuthorization");
+	//NSLog(@"OBJC requestWhenInUseAuthorization");
 
     // Only applicable on iOS 8 and above.
     if (IsAtLeastiOSVersion(@"8.0"))
@@ -659,9 +689,9 @@ Example: http://192.168.0.101:4042
 /**
  * Request authorisation for use also when app is in background.
  */
-- (void)requestAlwaysAuthorization:(CDVInvokedUrlCommand*)command
+- (void) beacons_requestAlwaysAuthorization:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC requestAlwaysAuthorization");
+	//NSLog(@"OBJC requestAlwaysAuthorization");
 
     // Only applicable on iOS 8 and above.
     if (IsAtLeastiOSVersion(@"8.0"))
@@ -679,9 +709,9 @@ Example: http://192.168.0.101:4042
 /**
  * Request authorisation for use also when app is in background.
  */
-- (void)authorizationStatus:(CDVInvokedUrlCommand*)command
+- (void) beacons_authorizationStatus:(CDVInvokedUrlCommand*)command
 {
-	NSLog(@"OBJC authorizationStatus");
+	//NSLog(@"OBJC authorizationStatus");
 
 	// Default value.
 	// TODO: Should we use the real value also on iOS 7? Is it available?
@@ -700,6 +730,386 @@ Example: http://192.168.0.101:4042
 			messageAsInt:status]
 		callbackId:command.callbackId];
 }
+
+/*********************************************************/
+/************ Estimote Nearbles Implementation ***********/
+/*********************************************************/
+
+#pragma mark - Initialization
+
+- (void) nearables_pluginInitialize
+{
+	//NSLog(@"OBJC EstimoteNearables pluginInitialize");
+
+	// Crete Nearable manager instance.
+	self.nearableManager = [ESTNearableManager new];
+	self.nearableManager.delegate = self;
+
+	// Variables that track callbacks.
+	self.callbackIds_nearablesRangingIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesRangingType = [NSMutableDictionary new];
+}
+
+/**
+ * From interface CDVPlugin.
+ * Called when the WebView navigates or refreshes.
+ */
+- (void) nearables_onReset
+{
+	// Reset callback variables.
+	self.callbackIds_nearablesRangingIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesRangingType = [NSMutableDictionary new];
+
+	// Stop any ongoing ranging/monitoring.
+	[self.nearableManager stopRanging];
+	[self.nearableManager stopMonitoring];
+}
+
+#pragma mark - Nearables helper methods
+
+/**
+ * Create a dictionary from a Nearable object (used to
+ * pass data back to JavaScript).
+ */
+- (NSDictionary*) nearableToDictionary: (ESTNearable*)nearable
+{
+	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:32];
+
+	[dict setValue: [NSNumber numberWithInt: nearable.type]
+		forKey: @"type"];
+	[dict setValue: [nearable nameForType: nearable.type]
+		forKey: @"nameForType"];
+	[dict setValue: nearable.identifier
+		forKey: @"identifier"];
+	[dict setValue: nearable.hardwareVersion
+		forKey: @"hardwareVersion"];
+	[dict setValue: nearable.firmwareVersion
+		forKey: @"firmwareVersion"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.rssi]
+		forKey: @"rssi"];
+	[dict setValue: [NSNumber numberWithInt: nearable.zone]
+		forKey: @"zone"];
+	[dict setValue: [NSNumber numberWithDouble: nearable.idleBatteryVoltage]
+		forKey: @"idleBatteryVoltage"];
+	[dict setValue: [NSNumber numberWithDouble: nearable.stressBatteryVoltage]
+		forKey: @"stressBatteryVoltage"];
+	[dict setValue: [NSNumber numberWithLongLong: nearable.currentMotionStateDuration]
+		forKey: @"currentMotionStateDuration"];
+	[dict setValue: [NSNumber numberWithLongLong: nearable.previousMotionStateDuration]
+		forKey: @"previousMotionStateDuration"];
+	[dict setValue: [NSNumber numberWithBool: nearable.isMoving]
+		forKey: @"isMoving"];
+	[dict setValue: [NSNumber numberWithInt: nearable.orientation]
+		forKey:@"orientation"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.xAcceleration]
+		forKey:@"xAcceleration"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.yAcceleration]
+		forKey:@"yAcceleration"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.zAcceleration]
+		forKey:@"zAcceleration"];
+	[dict setValue: [NSNumber numberWithDouble: nearable.temperature]
+		forKey: @"temperature"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.txPower]
+		forKey:@"txPower"];
+	[dict setValue: [NSNumber numberWithInteger: nearable.channel]
+		forKey:@"channel"];
+	[dict setValue: [NSNumber numberWithInt: nearable.firmwareState]
+		forKey:@"firmwareState"];
+
+	return dict;
+}
+
+/**
+ * Create an array of nearable dictionary objects from an array of 
+ * nearables (used to pass data back to JavaScript).
+ */
+- (NSArray*) nearablesToArray: (NSArray*)nearables
+{
+	// Convert beacons to a an array of property-value objects.
+	NSMutableArray* array = [NSMutableArray array];
+	for (ESTNearable* nearable in nearables)
+	{
+		[array addObject: [self nearableToDictionary: nearable]];
+	}
+
+	return array;
+}
+
+#pragma mark - Nearble ranging
+
+/**
+ * Start Nearble ranging for identifier.
+ */
+- (void) nearables_startRangingForIdentifier: (CDVInvokedUrlCommand*)command
+{
+	//NSLog(@"OBJC startRangingForIdentifier");
+
+	// Get identifier passed from JavaScript.
+	NSString* identifier = [command argumentAtIndex: 0];
+
+	// Stop any ongoing ranging for the given identifier.
+	// Only one callback at a time may be ranging a specific identifier.
+	// Multiple callbacks cannot range the same identifer.
+	[self helper_stopRangingForIdentifier: identifier];
+
+	// Save callback id for the identifier.
+	[self.callbackIds_nearablesRangingIdentifier
+		setObject: command.callbackId
+		forKey: identifier];
+
+	// Start ranging.
+	[self.nearableManager startRangingForIdentifier: identifier];
+}
+
+/**
+ * Stop Nearble ranging for identifier.
+ */
+- (void) nearables_stopRangingForIdentifier: (CDVInvokedUrlCommand*)command
+{
+	// Get identifier passed from JavaScript.
+	NSString* identifier = [command argumentAtIndex: 0];
+
+	// Stop ranging.
+	[self helper_stopRangingForIdentifier: identifier];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) helper_stopRangingForIdentifier: (NSString*)identifier
+{
+	// Stop ranging the identifier.
+	[self.nearableManager stopRangingForIdentifier: identifier];
+
+	// Clear any existing callback.
+	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier
+		objectForKey: identifier];
+	if (nil != callbackId)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool: NO];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+
+		// Clear callback id.
+		[self.callbackIds_nearablesRangingIdentifier
+			removeObjectForKey: identifier];
+	}
+}
+
+/**
+ * Nearable identifier ranging event.
+ */
+ - (void) nearableManager: (ESTNearableManager*)manager
+ 	didRangeNearable: (ESTNearable *)nearable
+{
+	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier
+		objectForKey: nearable.identifier];
+	if (nil != callbackId)
+	{
+		// Create dictionary with result.
+		NSDictionary* resultDictionary = [self nearableToDictionary: nearable];
+
+		// Pass result to JavaScript callback.
+		CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_OK
+				messageAsDictionary: resultDictionary];
+		[result setKeepCallbackAsBool: YES];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+/**
+ * Start Nearable ranging for type.
+ */
+- (void) nearables_startRangingForType: (CDVInvokedUrlCommand*)command
+{
+	//NSLog(@"OBJC startRangingForType");
+
+	// Get type passed from JavaScript.
+	NSNumber* type = [command argumentAtIndex: 0];
+
+	// Stop any ongoing ranging for the given type.
+	// Only one callback at a time may be ranging a specific type.
+	// Multiple callbacks cannot range the same type.
+	[self helper_stopRangingForType: type];
+
+	// Save callback id for the identifier.
+	[self.callbackIds_nearablesRangingType
+		setObject: command.callbackId
+		forKey: type];
+
+	// Start ranging.
+	[self.nearableManager startRangingForType: [type intValue]];
+}
+
+/**
+ * Stop Nearable ranging for type.
+ */
+- (void) nearables_stopRangingForType: (CDVInvokedUrlCommand*)command
+{
+	// Get type passed from JavaScript.
+	NSNumber* type = [command argumentAtIndex: 0];
+
+	// Stop ranging.
+	[self helper_stopRangingForType: type];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) helper_stopRangingForType: (NSNumber*)type
+{
+	// Stop ranging the type.
+	[self.nearableManager stopRangingForType: [type intValue]];
+
+	// Clear any existing callback.
+	NSString* callbackId = [self.callbackIds_nearablesRangingType
+		objectForKey: type];
+	if (nil != callbackId)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool: NO];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+
+		// Clear callback id.
+		[self.callbackIds_nearablesRangingType
+			removeObjectForKey: type];
+	}
+}
+
+/**
+ * Nearable type ranging event.
+ */
+- (void) nearableManager: (ESTNearableManager*) manager
+	didRangeNearables: (NSArray*)nearables
+	withType: (ESTNearableType)type
+{
+	NSString* callbackId = [self.callbackIds_nearablesRangingType
+		objectForKey: [NSNumber numberWithInt: type]];
+	if (nil != callbackId)
+	{
+		// Create dictionary with result.
+		NSArray* resultArray = [self nearablesToArray: nearables];
+
+		// Pass result to JavaScript callback.
+		CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_OK
+				messageAsArray: resultArray];
+		[result setKeepCallbackAsBool: YES];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+/**
+ * Nearable ranging error event.
+ */
+- (void) nearableManager: (ESTNearableManager*)manager
+	rangingFailedWithError: (NSError*)error
+{
+	// Send error message to all ranging callbacks.
+
+	for (NSString* key in self.callbackIds_nearablesRangingIdentifier)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey:key];
+		if (nil != callbackId)
+		{
+			// Pass error message to JavaScript.
+			[self.commandDelegate
+				sendPluginResult: [CDVPluginResult
+					resultWithStatus: CDVCommandStatus_ERROR
+					messageAsString: error.localizedDescription]
+				callbackId: callbackId];
+		}
+	}
+
+	for (NSNumber* key in self.callbackIds_nearablesRangingType)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey:key];
+		if (nil != callbackId)
+		{
+			// Pass error message to JavaScript.
+			[self.commandDelegate
+				sendPluginResult: [CDVPluginResult
+					resultWithStatus: CDVCommandStatus_ERROR
+					messageAsString: error.localizedDescription]
+				callbackId: callbackId];
+		}
+	}
+}
+
+/**
+ * Stop ranging all Nearables.
+ */
+- (void) nearables_stopRanging: (CDVInvokedUrlCommand*)command
+{
+	// Stop ranging.
+	[self.nearableManager stopRanging];
+
+	// Clear all callbacks.
+
+	for (NSString* key in self.callbackIds_nearablesRangingIdentifier)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey: key];
+		if (nil != callbackId)
+		{
+			// Clear callback on the JS side.
+			CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_NO_RESULT];
+			[result setKeepCallbackAsBool: NO];
+			[self.commandDelegate
+				sendPluginResult: result
+				callbackId: callbackId];
+		}
+	}
+
+	for (NSNumber* key in self.callbackIds_nearablesRangingType)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey: key];
+		if (nil != callbackId)
+		{
+			// Clear callback on the JS side.
+			CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_NO_RESULT];
+			[result setKeepCallbackAsBool: NO];
+			[self.commandDelegate
+				sendPluginResult: result
+				callbackId: callbackId];
+		}
+	}
+
+	// Reset callback dictionaries.
+	self.callbackIds_nearablesRangingIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesRangingType = [NSMutableDictionary new];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+#pragma mark - Nearable monitoring
+
+// TODO Implement monitoring
+
+/*********************************************************/
+/********************** Unused Code **********************/
+/*********************************************************/
 
 // TODO: Rewrite methods below to use callbacks.
 
