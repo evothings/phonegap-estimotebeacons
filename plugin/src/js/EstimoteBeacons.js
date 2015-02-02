@@ -246,6 +246,79 @@ EstimoteBeacons.authorizationStatus = function (success, error)
 };
 
 /**
+ * Start advertising as a beacon.
+ *
+ * @param uuid UUID string the beacon should advertise (string, mandatory).
+ * @param major Major value to advertise (integer, mandatory).
+ * @param minor Minor value to advertise (integer, mandatory).
+ * @param regionId Identifier of the region used to advertise (string, mandatory).
+ * @param success Function called on success (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that starts advertising:
+ *   EstimoteBeacons.startAdvertisingAsBeacon(
+ *     'B9407F30-F5F8-466E-AFF9-25556B57FE6D',
+ *     1,
+ *     1,
+ *     'MyRegion',
+ *     function(result) {
+ *       console.log('Beacon started') },
+ *     function(errorMessage) {
+ *       console.log('Error starting beacon: ' + errorMessage) }
+ *   )
+ */
+EstimoteBeacons.startAdvertisingAsBeacon = function (
+	uuid, major, minor, regionId, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"beacons_startAdvertisingAsBeacon",
+		[uuid, major, minor, regionId]
+	);
+
+	return true;
+};
+
+/**
+ * Stop advertising as a beacon.
+ *
+ * @param success Function called on success (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops advertising:
+ *   EstimoteBeacons.stopAdvertisingAsBeacon(
+ *     function(result) {
+ *       console.log('Beacon stopped') },
+ *     function(errorMessage) {
+ *       console.log('Error stopping beacon: ' + errorMessage) }
+ *   )
+ */
+EstimoteBeacons.stopAdvertisingAsBeacon = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"beacons_stopAdvertisingAsBeacon",
+		[]
+	);
+
+	return true;
+};
+
+/**
  * Start scanning for beacons using CoreBluetooth.
  *
  * @param region Dictionary with region properties (mandatory).

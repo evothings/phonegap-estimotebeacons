@@ -731,6 +731,50 @@ Example: http://192.168.0.101:4042
 		callbackId:command.callbackId];
 }
 
+#pragma mark - Virtual Beacon methods
+
+// A virtual beacon is an iPhone that pretends to be an iBeacon.
+
+- (void) beacons_startAdvertisingAsBeacon: (CDVInvokedUrlCommand*)command
+{
+	NSString* uuidString = [command argumentAtIndex: 0];
+	NSInteger major = [[command argumentAtIndex: 1] intValue];
+	NSInteger minor = [[command argumentAtIndex: 2] intValue];
+	NSString* regionId = [command argumentAtIndex: 3];
+	NSUUID* uuid = [[NSUUID alloc] initWithUUIDString: uuidString];
+
+	if (nil == uuid)
+	{
+		[self.commandDelegate
+			sendPluginResult: [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_ERROR
+				messageAsString: @"Invalid UUID"]
+			callbackId: command.callbackId];
+		return;
+	}
+
+	[self.beaconManager
+		startAdvertisingWithProximityUUID: uuid
+		major: major
+		minor: minor
+		identifier: regionId];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) beacons_stopAdvertisingAsBeacon: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"beacons_stopAdvertisingAsBeacon");
+
+	[self.beaconManager stopAdvertising];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
 /*********************************************************/
 /************ Estimote Nearbles Implementation ***********/
 /*********************************************************/
@@ -820,7 +864,7 @@ Example: http://192.168.0.101:4042
 }
 
 /**
- * Create an array of nearable dictionary objects from an array of 
+ * Create an array of nearable dictionary objects from an array of
  * nearables (used to pass data back to JavaScript).
  */
 - (NSArray*) nearablesToArray: (NSArray*)nearables
@@ -1204,34 +1248,6 @@ Example: http://192.168.0.101:4042
 				messageAsString:@"There are no connected beacons."]
 			callbackId:command.callbackId];
 	}
-}
-
-#pragma mark - Virtual Beacon methods
-
-- (void)startVirtualBeacon:(CDVInvokedUrlCommand*)command
-{
-	NSInteger major = [[command argumentAtIndex:0] intValue];
-	NSInteger minor = [[command argumentAtIndex:1] intValue];
-	NSString* beaconId = [[command argumentAtIndex:2] stringValue];
-
-	[self.beaconManager
-		startAdvertisingWithProximityUUID:ESTIMOTE_PROXIMITY_UUID
-		major:major
-		minor:minor
-		identifier:beaconId];
-
-	[self.commandDelegate
-		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-		callbackId:command.callbackId];
-}
-
-- (void)stopVirtualBeacon:(CDVInvokedUrlCommand*)command
-{
-	[self.beaconManager stopAdvertising];
-
-	[self.commandDelegate
-		sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
-		callbackId:command.callbackId];
 }
 
 #pragma mark - Connect to methods
