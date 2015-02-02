@@ -76,45 +76,22 @@ function checkExecParamsRegion(region)
 }
 
 /*********************************************************/
-/*************** Estimote Beacon Functions ***************/
+/******************* Estimote Objects ********************/
 /*********************************************************/
 
 /**
- * Object that holds beacon functions.
+ *  Object that is exported. Holds two modules, beacons and nearables.
  */
-var EstimoteBeacons = {}
+var estimote = {};
+estimote.beacons = {};
+estimote.nearables = {};
 
 /**
- * Proximity values.
+ * Print an object. Useful for debugging. Example calls:
+ *   estimote.printObject(obj);
+ *   estimote.printObject(obj, console.log);
  */
-EstimoteBeacons.ProximityUnknown = 0;
-EstimoteBeacons.ProximityImmediate = 1;
-EstimoteBeacons.ProximityNear = 2;
-EstimoteBeacons.ProximityFar = 3;
-
-/**
- * Beacon colours.
- */
-EstimoteBeacons.BeaconColorUnknown = 0;
-EstimoteBeacons.BeaconColorMint = 1;
-EstimoteBeacons.BeaconColorIce = 2;
-EstimoteBeacons.BeaconColorBlueberry = 3;
-EstimoteBeacons.BeaconColorWhite = 4;
-EstimoteBeacons.BeaconColorTransparent = 5;
-
-/**
- * Region states.
- */
-EstimoteBeacons.RegionStateUnknown = "unknown";
-EstimoteBeacons.RegionStateOutside = "outside";
-EstimoteBeacons.RegionStateInside = "inside";
-
-/**
- * Print an object. Use for debugging. Example calls:
- *   EstimoteBeacons.printObject(obj);
- *   EstimoteBeacons.printObject(obj, console.log);
- */
-EstimoteBeacons.printObject = function(obj, printFun)
+estimote.printObject = function(obj, printFun)
 {
 	if (!printFun) { printFun = console.log; }
 	function print(obj, level)
@@ -136,6 +113,35 @@ EstimoteBeacons.printObject = function(obj, printFun)
 	print(obj, 0);
 };
 
+/*********************************************************/
+/*************** Estimote Beacon Functions ***************/
+/*********************************************************/
+
+/**
+ * Proximity values.
+ */
+estimote.beacons.ProximityUnknown = 0;
+estimote.beacons.ProximityImmediate = 1;
+estimote.beacons.ProximityNear = 2;
+estimote.beacons.ProximityFar = 3;
+
+/**
+ * Beacon colours.
+ */
+estimote.beacons.BeaconColorUnknown = 0;
+estimote.beacons.BeaconColorMint = 1;
+estimote.beacons.BeaconColorIce = 2;
+estimote.beacons.BeaconColorBlueberry = 3;
+estimote.beacons.BeaconColorWhite = 4;
+estimote.beacons.BeaconColorTransparent = 5;
+
+/**
+ * Region states.
+ */
+estimote.beacons.RegionStateUnknown = "unknown";
+estimote.beacons.RegionStateOutside = "outside";
+estimote.beacons.RegionStateInside = "inside";
+
 /**
  * Ask the user for permission to use location services
  * while the app is in the foreground.
@@ -153,12 +159,12 @@ EstimoteBeacons.printObject = function(obj, printFun)
  *   error(errorMessage)
  *
  * Example:
- *   EstimoteBeacons.requestWhenInUseAuthorization()
+ *   estimote.beacons.requestWhenInUseAuthorization()
  *
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.requestWhenInUseAuthorization = function (success, error)
+estimote.beacons.requestWhenInUseAuthorization = function (success, error)
 {
 	exec(success,
 		error,
@@ -187,12 +193,12 @@ EstimoteBeacons.requestWhenInUseAuthorization = function (success, error)
  *   error(errorMessage)
  *
  * Example:
- *   EstimoteBeacons.requestAlwaysAuthorization()
+ *   estimote.beacons.requestAlwaysAuthorization()
  *
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.requestAlwaysAuthorization = function (success, error)
+estimote.beacons.requestAlwaysAuthorization = function (success, error)
 {
 	exec(success,
 		error,
@@ -219,7 +225,7 @@ EstimoteBeacons.requestAlwaysAuthorization = function (success, error)
  *   error(errorMessage)
  *
  * Example:
- *   EstimoteBeacons.authorizationStatus(
+ *   estimote.beacons.authorizationStatus(
  *     function(result) {
  *       console.log('Location authorization status: ' + result) },
  *     function(errorMessage) {
@@ -229,7 +235,7 @@ EstimoteBeacons.requestAlwaysAuthorization = function (success, error)
  * More information:
  *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
  */
-EstimoteBeacons.authorizationStatus = function (success, error)
+estimote.beacons.authorizationStatus = function (success, error)
 {
 	if (!checkExecParamsSuccessError(success, error)) {
 		return false;
@@ -262,7 +268,7 @@ EstimoteBeacons.authorizationStatus = function (success, error)
  *   error(errorMessage)
  *
  * Example that starts advertising:
- *   EstimoteBeacons.startAdvertisingAsBeacon(
+ *   estimote.beacons.startAdvertisingAsBeacon(
  *     'B9407F30-F5F8-466E-AFF9-25556B57FE6D',
  *     1,
  *     1,
@@ -273,7 +279,7 @@ EstimoteBeacons.authorizationStatus = function (success, error)
  *       console.log('Error starting beacon: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.startAdvertisingAsBeacon = function (
+estimote.beacons.startAdvertisingAsBeacon = function (
 	uuid, major, minor, regionId, success, error)
 {
 	exec(success,
@@ -299,14 +305,14 @@ EstimoteBeacons.startAdvertisingAsBeacon = function (
  *   error(errorMessage)
  *
  * Example that stops advertising:
- *   EstimoteBeacons.stopAdvertisingAsBeacon(
+ *   estimote.beacons.stopAdvertisingAsBeacon(
  *     function(result) {
  *       console.log('Beacon stopped') },
  *     function(errorMessage) {
  *       console.log('Error stopping beacon: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.stopAdvertisingAsBeacon = function (success, error)
+estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
 {
 	exec(success,
 		error,
@@ -352,16 +358,16 @@ EstimoteBeacons.stopAdvertisingAsBeacon = function (success, error)
  *   error(errorMessage)
  *
  * Example that prints all discovered beacons and properties:
- *   EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
+ *   estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
  *       console.log('*** Beacons discovered ***')
- *       EstimoteBeacons.printObject(result) },
+ *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Discovery error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
+estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -390,9 +396,9 @@ EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion = function (region, succe
  *   error(errorMessage)
  *
  * Example that stops discovery:
- *   EstimoteBeacons.stopEstimoteBeaconDiscovery()
+ *   estimote.beacons.stopEstimoteBeaconDiscovery()
  */
-EstimoteBeacons.stopEstimoteBeaconDiscovery = function (success, error)
+estimote.beacons.stopEstimoteBeaconDiscovery = function (success, error)
 {
 	exec(success,
 		error,
@@ -422,16 +428,16 @@ EstimoteBeacons.stopEstimoteBeaconDiscovery = function (success, error)
  *   error(errorMessage)
  *
  * Example that prints all beacons and properties:
- *   EstimoteBeacons.startRangingBeaconsInRegion(
+ *   estimote.beacons.startRangingBeaconsInRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
  *       console.log('*** Beacons ranged ***')
- *       EstimoteBeacons.printObject(result) },
+ *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.startRangingBeaconsInRegion = function (region, success, error)
+estimote.beacons.startRangingBeaconsInRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -461,9 +467,9 @@ EstimoteBeacons.startRangingBeaconsInRegion = function (region, success, error)
  *   error(errorMessage)
  *
  * Example that stops ranging:
- *   EstimoteBeacons.stopRangingBeaconsInRegion({})
+ *   estimote.beacons.stopRangingBeaconsInRegion({})
  */
-EstimoteBeacons.stopRangingBeaconsInRegion = function (region, success, error)
+estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegion(region)) {
 		return false;
@@ -518,16 +524,16 @@ EstimoteBeacons.stopRangingBeaconsInRegion = function (region, success, error)
  *   error(errorMessage)
  *
  * Example that prints regionState properties:
- *   EstimoteBeacons.startMonitoringForRegion(
+ *   estimote.beacons.startMonitoringForRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
  *       console.log('*** Region state ***')
- *       EstimoteBeacons.printObject(result) },
+ *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Monitoring error: ' + errorMessage) }
  *   )
  */
-EstimoteBeacons.startMonitoringForRegion = function (
+estimote.beacons.startMonitoringForRegion = function (
 	region, success, error, notifyEntryStateOnDisplay)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
@@ -558,9 +564,9 @@ EstimoteBeacons.startMonitoringForRegion = function (
  *   error(errorMessage)
  *
  * Example that stops monitoring:
- *   EstimoteBeacons.stopMonitoringForRegion({})
+ *   estimote.beacons.stopMonitoringForRegion({})
  */
-EstimoteBeacons.stopMonitoringForRegion = function (region, success, error)
+estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 {
 	if (!checkExecParamsRegion(region)) {
 		return false;
@@ -583,25 +589,20 @@ EstimoteBeacons.stopMonitoringForRegion = function (region, success, error)
 
 
 /**
- * Object that holds nearable functions.
- */
-var EstimoteNearables = {}
-
-/**
  * Nearable types.
  */
-EstimoteNearables.ESTNearableTypeUnknown = 0;
-EstimoteNearables.ESTNearableTypeDog = 1;
-EstimoteNearables.ESTNearableTypeCar = 2;
-EstimoteNearables.ESTNearableTypeFridge = 3;
-EstimoteNearables.ESTNearableTypeBag = 4;
-EstimoteNearables.ESTNearableTypeBike = 5;
-EstimoteNearables.ESTNearableTypeChair = 6;
-EstimoteNearables.ESTNearableTypeBed = 7;
-EstimoteNearables.ESTNearableTypeDoor = 8;
-EstimoteNearables.ESTNearableTypeShoe = 9;
-EstimoteNearables.ESTNearableTypeGeneric = 10;
-EstimoteNearables.ESTNearableTypeAll = 11;
+estimote.nearables..ESTNearableTypeUnknown = 0;
+estimote.nearables.ESTNearableTypeDog = 1;
+estimote.nearables.ESTNearableTypeCar = 2;
+estimote.nearables.ESTNearableTypeFridge = 3;
+estimote.nearables.ESTNearableTypeBag = 4;
+estimote.nearables.ESTNearableTypeBike = 5;
+estimote.nearables.ESTNearableTypeChair = 6;
+estimote.nearables.ESTNearableTypeBed = 7;
+estimote.nearables.ESTNearableTypeDoor = 8;
+estimote.nearables.ESTNearableTypeShoe = 9;
+estimote.nearables.ESTNearableTypeGeneric = 10;
+estimote.nearables.ESTNearableTypeAll = 11;
 
 /**
  * Start ranging for Nearable with the given identifier.
@@ -644,16 +645,16 @@ EstimoteNearables.ESTNearableTypeAll = 11;
  * http://estimote.github.io/iOS-SDK/Classes/ESTNearable.html
  *
  * Example that prints ranged nearable:
- *   EstimoteNearables.startRangingForIdentifier(
+ *   estimote.nearables.startRangingForIdentifier(
  *     '12e31',
  *     function(nearable) {
  *       console.log('*** Nearable ranged ***')
- *       EstimoteBeacons.printObject(nearable) },
+ *       estimote.printObject(nearable) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
  *   )
  */
-EstimoteNearables.startRangingForIdentifier = function (identifier, success, error)
+estimote.nearables.startRangingForIdentifier = function (identifier, success, error)
 {
 	exec(success,
 		error,
@@ -679,9 +680,9 @@ EstimoteNearables.startRangingForIdentifier = function (identifier, success, err
  *   error(errorMessage)
  *
  * Example that stops ranging:
- *   EstimoteNearables.stopRangingForIdentifier(identifier)
+ *   estimote.nearables.stopRangingForIdentifier(identifier)
  */
-EstimoteNearables.stopRangingForIdentifier = function (identifier, success, error)
+estimote.nearables.stopRangingForIdentifier = function (identifier, success, error)
 {
 	exec(success,
 		error,
@@ -709,19 +710,19 @@ EstimoteNearables.stopRangingForIdentifier = function (identifier, success, erro
  *
  * nearables format: array of nearable
  *
- * nearable format: see function EstimoteNearables.startRangingForIdentifier
+ * nearable format: see function estimote.nearables.startRangingForIdentifier
  *
  * Example that prints all ranged nearables:
- *   EstimoteNearables.startRangingForType(
- *     EstimoteNearables.ESTNearableTypeAll,
+ *   estimote.nearables.startRangingForType(
+ *     estimote.nearables.ESTNearableTypeAll,
  *     function(nearables) {
  *       console.log('*** Nearables ranged ***')
- *       EstimoteBeacons.printObject(nearables) },
+ *       estimote.printObject(nearables) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
  *   )
  */
-EstimoteNearables.startRangingForType = function (type, success, error)
+estimote.nearables.startRangingForType = function (type, success, error)
 {
 	exec(success,
 		error,
@@ -747,9 +748,9 @@ EstimoteNearables.startRangingForType = function (type, success, error)
  *   error(errorMessage)
  *
  * Example that stops ranging:
- *   EstimoteNearables.stopRangingForType(EstimoteNearables.ESTNearableTypeAll)
+ *   estimote.nearables.stopRangingForType(estimote.nearables.ESTNearableTypeAll)
  */
-EstimoteNearables.stopRangingForType = function (type, success, error)
+estimote.nearables.stopRangingForType = function (type, success, error)
 {
 	exec(success,
 		error,
@@ -774,9 +775,9 @@ EstimoteNearables.stopRangingForType = function (type, success, error)
  *   error(errorMessage)
  *
  * Example that stops ranging:
- *   EstimoteNearables.stopRanging()
+ *   estimote.nearables.stopRanging()
  */
-EstimoteNearables.stopRanging = function (success, error)
+estimote.nearables.stopRanging = function (success, error)
 {
 	exec(success,
 		error,
@@ -1120,12 +1121,8 @@ EstimoteBeacons.stopVirtualBeacon = function(successCallback) {
 };
 */
 
-// Object that is exported. Holds two modules, beacons and nearables.
-var estimote = {};
-estimote.beacons = EstimoteBeacons;
-estimote.nearables = EstimoteNearables;
-
 // For backwards compatibility.
+estimote.beacons.printObject = estimote.printObject
 window.EstimoteBeacons = estimote.beacons;
 
 module.exports = estimote;
