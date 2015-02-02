@@ -45,6 +45,18 @@
  */
 @property NSMutableDictionary* callbackIds_nearablesRangingType;
 
+/**
+ * Dictionary of callback ids for startMonitoringForIdentifier.
+ * Nearable identifiers are used as keys.
+ */
+@property NSMutableDictionary* callbackIds_nearablesMonitoringIdentifier;
+
+/**
+ * Dictionary of callback ids for startMonitoringForType.
+ * Nearable types are used as keys.
+ */
+@property NSMutableDictionary* callbackIds_nearablesMonitoringType;
+
 @end
 
 @implementation EstimoteBeacons
@@ -612,26 +624,26 @@ Example: http://192.168.0.101:4042
 {
 	//NSLog(@"OBJC didDetermineStateforRegion");
 
-	// Create state string.
-	NSString* stateString;
-	switch (state)
-	{
-		case CLRegionStateInside:
-			stateString = @"inside";
-			break;
-		case CLRegionStateOutside:
-			stateString = @"outside";
-			break;
-		case CLRegionStateUnknown:
-		default:
-			stateString = @"unknown";
-	}
-
 	// Send result to JavaScript.
 	NSString* callbackId = [self.callbackIds_beaconsMonitoring
 		objectForKey:[self regionDictionaryKey:region]];
 	if (nil != callbackId)
 	{
+		// Create state string.
+		NSString* stateString;
+		switch (state)
+		{
+			case CLRegionStateInside:
+				stateString = @"inside";
+				break;
+			case CLRegionStateOutside:
+				stateString = @"outside";
+				break;
+			case CLRegionStateUnknown:
+			default:
+				stateString = @"unknown";
+		}
+
 		// Create result object.
 		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:8];
 		[dict setValue:region.proximityUUID.UUIDString forKey:@"uuid"];
@@ -801,6 +813,8 @@ Example: http://192.168.0.101:4042
 	// Variables that track callbacks.
 	self.callbackIds_nearablesRangingIdentifier = [NSMutableDictionary new];
 	self.callbackIds_nearablesRangingType = [NSMutableDictionary new];
+	self.callbackIds_nearablesMonitoringIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesMonitoringType = [NSMutableDictionary new];
 }
 
 /**
@@ -812,6 +826,8 @@ Example: http://192.168.0.101:4042
 	// Reset callback variables.
 	self.callbackIds_nearablesRangingIdentifier = [NSMutableDictionary new];
 	self.callbackIds_nearablesRangingType = [NSMutableDictionary new];
+	self.callbackIds_nearablesMonitoringIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesMonitoringType = [NSMutableDictionary new];
 
 	// Stop any ongoing ranging/monitoring.
 	[self.nearableManager stopRanging];
@@ -1158,7 +1174,329 @@ Example: http://192.168.0.101:4042
 
 #pragma mark - Nearable monitoring
 
-// TODO Implement monitoring
+/**
+ * Start Nearble monitoring for identifier.
+ */
+- (void) nearables_startMonitoringForIdentifier: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC nearables_startMonitoringForIdentifier");
+
+	// Get identifier passed from JavaScript.
+	NSString* identifier = [command argumentAtIndex: 0];
+
+	// Stop any ongoing monitoring for the given identifier.
+	// Only one callback at a time may be monitoring a specific identifier.
+	// Multiple callbacks cannot monitor the same identifer.
+	[self helper_stopMonitoringForIdentifier: identifier];
+
+	// Save callback id for the identifier.
+	[self.callbackIds_nearablesMonitoringIdentifier
+		setObject: command.callbackId
+		forKey: identifier];
+
+	// Start monitoring.
+	[self.nearableManager startMonitoringForIdentifier: identifier];
+}
+
+/**
+ * Stop Nearble monitoring for identifier.
+ */
+- (void) nearables_stopMonitoringForIdentifier: (CDVInvokedUrlCommand*)command
+{
+	// Get identifier passed from JavaScript.
+	NSString* identifier = [command argumentAtIndex: 0];
+
+	// Stop monitoring.
+	[self helper_stopMonitoringForIdentifier: identifier];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) helper_stopMonitoringForIdentifier: (NSString*)identifier
+{
+	// Stop monitoring the identifier.
+	[self.nearableManager stopMonitoringForIdentifier: identifier];
+
+	// Clear any existing callback.
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier
+		objectForKey: identifier];
+	if (nil != callbackId)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool: NO];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+
+		// Clear callback id.
+		[self.callbackIds_nearablesMonitoringIdentifier
+			removeObjectForKey: identifier];
+	}
+}
+
+/**
+ * Nearable identifier monitoring enter event.
+ */
+ - (void) nearableManager: (ESTNearableManager *)manager
+ 	didEnterIdentifierRegion: (NSString *)identifier
+{
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier
+		objectForKey: identifier];
+	if (nil != callbackId)
+	{
+		// Create result object.
+		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity: 4];
+		[dict setValue: identifier forKey:@"identifier"];
+		[dict setValue: @"inside" forKey:@"state"];
+
+		// Send result.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsDictionary: dict];
+		[result setKeepCallback: [NSNumber numberWithBool: YES]];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+/**
+ * Nearable identifier monitoring exit event.
+ */
+- (void) nearableManager: (ESTNearableManager *)manager
+	didExitIdentifierRegion: (NSString *)identifier
+{
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier
+		objectForKey: identifier];
+	if (nil != callbackId)
+	{
+		// Create result object.
+		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity: 4];
+		[dict setValue: identifier forKey:@"identifier"];
+		[dict setValue: @"outside" forKey:@"state"];
+
+		// Send result.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsDictionary: dict];
+		[result setKeepCallback: [NSNumber numberWithBool: YES]];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+/**
+ * Start Nearble monitoring for type.
+ */
+- (void) nearables_startMonitoringForType: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC nearables_startMonitoringForType");
+
+	// Get type passed from JavaScript.
+	NSNumber* type = [command argumentAtIndex: 0];
+
+	// Stop any ongoing monitoring for the given type.
+	// Only one callback at a time may be monitoring a specific type.
+	// Multiple callbacks cannot monitor the same type.
+	[self helper_stopMonitoringForType: type];
+
+	// Save callback id for the type.
+	[self.callbackIds_nearablesMonitoringType
+		setObject: command.callbackId
+		forKey: type];
+
+	// Start monitoring.
+	[self.nearableManager startMonitoringForType: [type intValue]];
+}
+
+/**
+ * Stop Nearble monitoring for type.
+ */
+- (void) nearables_stopMonitoringForType: (CDVInvokedUrlCommand*)command
+{
+	// Get type passed from JavaScript.
+	NSNumber* type = [command argumentAtIndex: 0];
+
+	// Stop monitoring.
+	[self helper_stopMonitoringForType: type];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) helper_stopMonitoringForType: (NSNumber*)type
+{
+	// Stop monitoring the type.
+	[self.nearableManager stopMonitoringForType: [type intValue]];
+
+	// Clear any existing callback.
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringType
+		objectForKey: type];
+	if (nil != callbackId)
+	{
+		// Clear callback on the JS side.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_NO_RESULT];
+		[result setKeepCallbackAsBool: NO];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+
+		// Clear callback id.
+		[self.callbackIds_nearablesMonitoringType
+			removeObjectForKey: type];
+	}
+}
+
+/**
+ * Nearable type monitoring enter event.
+ */
+ - (void) nearableManager: (ESTNearableManager *)manager
+ 	didEnterTypeRegion: (ESTNearableType)type
+{
+	NSLog(@"OBJC nearableManager didEnterTypeRegion");
+
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringType
+		objectForKey: [NSNumber numberWithInt: type]];
+	if (nil != callbackId)
+	{
+		// Create result object.
+		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity: 4];
+		[dict setValue: [NSNumber numberWithInt: type] forKey:@"type"];
+		[dict setValue: @"inside" forKey:@"state"];
+
+		// Send result.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsDictionary: dict];
+		[result setKeepCallback: [NSNumber numberWithBool: YES]];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+/**
+ * Nearable type monitoring exit event.
+ */
+- (void) nearableManager: (ESTNearableManager *)manager
+	didExitTypeRegion: (ESTNearableType)type
+{
+	NSLog(@"OBJC nearableManager didExitTypeRegion");
+
+	NSString* callbackId = [self.callbackIds_nearablesMonitoringType
+		objectForKey: [NSNumber numberWithInt: type]];
+	if (nil != callbackId)
+	{
+		// Create result object.
+		NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity: 4];
+		[dict setValue: [NSNumber numberWithInt: type] forKey:@"type"];
+		[dict setValue: @"outside" forKey:@"state"];
+
+		// Send result.
+		CDVPluginResult* result = [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsDictionary: dict];
+		[result setKeepCallback: [NSNumber numberWithBool: YES]];
+		[self.commandDelegate
+			sendPluginResult: result
+			callbackId: callbackId];
+	}
+}
+
+- (void) nearableManager: (ESTNearableManager *)manager
+	monitoringFailedWithError:(NSError *)error
+{
+	NSLog(@"OBJC nearableManager monitoringFailedWithError: %@", error.localizedDescription);
+
+	// Send error message to all monitoring callbacks.
+
+	for (NSString* key in self.callbackIds_nearablesMonitoringIdentifier)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey:key];
+		if (nil != callbackId)
+		{
+			// Pass error message to JavaScript.
+			[self.commandDelegate
+				sendPluginResult: [CDVPluginResult
+					resultWithStatus: CDVCommandStatus_ERROR
+					messageAsString: error.localizedDescription]
+				callbackId: callbackId];
+		}
+	}
+
+	for (NSNumber* key in self.callbackIds_nearablesMonitoringType)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey:key];
+		if (nil != callbackId)
+		{
+			// Pass error message to JavaScript.
+			[self.commandDelegate
+				sendPluginResult: [CDVPluginResult
+					resultWithStatus: CDVCommandStatus_ERROR
+					messageAsString: error.localizedDescription]
+				callbackId: callbackId];
+		}
+	}
+}
+
+/**
+ * Stop monitoring all Nearables.
+ */
+- (void) nearables_stopMonitoring: (CDVInvokedUrlCommand*)command
+{
+	// Stop monitoring.
+	[self.nearableManager stopMonitoring];
+
+	// Clear all callbacks.
+
+	for (NSString* key in self.callbackIds_nearablesMonitoringIdentifier)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey: key];
+		if (nil != callbackId)
+		{
+			// Clear callback on the JS side.
+			CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_NO_RESULT];
+			[result setKeepCallbackAsBool: NO];
+			[self.commandDelegate
+				sendPluginResult: result
+				callbackId: callbackId];
+		}
+	}
+
+	for (NSNumber* key in self.callbackIds_nearablesMonitoringType)
+	{
+    	NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey: key];
+		if (nil != callbackId)
+		{
+			// Clear callback on the JS side.
+			CDVPluginResult* result = [CDVPluginResult
+				resultWithStatus: CDVCommandStatus_NO_RESULT];
+			[result setKeepCallbackAsBool: NO];
+			[self.commandDelegate
+				sendPluginResult: result
+				callbackId: callbackId];
+		}
+	}
+
+	// Reset callback dictionaries.
+	self.callbackIds_nearablesMonitoringIdentifier = [NSMutableDictionary new];
+	self.callbackIds_nearablesMonitoringType = [NSMutableDictionary new];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult:[CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
 
 /*********************************************************/
 /********************** Unused Code **********************/

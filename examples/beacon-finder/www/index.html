@@ -18,11 +18,13 @@
 			<div id="id-screen-home-button-scan-beacons"
 				class="style-button style-color-blueberry">Scan Beacons</div>
 			<div id="id-screen-home-button-range-beacons"
-				class="style-button style-color-yellow">Range Beacons</div>
+				class="style-button style-color-purple">Range Beacons</div>
 			<div id="id-screen-home-button-monitor-regions"
 				class="style-button style-color-pink">Monitor Regions</div>
 			<div id="id-screen-home-button-range-nearables"
 				class="style-button style-color-purple">Range Nearables</div>
+			<div id="id-screen-home-button-monitor-nearables"
+				class="style-button style-color-pink">Monitor Nearables</div>
 			<div id="id-screen-home-button-back"
 				class="style-button-back style-color-blueberry">Back</div>
 			<!-- 
@@ -32,10 +34,10 @@
 				file into the Workbench window and press RUN. You now have live
 				reload enabled, just save the code in your editor and the app reloads. 
 			-->
-			<!--
+
 			<div class="style-button style-color-yellow"
 				ontouchend="window.location.replace('http://192.168.43.131:4042')">Connect</div>
-			-->
+			
 		</div>
 
 		<div id="id-screen-scan-beacons" class="style-screen">
@@ -62,6 +64,12 @@
 			<div class="style-beacon-list"></div>
 		</div>
 
+		<div id="id-screen-monitor-nearables" class="style-screen">
+			<div class="style-heading-small style-color-purple">Monitoring Nearables</div>
+			<div class="style-button-back style-color-blueberry">Back</div>
+			<div class="style-beacon-list"></div>
+		</div>
+
 		<script src="cordova.js"></script>
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/touch.js"></script>
@@ -74,43 +82,52 @@
       		$('#id-screen-home-button-back').hide();
       	}
 
-		// Hide scan button on Android.
+		// Setup touch handlers.
+		evothings.touch.onTap(
+			$('#id-screen-home-button-scan-beacons')[0],
+			app.onStartScanningBeacons);
+		evothings.touch.onTap(
+			$('#id-screen-home-button-range-beacons')[0],
+			app.onStartRangingBeacons);
+		evothings.touch.onTap(
+			$('#id-screen-home-button-monitor-regions')[0],
+			app.onStartMonitoringRegions);
+		evothings.touch.onTap(
+			$('#id-screen-home-button-range-nearables')[0],
+			app.onStartRangingNearables);
+		evothings.touch.onTap(
+			$('#id-screen-home-button-monitor-nearables')[0],
+			app.onStartMonitoringNearables);
+		evothings.touch.onTap(
+			$('#id-screen-home-button-back')[0],
+			app.onNavigateBack);
+
+		evothings.touch.onTap(
+			$('#id-screen-scan-beacons div.style-button-back')[0],
+			app.onStopScanningBeacons);
+		evothings.touch.onTap(
+			$('#id-screen-range-beacons div.style-button-back')[0],
+			app.onStopRangingBeacons);
+		evothings.touch.onTap(
+			$('#id-screen-monitor-regions div.style-button-back')[0],
+			app.onStopMonitoringRegions);
+		evothings.touch.onTap(
+			$('#id-screen-range-nearables div.style-button-back')[0],
+			app.onStopRangingNearables);
+		evothings.touch.onTap(
+			$('#id-screen-monitor-nearables div.style-button-back')[0],
+			app.onStopMonitoringNearables);
+
+		// Hide buttons on Android.
 		var isAndroid =
 			navigator.userAgent.match(/Android/) ||
 			navigator.userAgent.match(/android/);
 		if (isAndroid)
 		{
-      		$('#id-screen-home-button-scan').hide();
+      		$('#id-screen-home-button-scan-beacons').hide();
+      		$('#id-screen-home-button-range-nearables').hide();
+      		$('#id-screen-home-button-monitor-nearables').hide();
       	}
-
-		// Setup touch handlers.
-		evothings.touch.onTap(
-			$('#id-screen-home-button-scan-beacons')[0],
-			app.onStartScanningBeacons)
-		evothings.touch.onTap(
-			$('#id-screen-home-button-range-beacons')[0],
-			app.onStartRangingBeacons)
-		evothings.touch.onTap(
-			$('#id-screen-home-button-monitor-regions')[0],
-			app.onStartMonitoringRegions)
-		evothings.touch.onTap(
-			$('#id-screen-home-button-range-nearables')[0],
-			app.onStartRangingNearables)
-		evothings.touch.onTap(
-			$('#id-screen-home-button-back')[0],
-			app.onNavigateBack)
-		evothings.touch.onTap(
-			$('#id-screen-scan-beacons div.style-button-back')[0],
-			app.onStopScanningBeacons)
-		evothings.touch.onTap(
-			$('#id-screen-range-beacons div.style-button-back')[0],
-			app.onStopRangingBeacons)
-		evothings.touch.onTap(
-			$('#id-screen-monitor-regions div.style-button-back')[0],
-			app.onStopMonitoringRegions)
-		evothings.touch.onTap(
-			$('#id-screen-range-nearables div.style-button-back')[0],
-			app.onStopRangingNearables)
 		</script>
 
 	</body>

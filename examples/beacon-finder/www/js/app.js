@@ -92,21 +92,31 @@ var app = (function()
 	app.showScanBeaconsScreen = function()
 	{
 		app.showScreen('id-screen-scan-beacons');
+		$('#id-screen-scan-beacons .style-beacon-list').empty();
 	};
 
 	app.showRangeBeaconsScreen = function()
 	{
 		app.showScreen('id-screen-range-beacons');
+		$('#id-screen-range-beacons .style-beacon-list').empty();
 	};
 
 	app.showMonitorRegionsScreen = function()
 	{
 		app.showScreen('id-screen-monitor-regions');
+		$('#id-screen-monitor-regions .style-beacon-list').empty();
 	};
 
 	app.showRangeNearablesScreen = function()
 	{
 		app.showScreen('id-screen-range-nearables');
+		$('#id-screen-range-nearables .style-beacon-list').empty();
+	};
+
+	app.showMonitorNearablesScreen = function()
+	{
+		app.showScreen('id-screen-monitor-nearables');
+		$('#id-screen-monitor-nearables .style-beacon-list').empty();
 	};
 
 	app.startScanningBeacons = function()
@@ -341,6 +351,47 @@ var app = (function()
 		app.showHomeScreen();
 	};
 
+	app.startMonitoringNearables = function()
+	{
+		function onMonitor(state)
+		{
+			displayRegionInfo(state);
+		}
+
+		function onError(errorMessage)
+		{
+			console.log('Monitor error: ' + errorMessage);
+		}
+
+		function displayRegionInfo(state)
+		{
+			// Clear HTML.
+			$('#id-screen-monitor-nearables .style-beacon-list').empty();
+
+			var colorClasses = 'style-color-blueberry-dark style-color-blueberry-dark-text';
+			htm = '<div class="' + colorClasses + '">'
+				+ '<table><tr><td>Type</td><td>' + state.type
+				+ '</td></tr><tr><td>State</td><td>' + state.state
+				+ '</td></tr></table></div>';
+
+			$('#id-screen-monitor-nearables .style-beacon-list').append(htm);
+		};
+
+		app.showMonitorNearablesScreen();
+
+		estimote.nearables.startMonitoringForType(
+			//estimote.nearables.ESTNearableTypeDog,
+			estimote.nearables.ESTNearableTypeUnknown,
+			onMonitor,
+			onError);
+	};
+
+	app.stopMonitoringNearables = function()
+	{
+		estimote.nearables.stopMonitoring();
+		app.showHomeScreen();
+	};
+	
 	// ------------- Public touch event functions ------------- //
 
 	app.onStartScanningBeacons = function()
@@ -381,6 +432,16 @@ var app = (function()
 	app.onStopRangingNearables = function()
 	{
 		app.stopRangingNearables();
+	};
+
+	app.onStartMonitoringNearables = function()
+	{
+		app.startMonitoringNearables();
+	};
+
+	app.onStopMonitoringNearables = function()
+	{
+		app.stopMonitoringNearables();
 	};
 
 	app.onNavigateBack = function()

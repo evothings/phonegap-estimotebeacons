@@ -367,7 +367,7 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
  *   estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
- *       console.log('*** Beacons discovered ***')
+ *       console.log('Beacons discovered:')
  *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Discovery error: ' + errorMessage) }
@@ -437,7 +437,7 @@ estimote.beacons.stopEstimoteBeaconDiscovery = function (success, error)
  *   estimote.beacons.startRangingBeaconsInRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
- *       console.log('*** Beacons ranged ***')
+ *       console.log('Beacons ranged:')
  *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
@@ -533,7 +533,7 @@ estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
  *   estimote.beacons.startMonitoringForRegion(
  *     {}, // Empty region matches all beacons.
  *     function(result) {
- *       console.log('*** Region state ***')
+ *       console.log('Region state:')
  *       estimote.printObject(result) },
  *     function(errorMessage) {
  *       console.log('Monitoring error: ' + errorMessage) }
@@ -611,10 +611,11 @@ estimote.nearables.ESTNearableTypeGeneric = 10;
 estimote.nearables.ESTNearableTypeAll = 11;
 
 /**
- * Start ranging for Nearable with the given identifier.
+ * Start ranging for nearables with the given identifier.
  *
- * @param identifier String with Nearable id (mandatory).
- * @param success Function called when the nearable with the given id is ranged (mandatory).
+ * @param identifier String with nearable id (mandatory).
+ * @param success Function called when the nearable with the
+ * given id is ranged (mandatory).
  * @param error Function called on error (mandatory).
  *
  * success callback format:
@@ -654,7 +655,7 @@ estimote.nearables.ESTNearableTypeAll = 11;
  *   estimote.nearables.startRangingForIdentifier(
  *     '12e31',
  *     function(nearable) {
- *       console.log('*** Nearable ranged ***')
+ *       console.log('Nearable ranged:')
  *       estimote.printObject(nearable) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
@@ -673,9 +674,9 @@ estimote.nearables.startRangingForIdentifier = function (identifier, success, er
 };
 
 /**
- * Stop ranging for Nearable with the given identifier.
+ * Stop ranging for nearables with the given identifier.
  *
- * @param identifier String with Nearable id (mandatory).
+ * @param identifier String with nearable id (mandatory).
  * @param success Function called when ranging is stopped (non-mandatory).
  * @param error Function called on error (non-mandatory).
  *
@@ -702,10 +703,12 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
 
 
 /**
- * Start ranging for Nearables of the given type.
+ * Start ranging for nearables of the given type.
  *
- * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
- * @param success Function called when the nearable with the given id is ranged (mandatory).
+ * @param type Nearable type - one of the
+ * ESTNearableType* constants (mandatory).
+ * @param success Function called when the nearable with the
+ * given id is ranged (mandatory).
  * @param error Function called on error (mandatory).
  *
  * success callback format:
@@ -722,7 +725,7 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
  *   estimote.nearables.startRangingForType(
  *     estimote.nearables.ESTNearableTypeAll,
  *     function(nearables) {
- *       console.log('*** Nearables ranged ***')
+ *       console.log('Nearables ranged:')
  *       estimote.printObject(nearables) },
  *     function(errorMessage) {
  *       console.log('Ranging error: ' + errorMessage) }
@@ -741,7 +744,7 @@ estimote.nearables.startRangingForType = function (type, success, error)
 };
 
 /**
- * Stop ranging for Nearables of the given type.
+ * Stop ranging for nearables of the given type.
  *
  * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
  * @param success Function called when ranging is stopped (non-mandatory).
@@ -769,7 +772,7 @@ estimote.nearables.stopRangingForType = function (type, success, error)
 };
 
 /**
- * Stop ranging all Nearables.
+ * Stop ranging all nearables.
  *
  * @param success Function called when ranging is stopped (non-mandatory).
  * @param error Function called on error (non-mandatory).
@@ -789,6 +792,175 @@ estimote.nearables.stopRanging = function (success, error)
 		error,
 		"EstimoteBeacons",
 		"nearables_stopRanging",
+		[]
+	);
+
+	return true;
+};
+
+/**
+ * Start monitoring for nearables with the given identifier.
+ *
+ * @param identifier String with nearable id (mandatory).
+ * @param success Function called when the nearable with the
+ * given id is monitored (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(identifierRegionState)
+ *
+ * identifierRegionState format:
+ *   {
+ *     identifier: string,
+ *     state: string ['outside'|'inside']
+ *   }
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that prints state for monitored identifier:
+ *   estimote.nearables.startMonitoringForIdentifier(
+ *     '12e31',
+ *     function(state) {
+ *       console.log('Nearable monitored:')
+ *       estimote.printObject(state) },
+ *     function(errorMessage) {
+ *       console.log('Monitoring error: ' + errorMessage) }
+ *   )
+ */
+estimote.nearables.startMonitoringForIdentifier = function (identifier, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_startMonitoringForIdentifier",
+		[identifier]
+	);
+
+	return true;
+};
+
+/**
+ * Stop monitoring for nearables with the given identifier.
+ *
+ * @param identifier String with nearable id (mandatory).
+ * @param success Function called when monitoring is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops monitoring:
+ *   estimote.nearables.stopMonitoringForIdentifier(identifier)
+ */
+estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopMonitoringForIdentifier",
+		[identifier]
+	);
+
+	return true;
+};
+
+/**
+ * Start monitoring for nearables of the given type.
+ *
+ * @param type Nearable type - one of the ESTNearableType*
+ * constants (mandatory).
+ * @param success Function called when nearables with the given
+ * type is monitored (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(typeRegionState)
+ *
+ * typeRegionState format:
+ *   {
+ *     type: number, // one of the ESTNearableType* values
+ *     state: string ['outside'|'inside']
+ *   }
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that prints state for monitored type:
+ *   estimote.nearables.startMonitoringForType(
+ *     estimote.nearables.ESTNearableTypeAll,
+ *     function(state) {
+ *       console.log('Nearables monitored:')
+ *       estimote.printObject(state) },
+ *     function(errorMessage) {
+ *       console.log('Monitoring error: ' + errorMessage) }
+ *   )
+ */
+estimote.nearables.startMonitoringForType = function (type, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_startMonitoringForType",
+		[type]
+	);
+
+	return true;
+};
+
+/**
+ * Stop monitoring for nearables of the given type.
+ *
+ * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
+ * @param success Function called when monitoring is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops monitoring:
+ *   estimote.nearables.stopMonitoringForType(estimote.nearables.ESTNearableTypeAll)
+ */
+estimote.nearables.stopMonitoringForType = function (type, success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopMonitoringForType",
+		[type]
+	);
+
+	return true;
+};
+
+
+/**
+ * Stop monitoring all nearables.
+ *
+ * @param success Function called when monitoring is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops monitoring:
+ *   estimote.nearables.stopMonitoring()
+ */
+estimote.nearables.stopMonitoring = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"nearables_stopMonitoring",
 		[]
 	);
 
