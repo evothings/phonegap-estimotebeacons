@@ -337,7 +337,13 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
  *     identifier: string,
  *     major: number,
  *     minor: number,
+ *     secure: boolean
  *   }
+ *
+ * The region field "secure" is supported on iOS for enabling
+ * secure beacon regions. Leaving it out defaults to false.
+ * See this article for further info:
+ * https://community.estimote.com/hc/en-us/articles/204233603-How-security-feature-works
  *
  * success callback format:
  *   success(beaconInfo)
@@ -591,7 +597,7 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 /**
  * Nearable types.
  */
-estimote.nearables..ESTNearableTypeUnknown = 0;
+estimote.nearables.ESTNearableTypeUnknown = 0;
 estimote.nearables.ESTNearableTypeDog = 1;
 estimote.nearables.ESTNearableTypeCar = 2;
 estimote.nearables.ESTNearableTypeFridge = 3;

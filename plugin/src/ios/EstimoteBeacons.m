@@ -119,8 +119,10 @@
 	NSString* identifier = @"EstimoteSampleRegion";
 	CLBeaconMajorValue major = 0;
 	CLBeaconMinorValue minor = 0;
+	BOOL secure = false;
 	BOOL majorIsDefined = NO;
 	BOOL minorIsDefined = NO;
+	BOOL secureIsDefined = NO;
 
 	// Get region values.
 	for (id key in regionDict) {
@@ -137,7 +139,11 @@
 		else
 		if ([key isEqualToString:@"minor"]) {
 			minor = [value integerValue];
-			minorIsDefined = YES; } }
+			minorIsDefined = YES; }
+		else
+		if ([key isEqualToString:@"secure"]) {
+			secure = [value boolValue];
+			secureIsDefined = YES; } }
 
 	// Create a beacon region object.
 	if (majorIsDefined && minorIsDefined) {
@@ -145,16 +151,19 @@
 			initWithProximityUUID: uuid
 			major: major
 			minor: minor
-			identifier: identifier]; }
+			identifier: identifier
+			secured: secure]; }
 	else if (majorIsDefined) {
 		return [[ESTBeaconRegion alloc]
 			initWithProximityUUID: uuid
 			major: major
-			identifier:identifier];	}
+			identifier:identifier
+			secured: secure];	}
 	else {
 		return [[ESTBeaconRegion alloc]
 			initWithProximityUUID: uuid
-			identifier: identifier]; } }
+			identifier: identifier
+			secured: secure]; } }
 
 /**
  * Create a dictionary object from a region.
