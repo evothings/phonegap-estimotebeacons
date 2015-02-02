@@ -103,16 +103,16 @@ public class EstimoteBeacons extends CordovaPlugin
 		final CallbackContext callbackContext)
 		throws JSONException
 	{
-		if ("startRangingBeaconsInRegion".equals(action)) {
+		if ("beacons_startRangingBeaconsInRegion".equals(action)) {
 			startRangingBeaconsInRegion(args, callbackContext);
 		}
-		else if ("stopRangingBeaconsInRegion".equals(action)) {
+		else if ("beacons_stopRangingBeaconsInRegion".equals(action)) {
 			stopRangingBeaconsInRegion(args, callbackContext);
 		}
-		else if ("startMonitoringForRegion".equals(action)) {
+		else if ("beacons_startMonitoringForRegion".equals(action)) {
 			startMonitoringForRegion(args, callbackContext);
 		}
-		else if ("stopMonitoringForRegion".equals(action)) {
+		else if ("beacons_stopMonitoringForRegion".equals(action)) {
 			stopMonitoringForRegion(args, callbackContext);
 		}
 		else {
