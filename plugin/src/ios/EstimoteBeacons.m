@@ -1,10 +1,58 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
 
+/*********************************************************/
+/************ Estimote Triggers Declarations *************/
+/*********************************************************/
+
+#define EST_CDV_RULE_TYPE_GENERIC 1
+#define EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER 2
+#define EST_CDV_RULE_TYPE_NEARABLE_TYPE 4
+
+// **************** Trigger object ****************
+
+@interface ESTCDVTrigger : NSObject
+
+@property NSString* triggerIdentifier;
+@property NSString* callbackId;
+@property ESTTrigger* nativeTrigger;
+@property NSDictionary* nativeRules;  // ruleIdentifier -> ESTRule
+
+@end
+
+// **************** Generic rule ****************
+
+@interface ESTCDVRuleGeneric : ESTRule
+
+@property id pluginManager;
+@property NSString* ruleIdentifier;
+@property NSString* triggerIdentifier;
+
+- (void) update;
+
+@end
+
+// **************** Nearable rule ****************
+
+@interface ESTCDVRuleNearable : ESTNearableRule
+
+@property id pluginManager;
+@property NSString* ruleIdentifier;
+@property NSString* triggerIdentifier;
+
+- (void) updateWithNearable: (ESTNearable*)nearable;
+
+@end
+
+/*********************************************************/
+/******** EstimoteBeacons Cordova Imlementation **********/
+/*********************************************************/
+
 @interface EstimoteBeacons ()
 <	ESTBeaconManagerDelegate,
 	ESTBeaconDelegate,
-	ESTNearableManagerDelegate >
+	ESTNearableManagerDelegate,
+	ESTTriggerManagerDelegate >
 
 /**
  * The beacon manager in the Estimote API.
@@ -57,6 +105,17 @@
  */
 @property NSMutableDictionary* callbackIds_nearablesMonitoringType;
 
+/**
+ * The trigger manager in the Estimote API.
+ */
+@property (nonatomic, strong) ESTTriggerManager* triggerManager;
+
+/**
+ * Dictionary of trigger holder objects.
+ * Trigger identifiers are used as keys.
+ */
+@property NSMutableDictionary* triggers;
+
 @end
 
 @implementation EstimoteBeacons
@@ -71,6 +130,7 @@
 {
 	[self beacons_pluginInitialize];
 	[self nearables_pluginInitialize];
+	[self triggers_pluginInitialize];
 
 	return self;
 }
@@ -83,6 +143,7 @@
 {
 	[self beacons_onReset];
 	[self nearables_onReset];
+	[self triggers_onReset];
 }
 
 /*********************************************************/
@@ -1498,6 +1559,265 @@ Example: http://192.168.0.101:4042
 		callbackId: command.callbackId];
 }
 
+
+/*********************************************************/
+/************ Estimote Triggers Implementation ***********/
+/*********************************************************/
+
+// **************** Initialise/release ****************
+
+- (void) triggers_pluginInitialize
+{
+	self.triggerManager = [ESTTriggerManager new];
+	self.triggerManager.delegate = self;
+
+	self.triggers = [NSMutableDictionary new];
+}
+
+- (void) triggers_onReset
+{
+	for (NSString* key in self.triggers)
+	{
+    	ESTCDVTrigger* trigger = self.triggers[key];
+		if (nil != trigger)
+		{
+			[self.triggerManager stopMonitoringForTriggerWithIdentifier:
+				trigger.triggerIdentifier];
+		}
+	}
+
+	self.triggers = [NSMutableDictionary new];
+}
+
+// Helper method.
+- (void) sendTriggerEventToJavaScript: (NSDictionary*) event
+{
+	// Trigger object holds callback id.
+	ESTCDVTrigger* trigger = [self.triggers objectForKey: event[@"triggerIdentifier"]];
+
+	// Send result.
+	CDVPluginResult* result = [CDVPluginResult
+		resultWithStatus: CDVCommandStatus_OK
+		messageAsDictionary: event];
+	[result setKeepCallback: [NSNumber numberWithBool: YES]];
+	[self.commandDelegate
+		sendPluginResult: result
+		callbackId: trigger.callbackId];
+}
+
+// **************** JavaScript API implementation ****************
+
+/**
+ * Start monitoring for a trigger. Create rule objects and set up
+ * callback to JavaScript for monitoring updates and trigger events.
+ */
+- (void) triggers_startMonitoringForTrigger: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC triggers_startMonitoringForTrigger");
+
+	// Get command parameters.
+	NSDictionary* jsTrigger = [command argumentAtIndex: 0];
+	NSString* triggerIdentifier = jsTrigger[@"triggerIdentifier"];
+	NSArray* jsRules = jsTrigger[@"rules"];
+
+	// Trigger must NOT exist.
+	if (nil != self.triggers[triggerIdentifier])
+	{
+		// Pass error to JavaScript.
+		[self.commandDelegate
+			sendPluginResult:[CDVPluginResult
+				resultWithStatus:CDVCommandStatus_ERROR
+				messageAsString: @"Trigger already exists"]
+			callbackId: command.callbackId];
+
+		// Abort.
+		return;
+	}
+
+	// Create custom trigger holder object. It is stored
+	// in the triggers dictionary.
+	ESTCDVTrigger* trigger = [ESTCDVTrigger new];
+	trigger.triggerIdentifier = triggerIdentifier;
+	trigger.callbackId = command.callbackId;
+	[self.triggers setValue: trigger forKey: triggerIdentifier];
+
+	// Create native rules for all JavaScript rules.
+	NSMutableArray* nativeRules = [NSMutableArray array];
+	for (NSDictionary* jsRule in jsRules)
+	{
+		int ruleType = [jsRule[@"ruleType"] intValue];
+		NSString* ruleIdentifier = jsRule[@"ruleIdentifier"];
+
+		// Create rule objects based on rule type.
+		if (ruleType & EST_CDV_RULE_TYPE_GENERIC)
+		{
+			ESTCDVRuleGeneric* rule = [ESTCDVRuleGeneric new];
+			rule.triggerIdentifier = triggerIdentifier;
+			rule.ruleIdentifier = ruleIdentifier;
+			rule.pluginManager = self;
+			[trigger.nativeRules setValue: rule forKey: ruleIdentifier];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_GENERIC");
+		}
+		else if (ruleType & EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER)
+		{
+		NSLog(@"jsRule nearableIdentifier; %@", jsRule[@"nearableIdentifier"]);
+			ESTCDVRuleNearable* rule = [[ESTCDVRuleNearable alloc]
+				initWithNearableIdentifier: jsRule[@"nearableIdentifier"]];
+			rule.triggerIdentifier = triggerIdentifier;
+			rule.ruleIdentifier = ruleIdentifier;
+			rule.pluginManager = self;
+			[trigger.nativeRules setValue: rule forKey: ruleIdentifier];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER");
+		}
+		else if (ruleType & EST_CDV_RULE_TYPE_NEARABLE_TYPE)
+		{
+			ESTCDVRuleNearable* rule = [[ESTCDVRuleNearable alloc]
+				initWithNearableType: [jsRule[@"nearableType"] intValue]];
+			rule.triggerIdentifier = triggerIdentifier;
+			rule.ruleIdentifier = ruleIdentifier;
+			rule.pluginManager = self;
+			[trigger.nativeRules setValue: rule forKey: ruleIdentifier];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_NEARABLE_TYPE");
+		}
+	}
+
+	// Create native trigger with the rules.
+	trigger.nativeTrigger = [[ESTTrigger alloc]
+		initWithRules: nativeRules
+		identifier: triggerIdentifier];
+
+	// Start monitoring.
+	[self.triggerManager startMonitoringForTrigger: trigger.nativeTrigger];
+}
+
+/**
+ * Stop monitoring for a trigger. Destroy rule objects.
+ */
+- (void) triggers_stopMonitoringForTrigger: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC triggers_stopMonitoringForTrigger");
+
+	// Get trigger identifier.
+	NSString* triggerIdentifier = [command argumentAtIndex: 0];
+
+	// Trigger must exist.
+	ESTCDVTrigger* trigger = self.triggers[triggerIdentifier];
+	if (nil == trigger)
+	{
+		// Pass error to JavaScript.
+		[self.commandDelegate
+			sendPluginResult:[CDVPluginResult
+				resultWithStatus:CDVCommandStatus_ERROR
+				messageAsString: @"Trigger does not exist"]
+			callbackId: command.callbackId];
+
+		// Abort.
+		return;
+	}
+
+	// Stop trigger.
+	[self.triggerManager stopMonitoringForTriggerWithIdentifier: triggerIdentifier];
+
+	// Clear JavaScript trigger callback.
+	CDVPluginResult* result = [CDVPluginResult
+		resultWithStatus: CDVCommandStatus_NO_RESULT];
+	[result setKeepCallbackAsBool: NO];
+	[self.commandDelegate
+		sendPluginResult: result
+		callbackId: trigger.callbackId];
+
+	// TODO: Clean up!
+	[self.triggers removeObjectForKey: triggerIdentifier];
+
+	// Respond to JavaScript with OK.
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+/**
+ * Update state for a rule. This command does not return
+ * anything to JavaScript. It is called by JavaScript library
+ * code, not by application code.
+ */
+- (void) triggers_updateRuleState: (CDVInvokedUrlCommand*)command
+{
+	NSLog(@"OBJC triggers_updateRuleState");
+
+	// Get command parameters.
+	NSString* triggerIdentifier = [command argumentAtIndex: 0];
+	NSString* ruleIdentifier = [command argumentAtIndex: 1];
+	BOOL state = [[command argumentAtIndex: 2] boolValue];
+
+	// Get rule and set state.
+	ESTCDVTrigger* trigger = self.triggers[triggerIdentifier];
+	ESTRule* rule = trigger.nativeRules[ruleIdentifier];
+	rule.state = state;
+}
+
+@end // End of implementation of class EstimoteBeacons
+
+// **************** Trigger object ****************
+
+@implementation ESTCDVTrigger
+
+- init
+{
+	self = [super init];
+	self.nativeRules = [NSMutableDictionary new];
+	return self;
+}
+
+@end
+
+// **************** Generic rule ****************
+
+@implementation ESTCDVRuleGeneric
+
+- (void) update
+{
+	NSLog(@"ESTCDVRuleGeneric update");
+
+    [super update];
+
+	NSMutableDictionary* event = [NSMutableDictionary dictionaryWithCapacity: 8];
+
+	[event setValue: @"update" forKey: @"eventType"];
+	[event setValue: self.ruleIdentifier forKey: @"ruleIdentifier"];
+	[event setValue: self.triggerIdentifier forKey: @"triggerIdentifier"];
+
+	[self.pluginManager sendTriggerEventToJavaScript: event];
+}
+
+@end
+
+// **************** Nearable rule ****************
+
+@implementation ESTCDVRuleNearable
+
+- (void) updateWithNearable: (ESTNearable*)nearable
+{
+	NSLog(@"ESTCDVRuleNearable updateWithNearable");
+
+    [super updateWithNearable: nearable];
+
+	NSMutableDictionary* event = [NSMutableDictionary dictionaryWithCapacity: 8];
+
+	[event setValue: @"update" forKey: @"eventType"];
+	[event setValue: self.ruleIdentifier forKey: @"ruleIdentifier"];
+	[event setValue: self.triggerIdentifier forKey: @"triggerIdentifier"];
+	[event
+		setValue: [self.pluginManager nearableToDictionary: nearable]
+		forKey: @"object"];
+
+	[self.pluginManager sendTriggerEventToJavaScript: event];
+}
+
+@end
+
 /*********************************************************/
 /********************** Unused Code **********************/
 /*********************************************************/
@@ -1940,5 +2260,3 @@ Example: http://192.168.0.101:4042
 	}
 }
 */
-
-@end
