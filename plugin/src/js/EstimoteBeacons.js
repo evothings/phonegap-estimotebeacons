@@ -1,3 +1,5 @@
+cordova.define("pl.makingwaves.estimotebeacons.EstimoteBeacons", function(require, exports, module) {
+
 var exec = cordova.require('cordova/exec');
 
 /*
@@ -28,18 +30,18 @@ function checkExecParamsRegionSuccessError(region, success, error)
 {
 	var caller = checkExecParamsRegionSuccessError.caller.name
 
-	if (typeof region != "object") {
-		console.error("Error: region parameter is not an object in: " + caller);
+	if (typeof region != 'object') {
+		console.error('Error: region parameter is not an object in: ' + caller);
 		return false;
 	}
 
-	if (typeof success != "function") {
-		console.error("Error: success parameter is not a function in: " + caller);
+	if (typeof success != 'function') {
+		console.error('Error: success parameter is not a function in: ' + caller);
 		return false;
 	}
 
-	if (typeof error != "function") {
-		console.error("Error: error parameter is not a function in: " + caller);
+	if (typeof error != 'function') {
+		console.error('Error: error parameter is not a function in: ' + caller);
 		return false;
 	}
 
@@ -50,13 +52,13 @@ function checkExecParamsSuccessError(success, error)
 {
 	var caller = checkExecParamsSuccessError.caller.name
 
-	if (typeof success != "function") {
-		console.error("Error: success parameter is not a function in: " + caller);
+	if (typeof success != 'function') {
+		console.error('Error: success parameter is not a function in: ' + caller);
 		return false;
 	}
 
-	if (typeof error != "function") {
-		console.error("Error: error parameter is not a function in: " + caller);
+	if (typeof error != 'function') {
+		console.error('Error: error parameter is not a function in: ' + caller);
 		return false;
 	}
 
@@ -67,8 +69,8 @@ function checkExecParamsRegion(region)
 {
 	var caller = checkExecParamsRegion.caller.name
 
-	if (typeof region != "object") {
-		console.error("Error: region parameter is not an object in: " + caller);
+	if (typeof region != 'object') {
+		console.error('Error: region parameter is not an object in: ' + caller);
 		return false;
 	}
 
@@ -96,16 +98,16 @@ estimote.printObject = function(obj, printFun)
 	if (!printFun) { printFun = console.log; }
 	function print(obj, level)
 	{
-		var indent = new Array(level + 1).join("  ");
+		var indent = new Array(level + 1).join('  ');
 		for (var prop in obj) {
 			if (obj.hasOwnProperty(prop)) {
 				var value = obj[prop];
-				if (typeof value == "object") {
-					printFun(indent + prop + ":");
+				if (typeof value == 'object') {
+					printFun(indent + prop + ':');
 					print(value, level + 1);
 				}
 				else {
-					printFun(indent + prop + ": " + value);
+					printFun(indent + prop + ': ' + value);
 				}
 			}
 		}
@@ -138,9 +140,9 @@ estimote.beacons.BeaconColorTransparent = 5;
 /**
  * Region states.
  */
-estimote.beacons.RegionStateUnknown = "unknown";
-estimote.beacons.RegionStateOutside = "outside";
-estimote.beacons.RegionStateInside = "inside";
+estimote.beacons.RegionStateUnknown = 'unknown';
+estimote.beacons.RegionStateOutside = 'outside';
+estimote.beacons.RegionStateInside = 'inside';
 
 /**
  * Ask the user for permission to use location services
@@ -168,8 +170,8 @@ estimote.beacons.requestWhenInUseAuthorization = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_requestWhenInUseAuthorization",
+		'EstimoteBeacons',
+		'beacons_requestWhenInUseAuthorization',
 		[]
 	);
 
@@ -202,8 +204,8 @@ estimote.beacons.requestAlwaysAuthorization = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_requestAlwaysAuthorization",
+		'EstimoteBeacons',
+		'beacons_requestAlwaysAuthorization',
 		[]
 	);
 
@@ -243,8 +245,8 @@ estimote.beacons.authorizationStatus = function (success, error)
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_authorizationStatus",
+		'EstimoteBeacons',
+		'beacons_authorizationStatus',
 		[]
 	);
 
@@ -284,8 +286,8 @@ estimote.beacons.startAdvertisingAsBeacon = function (
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_startAdvertisingAsBeacon",
+		'EstimoteBeacons',
+		'beacons_startAdvertisingAsBeacon',
 		[uuid, major, minor, regionId]
 	);
 
@@ -316,8 +318,8 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_stopAdvertisingAsBeacon",
+		'EstimoteBeacons',
+		'beacons_stopAdvertisingAsBeacon',
 		[]
 	);
 
@@ -340,7 +342,7 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
  *     secure: boolean
  *   }
  *
- * The region field "secure" is supported on iOS for enabling
+ * The region field 'secure' is supported on iOS for enabling
  * secure beacon regions. Leaving it out defaults to false.
  * See this article for further info:
  * https://community.estimote.com/hc/en-us/articles/204233603-How-security-feature-works
@@ -381,8 +383,8 @@ estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function (region, succ
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_startEstimoteBeaconsDiscoveryForRegion",
+		'EstimoteBeacons',
+		'beacons_startEstimoteBeaconsDiscoveryForRegion',
 		[region]
 	);
 
@@ -408,8 +410,8 @@ estimote.beacons.stopEstimoteBeaconDiscovery = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_stopEstimoteBeaconDiscovery",
+		'EstimoteBeacons',
+		'beacons_stopEstimoteBeaconDiscovery',
 		[]
 	);
 
@@ -451,8 +453,8 @@ estimote.beacons.startRangingBeaconsInRegion = function (region, success, error)
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_startRangingBeaconsInRegion",
+		'EstimoteBeacons',
+		'beacons_startRangingBeaconsInRegion',
 		[region]
 	);
 
@@ -483,8 +485,8 @@ estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_stopRangingBeaconsInRegion",
+		'EstimoteBeacons',
+		'beacons_stopRangingBeaconsInRegion',
 		[region]
 	);
 
@@ -505,14 +507,14 @@ estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
  *
  * Details regarding parameter notifyEntryStateOnDisplay from the iOS documentation:
  *
- * "When set to YES, the location manager sends beacon notifications when
+ * 'When set to YES, the location manager sends beacon notifications when
  * the user turns on the display and the device is already inside the region.
  * These notifications are sent even if your app is not running. In that
  * situation, the system launches your app into the background so that it
  * can handle the notifications. In both situations, the location manager
  * calls the locationManager:didDetermineState:forRegion: method of its
  * delegate object.
- * The default value for this property is NO."
+ * The default value for this property is NO.
  *
  * success callback format:
  *   success(regionState)
@@ -548,8 +550,8 @@ estimote.beacons.startMonitoringForRegion = function (
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_startMonitoringForRegion",
+		'EstimoteBeacons',
+		'beacons_startMonitoringForRegion',
 		[region, !!notifyEntryStateOnDisplay]
 	);
 
@@ -580,8 +582,8 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"beacons_stopMonitoringForRegion",
+		'EstimoteBeacons',
+		'beacons_stopMonitoringForRegion',
 		[region]
 	);
 
@@ -609,6 +611,14 @@ estimote.nearables.ESTNearableTypeDoor = 8;
 estimote.nearables.ESTNearableTypeShoe = 9;
 estimote.nearables.ESTNearableTypeGeneric = 10;
 estimote.nearables.ESTNearableTypeAll = 11;
+
+/**
+ * Nearable zones.
+ */
+estimote.nearables.ESTNearableZoneUnknown = 0;
+estimote.nearables.ESTNearableZoneImmediate = 1;
+estimote.nearables.ESTNearableZoneNear = 2;
+estimote.nearables.ESTNearableZoneFar = 3;
 
 /**
  * Start ranging for nearables with the given identifier.
@@ -665,8 +675,8 @@ estimote.nearables.startRangingForIdentifier = function (identifier, success, er
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_startRangingForIdentifier",
+		'EstimoteBeacons',
+		'nearables_startRangingForIdentifier',
 		[identifier]
 	);
 
@@ -693,8 +703,8 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopRangingForIdentifier",
+		'EstimoteBeacons',
+		'nearables_stopRangingForIdentifier',
 		[identifier]
 	);
 
@@ -735,8 +745,8 @@ estimote.nearables.startRangingForType = function (type, success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_startRangingForType",
+		'EstimoteBeacons',
+		'nearables_startRangingForType',
 		[type]
 	);
 
@@ -763,8 +773,8 @@ estimote.nearables.stopRangingForType = function (type, success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopRangingForType",
+		'EstimoteBeacons',
+		'nearables_stopRangingForType',
 		[type]
 	);
 
@@ -790,8 +800,8 @@ estimote.nearables.stopRanging = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopRanging",
+		'EstimoteBeacons',
+		'nearables_stopRanging',
 		[]
 	);
 
@@ -832,8 +842,8 @@ estimote.nearables.startMonitoringForIdentifier = function (identifier, success,
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_startMonitoringForIdentifier",
+		'EstimoteBeacons',
+		'nearables_startMonitoringForIdentifier',
 		[identifier]
 	);
 
@@ -860,8 +870,8 @@ estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, 
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopMonitoringForIdentifier",
+		'EstimoteBeacons',
+		'nearables_stopMonitoringForIdentifier',
 		[identifier]
 	);
 
@@ -903,8 +913,8 @@ estimote.nearables.startMonitoringForType = function (type, success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_startMonitoringForType",
+		'EstimoteBeacons',
+		'nearables_startMonitoringForType',
 		[type]
 	);
 
@@ -931,14 +941,13 @@ estimote.nearables.stopMonitoringForType = function (type, success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopMonitoringForType",
+		'EstimoteBeacons',
+		'nearables_stopMonitoringForType',
 		[type]
 	);
 
 	return true;
 };
-
 
 /**
  * Stop monitoring all nearables.
@@ -959,9 +968,161 @@ estimote.nearables.stopMonitoring = function (success, error)
 {
 	exec(success,
 		error,
-		"EstimoteBeacons",
-		"nearables_stopMonitoring",
+		'EstimoteBeacons',
+		'nearables_stopMonitoring',
 		[]
+	);
+
+	return true;
+};
+
+/*********************************************************/
+/******************* Trigger Functions *******************/
+/*********************************************************/
+
+estimote.triggers = {};
+estimote.triggers.RuleTypeGeneric = 1;
+estimote.triggers.RuleTypeNearableIdentifier = 2;
+estimote.triggers.RuleTypeNearableType = 4;
+
+var ruleCounter = 0;
+
+// Helper function.
+function helper_createTriggerObject(trigger)
+{
+	var triggerObject = {};
+
+	triggerObject.triggerIdentifier = trigger.identifier;
+
+	triggerObject.rules = [];
+	for (var i = 0; i < trigger.rules.length; ++i)
+	{
+		var rule = trigger.rules[i];
+		triggerObject.rules.push({
+			ruleType: rule.ruleType,
+			ruleIdentifier: rule.ruleIdentifier,
+			nearableIdentifier: rule.nearableIdentifier,
+			nearableType: rule.nearableType });
+	}
+
+	return triggerObject;
+}
+
+// Helper function.
+function helper_updateTriggerRule(trigger, event)
+{
+	var rule = trigger.ruleTable[event.ruleIdentifier];
+	if (rule && rule.ruleUpdateFunction)
+	{
+		rule.ruleUpdateFunction(event);
+	}
+}
+
+estimote.triggers.createTrigger = function(triggerIdentifier, rules)
+{
+	var trigger = {};
+
+	trigger.state = false;
+	trigger.identifier = triggerIdentifier;
+	trigger.rules = rules;
+
+	// Create table for rule ids for quick lookup.
+	trigger.ruleTable = {};
+	for (var i = 0; i < rules.length; ++i)
+	{
+		var rule = rules[i];
+		trigger.ruleTable[rule.ruleIdentifier] = rule;
+	}
+
+	return trigger;
+};
+
+estimote.triggers.createRule = function(ruleUpdateFunction)
+{
+	var rule = {};
+	rule.ruleType = estimote.triggers.RuleTypeGeneric;
+	rule.ruleUpdateFunction = ruleUpdateFunction;
+	rule.ruleIdentifier = 'Rule' + (++ruleCounter);
+	return rule;
+};
+
+estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpdateFunction)
+{
+	var rule = estimote.triggers.createRule(ruleUpdateFunction);
+	rule.ruleType = estimote.triggers.RuleTypeNearableIdentifier;
+	rule.nearableIdentifier = nearableIdentifier;
+	return rule;
+};
+
+estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
+{
+	var rule = estimote.triggers.createRule(ruleUpdateFunction);
+	rule.ruleType = estimote.triggers.RuleTypeNearableType;
+	rule.nearableType = nearableType;
+	return rule;
+};
+
+/**
+ * Start monitoring a trigger.
+ * @param success Function called when the trigger changes state: success(trigger)
+ * @param error Function called on error: error(errorMessage)
+ */
+estimote.triggers.startMonitoringForTrigger = function(trigger, success, error)
+{
+	function callback(event)
+	{
+		if (event.triggerIdentifier == trigger.identifier)
+		{
+			if ('triggerChangedState' == event.eventType)
+			{
+				trigger.state = event.triggerState;
+				success(trigger);
+			}
+			else if ('update' == event.eventType)
+			{
+				helper_updateTriggerRule(trigger, event);
+			}
+		}
+	}
+
+	var triggerObject = helper_createTriggerObject(trigger);
+
+	exec(callback,
+		error,
+		'EstimoteBeacons',
+		'triggers_startMonitoringForTrigger',
+		[triggerObject]
+	);
+
+	return true;
+};
+
+estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'triggers_stopMonitoringForTrigger',
+		[trigger.identifier]
+	);
+
+	return true;
+};
+
+/**
+ * Used to update the state of a native rule during an update event.
+ * @param event Event object passed to the event update function.
+ * @param state true if rule holds, false if rule does not hold.
+ * Example call:
+ *   estimote.triggers.updateRuleState(event, true)
+ */
+estimote.triggers.updateRuleState = function(event, state)
+{
+	exec(null,
+		null,
+		'EstimoteBeacons',
+		'triggers_updateRuleState',
+		[event.triggerIdentifier, event.ruleIdentifier, state]
 	);
 
 	return true;
@@ -1304,3 +1465,5 @@ estimote.beacons.printObject = estimote.printObject
 window.EstimoteBeacons = estimote.beacons;
 
 module.exports = estimote;
+
+});
