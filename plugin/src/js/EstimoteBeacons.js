@@ -613,6 +613,14 @@ estimote.nearables.ESTNearableTypeGeneric = 10;
 estimote.nearables.ESTNearableTypeAll = 11;
 
 /**
+ * Nearable zones.
+ */
+estimote.nearables.ESTNearableZoneUnknown = 0;
+estimote.nearables.ESTNearableZoneImmediate = 1;
+estimote.nearables.ESTNearableZoneNear = 2;
+estimote.nearables.ESTNearableZoneFar = 3;
+
+/**
  * Start ranging for nearables with the given identifier.
  *
  * @param identifier String with nearable id (mandatory).
@@ -980,11 +988,11 @@ estimote.triggers.RuleTypeNearableType = 4;
 var ruleCounter = 0;
 
 // Helper function.
-function createTriggerObject(trigger)
+function helper_createTriggerObject(trigger)
 {
 	var triggerObject = {};
 
-	triggerObject.triggerIdentifier = trigger.triggerIdentifier;
+	triggerObject.triggerIdentifier = trigger.identifier;
 
 	triggerObject.rules = [];
 	for (var i = 0; i < trigger.rules.length; ++i)
@@ -1001,10 +1009,8 @@ function createTriggerObject(trigger)
 }
 
 // Helper function.
-function updateTriggerRule(trigger, event)
+function helper_updateTriggerRule(trigger, event)
 {
-	console.log('updateTriggerRule: ' + event);
-
 	var rule = trigger.ruleTable[event.ruleIdentifier];
 	if (rule && rule.ruleUpdateFunction)
 	{
@@ -1017,7 +1023,7 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 	var trigger = {};
 
 	trigger.state = false;
-	trigger.triggerIdentifier = triggerIdentifier;
+	trigger.identifier = triggerIdentifier;
 	trigger.rules = rules;
 
 	// Create table for rule ids for quick lookup.
@@ -1026,9 +1032,6 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 	{
 		var rule = rules[i];
 		trigger.ruleTable[rule.ruleIdentifier] = rule;
-
-		// Also save triggerIdentifier.
-		//rule.triggerIdentifier = triggerIdentifier;
 	}
 
 	return trigger;
@@ -1059,25 +1062,30 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 	return rule;
 };
 
-// @param success Function called when the trigger changes state.
+/**
+ * Start monitoring a trigger.
+ * @param success Function called when the trigger changes state: success(trigger)
+ * @param error Function called on error: error(errorMessage)
+ */
 estimote.triggers.startMonitoringForTrigger = function(trigger, success, error)
 {
 	function callback(event)
 	{
-	//console.log('start trigger callback');
-	//estimote.printObject(event);
-		if ('triggerChangedState' == event.eventType)
+		if (event.triggerIdentifier == trigger.identifier)
 		{
-			trigger.state = event.state;
-			success(trigger);
-		}
-		else if ('update' == event.eventType)
-		{
-			updateTriggerRule(trigger, event);
+			if ('triggerChangedState' == event.eventType)
+			{
+				trigger.state = event.triggerState;
+				success(trigger);
+			}
+			else if ('update' == event.eventType)
+			{
+				helper_updateTriggerRule(trigger, event);
+			}
 		}
 	}
 
-	var triggerObject = createTriggerObject(trigger);
+	var triggerObject = helper_createTriggerObject(trigger);
 
 	exec(callback,
 		error,
@@ -1095,7 +1103,7 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 		error,
 		'EstimoteBeacons',
 		'triggers_stopMonitoringForTrigger',
-		[trigger.triggerIdentifier]
+		[trigger.identifier]
 	);
 
 	return true;

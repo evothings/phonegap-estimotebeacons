@@ -1758,6 +1758,20 @@ Example: http://192.168.0.101:4042
 	rule.state = state;
 }
 
+- (void) triggerManager: (ESTTriggerManager*)manager
+	triggerChangedState: (ESTTrigger*)trigger
+{
+	NSLog(@"triggerManager:triggerChangedState:");
+
+	NSMutableDictionary* event = [NSMutableDictionary dictionaryWithCapacity: 8];
+
+	[event setValue: @"triggerChangedState" forKey: @"eventType"];
+	[event setValue: trigger.identifier forKey: @"triggerIdentifier"];
+	[event setValue: [NSNumber numberWithBool: trigger.state] forKey: @"triggerState"];
+
+	[self sendTriggerEventToJavaScript: event];
+}
+
 @end // End of implementation of class EstimoteBeacons
 
 // **************** Trigger object ****************
@@ -1811,7 +1825,7 @@ Example: http://192.168.0.101:4042
 	[event setValue: self.triggerIdentifier forKey: @"triggerIdentifier"];
 	[event
 		setValue: [self.pluginManager nearableToDictionary: nearable]
-		forKey: @"object"];
+		forKey: @"nearable"];
 
 	[self.pluginManager sendTriggerEventToJavaScript: event];
 }
