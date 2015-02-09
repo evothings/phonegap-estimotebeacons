@@ -1,5 +1,3 @@
-cordova.define("pl.makingwaves.estimotebeacons.EstimoteBeacons", function(require, exports, module) {
-
 var exec = cordova.require('cordova/exec');
 
 /*
@@ -321,6 +319,123 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
 		'EstimoteBeacons',
 		'beacons_stopAdvertisingAsBeacon',
 		[]
+	);
+
+	return true;
+};
+
+/**
+ * Enable analytics. For further details see:
+ * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ *
+ * @param enable Boolean value to turn analytics on or off (mandatory).
+ * @param success Function called on success (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that enables analytics:
+ *   estimote.beacons.enableAnalytics(true)
+ */
+estimote.beacons.enableAnalytics = function (enable, success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_enableAnalytics',
+		[enable]
+	);
+
+	return true;
+};
+
+/**
+ * Test if analytics is enabled. For further details see:
+ * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ *
+ * @param success Function called on success (mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success(enabled)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that displays analytics enabled value:
+ *   estimote.beacons.isAnalyticsEnabled(function(enabled) {
+ *      console.log('Analytics enabled: ' + enabled) })
+ */
+estimote.beacons.isAnalyticsEnabled = function (success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_isAnalyticsEnabled',
+		[]
+	);
+
+	return true;
+};
+
+/**
+ * Test if App ID and App Token is set. For further details see:
+ * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ *
+ * @param success Function called on success (mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success(isAuthorized)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that displays the authorisation value:
+ *   estimote.beacons.isAuthorized(function(isAuthorized) {
+ *      console.log('App ID and App Token is set: ' + isAuthorized) })
+ */
+estimote.beacons.isAuthorized = function (success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_isAuthorized',
+		[]
+	);
+
+	return true;
+};
+
+/**
+ * Set App ID and App Token. For further details see:
+ * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ *
+ * @param success Function called on success (mandatory).
+ * @param success Function called on success (mandatory).
+ * @param success Function called on success (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success(isAuthorized)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that sets App ID and App Token:
+ *   estimote.beacons.setupAppIDAndAppToken('MyAppID', 'MyAppToken')
+ */
+estimote.beacons.setupAppIDAndAppToken = function (appID, appToken, success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_setupAppIDAndAppToken',
+		[appID, appToken]
 	);
 
 	return true;
@@ -1465,5 +1580,3 @@ estimote.beacons.printObject = estimote.printObject
 window.EstimoteBeacons = estimote.beacons;
 
 module.exports = estimote;
-
-});

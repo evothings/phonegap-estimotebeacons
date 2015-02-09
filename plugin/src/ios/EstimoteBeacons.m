@@ -1,5 +1,6 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
+#import "ESTConfig.h"
 
 /*********************************************************/
 /************ Estimote Triggers Declarations *************/
@@ -813,6 +814,53 @@ Example: http://192.168.0.101:4042
 		callbackId:command.callbackId];
 }
 
+#pragma mark - Config methods
+
+- (void) beacons_enableAnalytics: (CDVInvokedUrlCommand*)command
+{
+	BOOL enable = [[command argumentAtIndex: 0] boolValue];
+
+	[ESTConfig enableAnalytics: enable];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
+- (void) beacons_isAnalyticsEnabled: (CDVInvokedUrlCommand*)command
+{
+	BOOL isAnalyticsEnabled = [ESTConfig isAnalyticsEnabled];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsBool: isAnalyticsEnabled]
+		callbackId: command.callbackId];
+}
+
+- (void) beacons_isAuthorized: (CDVInvokedUrlCommand*)command
+{
+	BOOL isAuthorized = [ESTConfig isAuthorized];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsBool: isAuthorized]
+		callbackId: command.callbackId];
+}
+
+- (void) beacons_setupAppIDAndAppToken: (CDVInvokedUrlCommand*)command
+{
+	NSString* appID = [command argumentAtIndex: 0];
+	NSString* appToken = [command argumentAtIndex: 1];
+
+	[ESTConfig setupAppID: appID andAppToken: appToken];
+
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
+		callbackId: command.callbackId];
+}
+
 #pragma mark - Virtual Beacon methods
 
 // A virtual beacon is an iPhone that pretends to be an iBeacon.
@@ -1558,7 +1606,6 @@ Example: http://192.168.0.101:4042
 		sendPluginResult:[CDVPluginResult resultWithStatus: CDVCommandStatus_OK]
 		callbackId: command.callbackId];
 }
-
 
 /*********************************************************/
 /************ Estimote Triggers Implementation ***********/
