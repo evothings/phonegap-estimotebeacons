@@ -135,6 +135,7 @@ estimote.beacons.BeaconColorBlueberry = 3;
 estimote.beacons.BeaconColorWhite = 4;
 estimote.beacons.BeaconColorTransparent = 5;
 
+
 /**
  * Region states.
  */
@@ -215,7 +216,8 @@ estimote.beacons.requestAlwaysAuthorization = function (success, error)
  * Implemented on iOS 8+.
  * Does nothing on other platforms.
  *
- * @param success Function called on success (mandatory).
+ * @param success Function called on success, the result param of the
+ *   function contains the current authorization status (mandatory).
  * @param error Function called on error (mandatory).
  *
  * success callback format:
@@ -714,26 +716,48 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 /**
  * Nearable types.
  */
-estimote.nearables.ESTNearableTypeUnknown = 0;
-estimote.nearables.ESTNearableTypeDog = 1;
-estimote.nearables.ESTNearableTypeCar = 2;
-estimote.nearables.ESTNearableTypeFridge = 3;
-estimote.nearables.ESTNearableTypeBag = 4;
-estimote.nearables.ESTNearableTypeBike = 5;
-estimote.nearables.ESTNearableTypeChair = 6;
-estimote.nearables.ESTNearableTypeBed = 7;
-estimote.nearables.ESTNearableTypeDoor = 8;
-estimote.nearables.ESTNearableTypeShoe = 9;
-estimote.nearables.ESTNearableTypeGeneric = 10;
-estimote.nearables.ESTNearableTypeAll = 11;
+estimote.nearables.NearableTypeUnknown = 0;
+estimote.nearables.NearableTypeDog = 1;
+estimote.nearables.NearableTypeCar = 2;
+estimote.nearables.NearableTypeFridge = 3;
+estimote.nearables.NearableTypeBag = 4;
+estimote.nearables.NearableTypeBike = 5;
+estimote.nearables.NearableTypeChair = 6;
+estimote.nearables.NearableTypeBed = 7;
+estimote.nearables.NearableTypeDoor = 8;
+estimote.nearables.NearableTypeShoe = 9;
+estimote.nearables.NearableTypeGeneric = 10;
+estimote.nearables.NearableTypeAll = 11;
 
 /**
  * Nearable zones.
  */
-estimote.nearables.ESTNearableZoneUnknown = 0;
-estimote.nearables.ESTNearableZoneImmediate = 1;
-estimote.nearables.ESTNearableZoneNear = 2;
-estimote.nearables.ESTNearableZoneFar = 3;
+estimote.nearables.NearableZoneUnknown = 0;
+estimote.nearables.NearableZoneImmediate = 1;
+estimote.nearables.NearableZoneNear = 2;
+estimote.nearables.NearableZoneFar = 3;
+
+/**
+ * Nearable orientations.
+ */
+estimote.nearables.NearableOrientationUnknown = 0;
+estimote.nearables.NearableOrientationHorizontal = 1;
+estimote.nearables.NearableOrientationHorizontalUpsideDown = 2;
+estimote.nearables.NearableOrientationVertical = 3;
+estimote.nearables.NearableOrientationVerticalUpsideDown = 4;
+estimote.nearables.NearableOrientationLeftSide = 5;
+estimote.nearables.NearableOrientationRightSide = 6;
+
+/**
+ * Nearable colours.
+ */
+estimote.nearables.NearableColorUnknown = 0;
+estimote.nearables.NearableColorMintCocktail = 1;
+estimote.nearables.NearableColorIcyMarshmallow = 0;
+estimote.nearables.NearableColorBlueberryPie = 0;
+estimote.nearables.NearableColorSweetBeetroot = 0;
+estimote.nearables.NearableColorCandyFloss = 0;
+estimote.nearables.NearableColorLemonTart = 0;
 
 /**
  * Start ranging for nearables with the given identifier.
@@ -848,7 +872,7 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
  *
  * Example that prints all ranged nearables:
  *   estimote.nearables.startRangingForType(
- *     estimote.nearables.ESTNearableTypeAll,
+ *     estimote.nearables.NearableTypeAll,
  *     function(nearables) {
  *       console.log('Nearables ranged:')
  *       estimote.printObject(nearables) },
@@ -882,7 +906,7 @@ estimote.nearables.startRangingForType = function (type, success, error)
  *   error(errorMessage)
  *
  * Example that stops ranging:
- *   estimote.nearables.stopRangingForType(estimote.nearables.ESTNearableTypeAll)
+ *   estimote.nearables.stopRangingForType(estimote.nearables.NearableTypeAll)
  */
 estimote.nearables.stopRangingForType = function (type, success, error)
 {
@@ -1016,7 +1040,7 @@ estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, 
  *
  * Example that prints state for monitored type:
  *   estimote.nearables.startMonitoringForType(
- *     estimote.nearables.ESTNearableTypeAll,
+ *     estimote.nearables.NearableTypeAll,
  *     function(state) {
  *       console.log('Nearables monitored:')
  *       estimote.printObject(state) },
@@ -1050,7 +1074,7 @@ estimote.nearables.startMonitoringForType = function (type, success, error)
  *   error(errorMessage)
  *
  * Example that stops monitoring:
- *   estimote.nearables.stopMonitoringForType(estimote.nearables.ESTNearableTypeAll)
+ *   estimote.nearables.stopMonitoringForType(estimote.nearables.NearableTypeAll)
  */
 estimote.nearables.stopMonitoringForType = function (type, success, error)
 {
@@ -1133,6 +1157,17 @@ function helper_updateTriggerRule(trigger, event)
 	}
 }
 
+/**
+ * Create a trigger object.
+ *
+ * @param triggerIdentifier String that uniquely identifies the trigger.
+ * You can choose any identifiers as long as they are unique
+ * within the application.
+ * @param rules Array of rule objects that will be used by the trigger.
+ *
+ * Example that stops monitoring:
+ *   estimote.nearables.stopMonitoring()
+ */
 estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 {
 	var trigger = {};
@@ -1152,6 +1187,36 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 	return trigger;
 };
 
+/**
+ * Create a basic rule object.
+ *
+ * @param ruleUpdateFunction Function that is called when the
+ * rule state should be updated. Specify your rule login in
+ * this function.
+ *
+ * Update callback function format:
+ *   ruleUpdateFunction(ruleEvent)
+ *
+ * ruleEvent object format:
+ *   {
+ *     nearable: object // Nearable object
+ *     eventType: string, // used internally
+ *     triggerIdentifier: string, // used internally
+ *     triggerState: boolean, // used internally
+ *     ruleIdentifier: string // used internally
+ *   }
+ *
+ * The field of interest when writing the rule update function
+ * is 'nearable', which is an object with all properties for
+ * the nearable monitored by the rule.
+ *
+ * Use the ruleEvent object to pass the state of the rule
+ * to the trigger engine. This is done using the function:
+ *   estimote.triggers.updateRuleState(ruleEvent, state)
+ *
+ * For example, to signal that the rule state is true you call:
+ *   estimote.triggers.updateRuleState(ruleEvent, true)
+ */
 estimote.triggers.createRule = function(ruleUpdateFunction)
 {
 	var rule = {};
@@ -1161,6 +1226,14 @@ estimote.triggers.createRule = function(ruleUpdateFunction)
 	return rule;
 };
 
+/**
+ * Create a rule object for a nearable identifier.
+ *
+ * @param nearableIdentifier String with the nearable identifier.
+ * This specifies the specific nearable that will be monitoried
+ * by the rule.
+ * @param ruleUpdateFunction See estimote.triggers.createRule().
+ */
 estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpdateFunction)
 {
 	var rule = estimote.triggers.createRule(ruleUpdateFunction);
@@ -1169,6 +1242,14 @@ estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpd
 	return rule;
 };
 
+/**
+ * Create a rule object for a nearable type.
+ *
+ * @param nearableType Number for the nearable type to monitor.
+ * This specifies the type of nearable that will be monitoried
+ * by the rule.
+ * @param ruleUpdateFunction See estimote.triggers.createRule().
+ */
 estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 {
 	var rule = estimote.triggers.createRule(ruleUpdateFunction);
@@ -1179,19 +1260,67 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 
 /**
  * Start monitoring a trigger.
- * @param success Function called when the trigger changes state: success(trigger)
- * @param error Function called on error: error(errorMessage)
+ *
+ * @param trigger Trigger object to monitor.
+ * @param triggerCallback Function called when the trigger changes state.
+ * @param errorCallback Function called on error.
+ *
+ * Format for triggerCallback:
+ *   triggerCallback(trigger)
+ *
+ * trigger.state contains the current state of the trigger, it is true
+ * if the trigger holds, false if not.
+ *
+ * Format for errorCallback:
+ *   errorCallback(errorMessage)
+ *
+ * Code example:
+ *
+ *   // Called when trigger changes state.
+ *   function onTriggerChangedState(trigger) {
+ *       if (trigger.state)
+ *           console.log('Dog is moving')
+ *       else
+ *           console.log('Dog is still')
+ *   }
+ *
+ *   // Called is case of error.
+ *   function onTriggerError(errorMessage) {
+ *       console.log('Trigger error: ' + errorMessage)
+ *   }
+ *
+ *   // Rule function.
+ *   function dogIsMovingFunction(event) {
+ *       if (event.nearable.isMoving)
+ *           estimote.triggers.updateRuleState(event, true)
+ *       else
+ *           estimote.triggers.updateRuleState(event, false)
+ *   }
+ *
+ *   // Trigger rule.
+ *   var dogRule = estimote.triggers.createRuleForType(
+ *       estimote.nearables.NearableTypeDog,
+ *       dogIsMovingFunction)
+ *
+ *	 // Trigger.
+ *   var trigger = estimote.triggers.createTrigger('DogTrigger', [dogRule])
+ *
+ *   // Start monitoring for trigger.
+ *   estimote.triggers.startMonitoringForTrigger(
+ *       trigger,
+ *       onTriggerChangedState,
+ *       onTriggerError)
  */
-estimote.triggers.startMonitoringForTrigger = function(trigger, success, error)
+estimote.triggers.startMonitoringForTrigger = function(trigger, triggerCallback, errorCallback)
 {
-	function callback(event)
+	function internalCallback(event)
 	{
 		if (event.triggerIdentifier == trigger.identifier)
 		{
 			if ('triggerChangedState' == event.eventType)
 			{
 				trigger.state = event.triggerState;
-				success(trigger);
+				triggerCallback(trigger);
 			}
 			else if ('update' == event.eventType)
 			{
@@ -1202,8 +1331,8 @@ estimote.triggers.startMonitoringForTrigger = function(trigger, success, error)
 
 	var triggerObject = helper_createTriggerObject(trigger);
 
-	exec(callback,
-		error,
+	exec(internalCallback,
+		errorCallback,
 		'EstimoteBeacons',
 		'triggers_startMonitoringForTrigger',
 		[triggerObject]
@@ -1212,6 +1341,22 @@ estimote.triggers.startMonitoringForTrigger = function(trigger, success, error)
 	return true;
 };
 
+/**
+ * Stop monitoring a trigger.
+ *
+ * @param trigger Trigger to stop monitoring.
+ * @param success Function called on success (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * Format for success function:
+ *   success()
+ *
+ * Format for error function:
+ *   error(errorMessage)
+ *
+ * Example call:
+ *   estimote.triggers.stopMonitoringForTrigger(trigger)
+ */
 estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 {
 	exec(success,
@@ -1226,10 +1371,12 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 
 /**
  * Used to update the state of a native rule during an update event.
- * @param event Event object passed to the event update function.
+ *
+ * @param ruleEvent Event object passed to the event update function.
  * @param state true if rule holds, false if rule does not hold.
+ *
  * Example call:
- *   estimote.triggers.updateRuleState(event, true)
+ *   estimote.triggers.updateRuleState(ruleEvent, true)
  */
 estimote.triggers.updateRuleState = function(event, state)
 {
