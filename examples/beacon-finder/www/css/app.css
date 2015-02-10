@@ -143,7 +143,7 @@ html,body
 	opacity: 0.9;
 }
 
-.style-beacon-list div
+.style-item-list div
 {
 	margin: 1.5%;
 	padding: 1% 2%;
@@ -152,11 +152,24 @@ html,body
 	font-weight: bold;
 }
 
-.style-beacon-data
+.style-info-text
+{
+	margin: 1.5%;
+	padding: 1% 2%;
+	color: black;
+	font-size: 120%;
+}
+
+.connect-address
 {
 	margin: 0px;
-	padding: 4% 10%;
-	color: white;
-	font-size: 140%;
-	font-weight: bold;
+	padding: 10px 10px;
+	border: none;
+	width: 100%;
+	font-size: 150%;
+	color: black;
+	background-color: white;
+	-webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }

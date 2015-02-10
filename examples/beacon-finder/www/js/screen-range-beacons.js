@@ -16,7 +16,7 @@
 		function displayBeconInfo(beaconInfo)
 		{
 			// Clear beacon HTML items.
-			$('#id-screen-range-beacons .style-beacon-list').empty();
+			$('#id-screen-range-beacons .style-item-list').empty();
 
 			// Sort beacons by distance.
 			beaconInfo.beacons.sort(function(beacon1, beacon2) {
@@ -26,7 +26,7 @@
 			$.each(beaconInfo.beacons, function(key, beacon)
 			{
 				var element = $(createBeaconHTML(beacon));
-				$('#id-screen-range-beacons .style-beacon-list').append(element);
+				$('#id-screen-range-beacons .style-item-list').append(element);
 			});
 		};
 
@@ -53,7 +53,7 @@
 
 		// Show screen.
 		app.showScreen('id-screen-range-beacons');
-		$('#id-screen-range-beacons .style-beacon-list').empty();
+		$('#id-screen-range-beacons .style-item-list').empty();
 
 		// Request authorisation.
 		estimote.beacons.requestAlwaysAuthorization();

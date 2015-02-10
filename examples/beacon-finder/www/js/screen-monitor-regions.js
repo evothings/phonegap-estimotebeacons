@@ -17,10 +17,10 @@
 		// one region will be displayed.
 		function displayRegionInfo(regionState)
 		{
-			$('#id-screen-monitor-regions .style-beacon-list').empty();
+			$('#id-screen-monitor-regions .style-item-list').empty();
 
 			var element = $(createRegionStateHTML(regionState));
-			$('#id-screen-monitor-regions .style-beacon-list').append(element);
+			$('#id-screen-monitor-regions .style-item-list').append(element);
 		};
 
 		function createRegionStateHTML(regionState)
@@ -38,7 +38,7 @@
 
 		// Show screen.
 		app.showScreen('id-screen-monitor-regions');
-		$('#id-screen-monitor-regions .style-beacon-list').empty();
+		$('#id-screen-monitor-regions .style-item-list').empty();
 
 		// Request authorisation.
 		estimote.beacons.requestAlwaysAuthorization();

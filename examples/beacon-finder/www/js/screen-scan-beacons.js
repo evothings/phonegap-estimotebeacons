@@ -16,7 +16,7 @@
 		function displayBeconInfo(beaconInfo)
 		{
 			// Clear beacon HTML items.
-			$('#id-screen-scan-beacons .style-beacon-list').empty();
+			$('#id-screen-scan-beacons .style-item-list').empty();
 
 			// Sort beacons by signal strength.
 			beaconInfo.beacons.sort(function(beacon1, beacon2) {
@@ -28,7 +28,7 @@
 			{
 				// jQuery doesn't work.
 				var element = $(createBeaconHTML(beacon));
-				$('#id-screen-scan-beacons .style-beacon-list').append(element);
+				$('#id-screen-scan-beacons .style-item-list').append(element);
 			});
 		};
 
@@ -47,7 +47,7 @@
 
 		// Show screen.
 		app.showScreen('id-screen-scan-beacons');
-		$('#id-screen-scan-beacons .style-beacon-list').empty();
+		$('#id-screen-scan-beacons .style-item-list').empty();
 
 		// Start scanning.
 		estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(

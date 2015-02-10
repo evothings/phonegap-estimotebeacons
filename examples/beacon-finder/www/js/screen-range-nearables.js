@@ -16,13 +16,13 @@
 		function displayNearablesInfo(nearables)
 		{
 			// Clear HTML list.
-			$('#id-screen-range-nearables .style-beacon-list').empty();
+			$('#id-screen-range-nearables .style-item-list').empty();
 
 			// Generate HTML for nearables.
 			$.each(nearables, function(i, nearable)
 			{
 				var element = $(createNearableHTML(nearable));
-				$('#id-screen-range-nearables .style-beacon-list').append(element);
+				$('#id-screen-range-nearables .style-item-list').append(element);
 			});
 		};
 
@@ -45,11 +45,11 @@
 
 		// Show screen.
 		app.showScreen('id-screen-range-nearables');
-		$('#id-screen-range-nearables .style-beacon-list').empty();
+		$('#id-screen-range-nearables .style-item-list').empty();
 
 		// Start ranging.
 		estimote.nearables.startRangingForType(
-			estimote.nearables.ESTNearableTypeAll,
+			estimote.nearables.NearableTypeAll,
 			onRange,
 			onError);
 	};
