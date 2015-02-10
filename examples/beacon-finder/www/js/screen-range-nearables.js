@@ -32,6 +32,7 @@
 			var htm = '<div class="' + colorClasses + '">'
 				+ '<table><tr><td>Type</td><td>' + nearable.nameForType
 				+ '</td></tr><tr><td>Identifier</td><td>' + nearable.identifier
+				+ '</td><tr><td>Color</td><td>' + nearable.nameForColor
 				+ '</td></tr><tr><td>Zone</td><td>' + nearable.zone
 				+ '</td></tr><tr><td>RSSI</td><td>' + nearable.rssi
 				+ '</td></tr><tr><td>Temperature</td><td>' + nearable.temperature

@@ -32,8 +32,9 @@
 
 		// Start monitoring.
 		estimote.nearables.startMonitoringForType(
-			estimote.nearables.NearableTypeDog,
+			//estimote.nearables.NearableTypeDog,
 			//estimote.nearables.NearableTypeUnknown,
+			estimote.nearables.NearableTypeAll,
 			onMonitor,
 			onError);
 	};
