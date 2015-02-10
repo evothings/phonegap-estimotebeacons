@@ -1,5 +1,6 @@
 #import <Cordova/CDV.h>
 #import "EstimoteBeacons.h"
+#import "ESTNearableDefinitions.h"
 #import "ESTConfig.h"
 
 /*********************************************************/
@@ -955,8 +956,12 @@ Example: http://192.168.0.101:4042
 
 	[dict setValue: [NSNumber numberWithInt: nearable.type]
 		forKey: @"type"];
-	[dict setValue: [nearable nameForType: nearable.type]
+	[dict setValue: [ESTNearableDefinitions nameForType: nearable.type]
 		forKey: @"nameForType"];
+	[dict setValue: [NSNumber numberWithInt: nearable.type]
+		forKey: @"color"];
+	[dict setValue: [ESTNearableDefinitions nameForColor: nearable.color]
+		forKey: @"nameForColor"];
 	[dict setValue: nearable.identifier
 		forKey: @"identifier"];
 	[dict setValue: nearable.hardwareVersion
@@ -967,9 +972,9 @@ Example: http://192.168.0.101:4042
 		forKey: @"rssi"];
 	[dict setValue: [NSNumber numberWithInt: nearable.zone]
 		forKey: @"zone"];
-	[dict setValue: [NSNumber numberWithDouble: nearable.idleBatteryVoltage]
+	[dict setValue: nearable.idleBatteryVoltage
 		forKey: @"idleBatteryVoltage"];
-	[dict setValue: [NSNumber numberWithDouble: nearable.stressBatteryVoltage]
+	[dict setValue: nearable.stressBatteryVoltage
 		forKey: @"stressBatteryVoltage"];
 	[dict setValue: [NSNumber numberWithLongLong: nearable.currentMotionStateDuration]
 		forKey: @"currentMotionStateDuration"];
@@ -987,10 +992,8 @@ Example: http://192.168.0.101:4042
 		forKey:@"zAcceleration"];
 	[dict setValue: [NSNumber numberWithDouble: nearable.temperature]
 		forKey: @"temperature"];
-	[dict setValue: [NSNumber numberWithInteger: nearable.txPower]
-		forKey:@"txPower"];
-	[dict setValue: [NSNumber numberWithInteger: nearable.channel]
-		forKey:@"channel"];
+	[dict setValue: nearable.power
+		forKey:@"power"];
 	[dict setValue: [NSNumber numberWithInt: nearable.firmwareState]
 		forKey:@"firmwareState"];
 

@@ -52,6 +52,7 @@
 		<header-file src="plugin/src/ios/Headers/ESTFirmwareInfoVO.h" />
 		<header-file src="plugin/src/ios/Headers/ESTMotionRule.h" />
 		<header-file src="plugin/src/ios/Headers/ESTNearable.h" />
+		<header-file src="plugin/src/ios/Headers/ESTNearableDefinitions.h" />
 		<header-file src="plugin/src/ios/Headers/ESTNearableManager.h" />
 		<header-file src="plugin/src/ios/Headers/ESTNearableRule.h" />
 		<header-file src="plugin/src/ios/Headers/ESTOrientationRule.h" />

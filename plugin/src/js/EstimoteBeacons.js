@@ -777,6 +777,8 @@ estimote.nearables.NearableColorLemonTart = 0;
  *   {
  *     type: number,
  *     nameForType: string,
+ *     color: number,
+ *     nameForColor: string,
  *     identifier: string,
  *     hardwareVersion: string,
  *     firmwareVersion: string,
@@ -792,7 +794,7 @@ estimote.nearables.NearableColorLemonTart = 0;
  *     yAcceleration: number,
  *     zAcceleration: number,
  *     temperature: number,
- *     txPower: number,
+ *     power: number,
  *     channel: number,
  *     firmwareState: number
  *   }
@@ -849,7 +851,6 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
 
 	return true;
 };
-
 
 /**
  * Start ranging for nearables of the given type.
