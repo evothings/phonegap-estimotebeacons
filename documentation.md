@@ -28,7 +28,7 @@ Stickers ranging example:
         function(errorMessage) {
             console.log('Ranging error: ' + errorMessage) })
 
-## Overview of the Estimote Beacons JavaScript API
+## Overview of the JavaScript API
 
 The plugin currently supports:
 
@@ -45,7 +45,7 @@ The plugin currently supports:
 
 Scanning is similar to ranging but uses a different underlying implementation than ranging does.
 
-## Beacon API
+## Estimote Beacons API
 
 ### Start and stop monitoring beacons (iOS and Android)
 
@@ -341,7 +341,7 @@ You can monitor for nearables by type:
 Example successCallback function used when monitoring for type:
 
     function successCallback(state) {
-        console.log('Type: ' + state.type + ' state: ' state.state) }
+        console.log('Type: ' + state.type + ' state: ' + state.state) }
 
 Or you can monitor by the unique nearable identifier:
 
@@ -358,7 +358,7 @@ Or you can monitor by the unique nearable identifier:
 Example successCallback function used when monitoring for identifier:
 
     function successCallback(state) {
-        console.log('Identifier: ' + state.identifier + ' state: ' state.state) }
+        console.log('Identifier: ' + state.identifier + ' state: ' + state.state) }
 
 Stop all ongoing nearable monitoring:
 
