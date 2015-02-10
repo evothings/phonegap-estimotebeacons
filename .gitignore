@@ -1,3 +1,4 @@
 .DS_Store
 platforms
 plugins
+plugin/plugin.xml
