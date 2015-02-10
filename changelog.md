@@ -1,5 +1,17 @@
 # Change Log
 
+## Version 0.7.0 (Feb, 2015)
+
+* Update to Estimote iOS SDK 2.4.0
+* Update to Estimote Android SDK 0.4.3
+* Nearable monitoring
+* Support for triggers
+* Support for Secure Beacons
+* Support for ESTConfig methods
+* Virtual beacons (using an iPhone as an Estimote Beacon)
+* Updated example application
+* Example application supports live coding with Evothings Workbench
+
 ## Version 0.6.0 (Jan 24, 2015)
 
 * Update to Estimote iOS SDK 2.3.2
