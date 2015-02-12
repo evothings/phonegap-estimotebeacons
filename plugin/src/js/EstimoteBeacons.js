@@ -1,3 +1,4 @@
+
 var exec = cordova.require('cordova/exec');
 
 /*
@@ -1127,7 +1128,10 @@ estimote.triggers.RuleTypeNearableType = 4;
 
 var ruleCounter = 0;
 
-// Helper function.
+/**
+ * Helper function that creates an internal 'lightweight'
+ * trigger object sent to the native side.
+ */
 function helper_createTriggerObject(trigger)
 {
 	var triggerObject = {};
@@ -1148,14 +1152,37 @@ function helper_createTriggerObject(trigger)
 	return triggerObject;
 }
 
-// Helper function.
+/**
+ * Helper function that calls the update function of the rule
+ * related to the event and then updates the native rule state.
+ */
 function helper_updateTriggerRule(trigger, event)
 {
 	var rule = trigger.ruleTable[event.ruleIdentifier];
 	if (rule && rule.ruleUpdateFunction)
 	{
-		rule.ruleUpdateFunction(event);
+		rule.ruleUpdateFunction(rule, event.nearable, event);
+		helper_updateRuleState(
+			event.triggerIdentifier,
+			event.ruleIdentifier,
+			rule.state);
 	}
+}
+
+/**
+ * Helper function used to update the state of a native rule
+ * during an update event.
+ * @param event Event object passed to the event update function.
+ * @param state true if rule holds, false if rule does not hold.
+ */
+function helper_updateRuleState(triggerIdentifier, ruleIdentifier, state)
+{
+	exec(null,
+		null,
+		'EstimoteBeacons',
+		'triggers_updateRuleState',
+		[triggerIdentifier, ruleIdentifier, state]
+	);
 }
 
 /**
@@ -1196,31 +1223,21 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
  * this function.
  *
  * Update callback function format:
- *   ruleUpdateFunction(ruleEvent)
+ *   ruleUpdateFunction(rule)
  *
- * ruleEvent object format:
+ * rule object format:
  *   {
- *     nearable: object // Nearable object
- *     eventType: string, // used internally
- *     triggerIdentifier: string, // used internally
- *     triggerState: boolean, // used internally
- *     ruleIdentifier: string // used internally
+ *     state: boolean // set to true or false to set rule state
  *   }
  *
  * The field of interest when writing the rule update function
  * is 'nearable', which is an object with all properties for
  * the nearable monitored by the rule.
- *
- * Use the ruleEvent object to pass the state of the rule
- * to the trigger engine. This is done using the function:
- *   estimote.triggers.updateRuleState(ruleEvent, state)
- *
- * For example, to signal that the rule state is true you call:
- *   estimote.triggers.updateRuleState(ruleEvent, true)
  */
 estimote.triggers.createRule = function(ruleUpdateFunction)
 {
 	var rule = {};
+	rule.state = false;
 	rule.ruleType = estimote.triggers.RuleTypeGeneric;
 	rule.ruleUpdateFunction = ruleUpdateFunction;
 	rule.ruleIdentifier = 'Rule' + (++ruleCounter);
@@ -1233,7 +1250,16 @@ estimote.triggers.createRule = function(ruleUpdateFunction)
  * @param nearableIdentifier String with the nearable identifier.
  * This specifies the specific nearable that will be monitoried
  * by the rule.
- * @param ruleUpdateFunction See estimote.triggers.createRule().
+ * @param ruleUpdateFunction Callback used to update the rule state.
+ * Also see estimote.triggers.createRule().
+ *
+ * Update callback function format:
+ *   ruleUpdateFunction(rule, nearable)
+ *
+ * The 'nearable' parameter is an object with fields for
+ * the nearable monitored by the rule.
+ *
+ * To update rule state, set the rule.state field to true or false.
  */
 estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpdateFunction)
 {
@@ -1249,7 +1275,16 @@ estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpd
  * @param nearableType Number for the nearable type to monitor.
  * This specifies the type of nearable that will be monitoried
  * by the rule.
- * @param ruleUpdateFunction See estimote.triggers.createRule().
+ * @param ruleUpdateFunction Callback used to update the rule state.
+ * Also see estimote.triggers.createRule().
+ *
+ * Update callback function format:
+ *   ruleUpdateFunction(rule, nearable)
+ *
+ * The 'nearable' parameter is an object with fields for
+ * the nearable monitored by the rule.
+ *
+ * To update rule state, set the rule.state field to true or false.
  */
 estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 {
@@ -1291,20 +1326,18 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
  *   }
  *
  *   // Rule function.
- *   function dogIsMovingFunction(event) {
- *       if (event.nearable.isMoving)
- *           estimote.triggers.updateRuleState(event, true)
- *       else
- *           estimote.triggers.updateRuleState(event, false)
+ *   function nearableIsMoving(rule, nearable) {
+ *       rule.state = nearable.isMoving
  *   }
  *
  *   // Trigger rule.
- *   var dogRule = estimote.triggers.createRuleForType(
+ *   var dogIsMovingRule = estimote.triggers.createRuleForType(
  *       estimote.nearables.NearableTypeDog,
- *       dogIsMovingFunction)
+ *       nearableIsMoving)
  *
  *	 // Trigger.
- *   var trigger = estimote.triggers.createTrigger('DogTrigger', [dogRule])
+ *   var trigger = estimote.triggers.createTrigger(
+ *       'DogIsMovingTrigger', [dogIsMovingRule])
  *
  *   // Start monitoring for trigger.
  *   estimote.triggers.startMonitoringForTrigger(
@@ -1312,7 +1345,8 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
  *       onTriggerChangedState,
  *       onTriggerError)
  */
-estimote.triggers.startMonitoringForTrigger = function(trigger, triggerCallback, errorCallback)
+estimote.triggers.startMonitoringForTrigger = function(
+	trigger, triggerCallback, errorCallback)
 {
 	function internalCallback(event)
 	{
@@ -1370,25 +1404,75 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 	return true;
 };
 
-/**
- * Used to update the state of a native rule during an update event.
- *
- * @param ruleEvent Event object passed to the event update function.
- * @param state true if rule holds, false if rule does not hold.
- *
- * Example call:
- *   estimote.triggers.updateRuleState(ruleEvent, true)
- */
-estimote.triggers.updateRuleState = function(event, state)
-{
-	exec(null,
-		null,
-		'EstimoteBeacons',
-		'triggers_updateRuleState',
-		[event.triggerIdentifier, event.ruleIdentifier, state]
-	);
+/*********************************************************/
+/**************** Trigger Rules Functions ****************/
+/*********************************************************/
 
-	return true;
+estimote.triggers.rules = {};
+
+estimote.triggers.rules.nearableIsMoving = function()
+{
+	return function(rule, nearable) {
+		rule.state = nearable.isMoving;
+	};
+};
+
+estimote.triggers.rules.nearableIsNotMoving = function()
+{
+	return function(rule, nearable) {
+		rule.state = !nearable.isMoving;
+	};
+};
+
+estimote.triggers.rules.nearableTemperatureBetween = function(low, high)
+{
+	return function(rule, nearable) {
+		rule.state = (nearable.temperature >= low) && (nearable.temperature <= high);
+	};
+};
+
+estimote.triggers.rules.nearableInRange = function()
+{
+	var timer = null;
+
+	return function(rule, nearable, event) {
+		if (0 != nearable.zone) {
+			rule.state = true;
+		}
+		// If there are no updates within the given
+		// time delay, the nearble is out of range.
+		timer && clearTimeout(timer);
+		timer = setTimeout(function() {
+			timer = null;
+			rule.state = false;
+			helper_updateRuleState(
+				event.triggerIdentifier,
+				event.ruleIdentifier,
+				rule.state);
+		}, 2000);
+	};
+};
+
+estimote.triggers.rules.nearableNotInRange = function()
+{
+	var timer = null;
+
+	return function(rule, nearable, event) {
+		if (0 != nearable.zone) {
+			rule.state = false;
+		}
+		// If there are no updates within the given
+		// time delay, the nearble is out of range.
+		timer && clearTimeout(timer);
+		timer = setTimeout(function() {
+			timer = null;
+			rule.state = true;
+			helper_updateRuleState(
+				event.triggerIdentifier,
+				event.ruleIdentifier,
+				rule.state);
+		}, 2000);
+	};
 };
 
 /*********************************************************/

@@ -16,20 +16,6 @@
 			console.log('Trigger error: ' + errorMessage);
 		}
 
-		function dogIsMovingRuleFunction(event)
-		{
-			if (event.nearable.isMoving)
-			{
-				// Dog is moving.
-    			estimote.triggers.updateRuleState(event, true);
-    		}
-    		else
-			{
-				// Dog is still.
-    			estimote.triggers.updateRuleState(event, false);
-    		}
-		}
-
 		function displayTriggerState(trigger)
 		{
 			// Clear HTML.
@@ -52,13 +38,16 @@
 		app.showScreen('id-screen-trigger-nearables');
 		$('#id-screen-trigger-nearables .style-item-list').empty();
 
-		// Create a trigger rule.
+		// Create a rule.
 		var dogIsMovingRule = estimote.triggers.createRuleForType(
 			estimote.nearables.NearableTypeDog,
-			dogIsMovingRuleFunction);
+			estimote.triggers.rules.nearableIsMoving()
+			);
 
 		// Create trigger object.
-		trigger = estimote.triggers.createTrigger('DogTrigger', [dogIsMovingRule]);
+		trigger = estimote.triggers.createTrigger(
+			'DogIsMovingTrigger',
+			[dogIsMovingRule]);
 
 		// Start monitoring for trigger.
 		estimote.triggers.startMonitoringForTrigger(
