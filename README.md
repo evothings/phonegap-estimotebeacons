@@ -59,4 +59,4 @@ Learn more about Cordova app development for the Internet of Things in the [Cord
 
 ## Credits
 
-Many thanks goes to [Konrad Dzwinel](https://github.com/kdzwinel) who developed the original version of this plugin and provided valuable support and advise for the redesign the plugin.
+Many thanks goes to [Konrad Dzwinel](https://github.com/kdzwinel) who developed the original version of this plugin and provided valuable support and advice for the redesign of the plugin.
