@@ -1,96 +1,71 @@
+// API definition for Estimote Cordova/PhoneGap plugin.
+//
+// Use jsdoc to generate documentation.
+//
 
 var exec = cordova.require('cordova/exec');
 
-/*
-	Contents of this file:
-	* Common Helper Functions
-	* Estimote Beacon Functions
-	* Estimote Stickers Functions
-*/
-
 /*********************************************************/
-/**************** Common Helper Functions ****************/
+/***************** Estimote Namespaces *******************/
 /*********************************************************/
 
 /**
- * Helpers
+ * Main exported module.
+ * @namespace estimote
  */
-function isString(value)
-{
-	return (typeof value == 'string' || value instanceof String);
-}
+var estimote = estimote || {};
 
-function isInt(value)
-{
-	return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
-}
-
-function checkExecParamsRegionSuccessError(region, success, error)
-{
-	var caller = checkExecParamsRegionSuccessError.caller.name
-
-	if (typeof region != 'object') {
-		console.error('Error: region parameter is not an object in: ' + caller);
-		return false;
-	}
-
-	if (typeof success != 'function') {
-		console.error('Error: success parameter is not a function in: ' + caller);
-		return false;
-	}
-
-	if (typeof error != 'function') {
-		console.error('Error: error parameter is not a function in: ' + caller);
-		return false;
-	}
-
-	return true;
-}
-
-function checkExecParamsSuccessError(success, error)
-{
-	var caller = checkExecParamsSuccessError.caller.name
-
-	if (typeof success != 'function') {
-		console.error('Error: success parameter is not a function in: ' + caller);
-		return false;
-	}
-
-	if (typeof error != 'function') {
-		console.error('Error: error parameter is not a function in: ' + caller);
-		return false;
-	}
-
-	return true;
-}
-
-function checkExecParamsRegion(region)
-{
-	var caller = checkExecParamsRegion.caller.name
-
-	if (typeof region != 'object') {
-		console.error('Error: region parameter is not an object in: ' + caller);
-		return false;
-	}
-
-	return true;
-}
-
-/*********************************************************/
-/******************* Estimote Objects ********************/
-/*********************************************************/
+// Export module.
+module.exports = estimote;
 
 /**
- *  Object that is exported. Holds two modules, beacons and nearables.
+ * Submodule for beacons.
+ * @namespace beacons
+ * @memberof estimote
  */
-var estimote = {};
-estimote.beacons = {};
-estimote.nearables = {};
+estimote.beacons = estimote.beacons || {};
 
 /**
- * Print an object. Useful for debugging. Example calls:
+ * Namespace alias for estimote.beacons, for backwards compatibility.
+ * Deprecated, use {@link estimote.beacons}
+ * @deprecated
+ * @global
+ */
+window.EstimoteBeacons = estimote.beacons;
+
+/**
+ * Submodule for nearables (stickers).
+ * @namespace nearables
+ * @memberof estimote
+ */
+estimote.nearables = estimote.nearables || {};
+
+/**
+ * Submodule for triggers.
+ * @namespace triggers
+ * @memberof estimote
+ */
+estimote.triggers = estimote.triggers || {};
+
+/**
+ * Submodule for trigger rules.
+ * @namespace rules
+ * @memberof estimote.triggers
+ */
+estimote.triggers.rules = estimote.triggers.rules || {};
+
+/*********************************************************/
+/****************** Debugging Functions ******************/
+/*********************************************************/
+
+/**
+ * Print an object. Useful for debugging.
+ * @param {object} obj Object to print.
+ * @param {function} [printFun=console.log] Print function, defaults to console.log (optional).
+ * @example Example calls:
  *   estimote.printObject(obj);
  *   estimote.printObject(obj, console.log);
+ * @function estimote.printObject
  */
 estimote.printObject = function(obj, printFun)
 {
@@ -115,33 +90,95 @@ estimote.printObject = function(obj, printFun)
 };
 
 /*********************************************************/
-/*************** Estimote Beacon Functions ***************/
+/*************** Basic Callback Functions ****************/
 /*********************************************************/
 
 /**
- * Proximity values.
+ * Success callback function that takes no parameters.
+ * @callback SuccessCallbackNoParams
+ */
+
+/**
+ * Error callback function.
+ * @callback ErrorCallback
+ * @param {string} error Error message.
+ */
+
+/*********************************************************/
+/**************** Estimote Beacons Module ****************/
+/*********************************************************/
+
+/**
+ * For backwards compatibility. Use {@link estimote.printObject}
+ * @deprecated
+ * @memberof estimote.beacons
+ */
+estimote.beacons.printObject = estimote.printObject
+
+/**
+ * Proximity value.
  */
 estimote.beacons.ProximityUnknown = 0;
+
+/**
+ * Proximity value.
+ */
 estimote.beacons.ProximityImmediate = 1;
+
+/**
+ * Proximity value.
+ */
 estimote.beacons.ProximityNear = 2;
+
+/**
+ * Proximity value.
+ */
 estimote.beacons.ProximityFar = 3;
 
 /**
- * Beacon colours.
+ * Beacon colour.
+ * @memberof estimote.beacons
  */
 estimote.beacons.BeaconColorUnknown = 0;
-estimote.beacons.BeaconColorMint = 1;
-estimote.beacons.BeaconColorIce = 2;
-estimote.beacons.BeaconColorBlueberry = 3;
-estimote.beacons.BeaconColorWhite = 4;
-estimote.beacons.BeaconColorTransparent = 5;
-
 
 /**
- * Region states.
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorMint = 1;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorIce = 2;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorBlueberry = 3;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorWhite = 4;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorTransparent = 5;
+
+/**
+ * Region state.
  */
 estimote.beacons.RegionStateUnknown = 'unknown';
+
+/**
+ * Region state.
+ */
 estimote.beacons.RegionStateOutside = 'outside';
+
+/**
+ * Region state.
+ */
 estimote.beacons.RegionStateInside = 'inside';
 
 /**
@@ -151,22 +188,15 @@ estimote.beacons.RegionStateInside = 'inside';
  * on iOS 8+.
  * Does nothing on other platforms.
  *
- * @param success Function called on success (optional).
- * @param error Function called on error (optional).
+ * @param {SuccessCallbackNoParams} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example:
+ * @example Example call:
  *   estimote.beacons.requestWhenInUseAuthorization()
  *
- * More information:
- *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ * @see {@link https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services|Estimote SDK and iOS 8 Location Services}
  */
-estimote.beacons.requestWhenInUseAuthorization = function (success, error)
+estimote.beacons.requestWhenInUseAuthorization = function(success, error)
 {
 	exec(success,
 		error,
@@ -185,22 +215,15 @@ estimote.beacons.requestWhenInUseAuthorization = function (success, error)
  * on iOS 8+.
  * Does nothing on other platforms.
  *
- * @param success Function called on success (optional).
- * @param error Function called on error (optional).
+ * @param {SuccessCallbackNoParams} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example:
+ * @example Example call:
  *   estimote.beacons.requestAlwaysAuthorization()
  *
- * More information:
- *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ * @see {@link https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services|Estimote SDK and iOS 8 Location Services}
  */
-estimote.beacons.requestAlwaysAuthorization = function (success, error)
+estimote.beacons.requestAlwaysAuthorization = function(success, error)
 {
 	exec(success,
 		error,
@@ -217,28 +240,23 @@ estimote.beacons.requestAlwaysAuthorization = function (success, error)
  * Implemented on iOS 8+.
  * Does nothing on other platforms.
  *
- * @param success Function called on success, the result param of the
- *   function contains the current authorization status (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {function} success Function called on success, the result param of the
+ * function contains the current authorization status (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success(result)
+ * @example success callback format:
+ *   success(authorizationStatus)
  *
- * error callback format:
- *   error(errorMessage)
- *
- * Example:
+ * @example Example call:
  *   estimote.beacons.authorizationStatus(
  *     function(result) {
  *       console.log('Location authorization status: ' + result) },
  *     function(errorMessage) {
- *       console.log('Error: ' + errorMessage) }
- *   )
+ *       console.log('Error: ' + errorMessage) })
  *
- * More information:
- *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ * @see {@link https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services|Estimote SDK and iOS 8 Location Services}
  */
-estimote.beacons.authorizationStatus = function (success, error)
+estimote.beacons.authorizationStatus = function(success, error)
 {
 	if (!checkExecParamsSuccessError(success, error)) {
 		return false;
@@ -257,32 +275,25 @@ estimote.beacons.authorizationStatus = function (success, error)
 /**
  * Start advertising as a beacon.
  *
- * @param uuid UUID string the beacon should advertise (string, mandatory).
- * @param major Major value to advertise (integer, mandatory).
- * @param minor Minor value to advertise (integer, mandatory).
- * @param regionId Identifier of the region used to advertise (string, mandatory).
- * @param success Function called on success (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {string} uuid UUID string the beacon should advertise (mandatory).
+ * @param {number} major Major value to advertise (mandatory).
+ * @param {number} minor Minor value to advertise (mandatory).
+ * @param {string} regionId Identifier of the region used to advertise (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that starts advertising:
+ * @example Example that starts advertising:
  *   estimote.beacons.startAdvertisingAsBeacon(
  *     'B9407F30-F5F8-466E-AFF9-25556B57FE6D',
  *     1,
  *     1,
  *     'MyRegion',
- *     function(result) {
+ *     function() {
  *       console.log('Beacon started') },
  *     function(errorMessage) {
- *       console.log('Error starting beacon: ' + errorMessage) }
- *   )
+ *       console.log('Error starting beacon: ' + errorMessage) })
  */
-estimote.beacons.startAdvertisingAsBeacon = function (
+estimote.beacons.startAdvertisingAsBeacon = function(
 	uuid, major, minor, regionId, success, error)
 {
 	exec(success,
@@ -298,24 +309,17 @@ estimote.beacons.startAdvertisingAsBeacon = function (
 /**
  * Stop advertising as a beacon.
  *
- * @param success Function called on success (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {SuccessCallbackNoParams} success Function called on success (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops advertising:
+ * @example Example that stops advertising:
  *   estimote.beacons.stopAdvertisingAsBeacon(
  *     function(result) {
  *       console.log('Beacon stopped') },
  *     function(errorMessage) {
- *       console.log('Error stopping beacon: ' + errorMessage) }
- *   )
+ *       console.log('Error stopping beacon: ' + errorMessage) })
  */
-estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
+estimote.beacons.stopAdvertisingAsBeacon = function(success, error)
 {
 	exec(success,
 		error,
@@ -328,23 +332,18 @@ estimote.beacons.stopAdvertisingAsBeacon = function (success, error)
 };
 
 /**
- * Enable analytics. For further details see:
- * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ * Enable analytics.
  *
- * @param enable Boolean value to turn analytics on or off (mandatory).
- * @param success Function called on success (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html|Further details}
  *
- * success callback format:
- *   success()
+ * @param {boolean} enable Boolean value to turn analytics on or off (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that enables analytics:
+ * @example Example call that enables analytics:
  *   estimote.beacons.enableAnalytics(true)
  */
-estimote.beacons.enableAnalytics = function (enable, success, error)
+estimote.beacons.enableAnalytics = function(enable, success, error)
 {
 	exec(success,
 		error,
@@ -357,23 +356,22 @@ estimote.beacons.enableAnalytics = function (enable, success, error)
 };
 
 /**
- * Test if analytics is enabled. For further details see:
- * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ * Test if analytics is enabled.
  *
- * @param success Function called on success (mandatory).
- * @param error Function called on error (non-mandatory).
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html|Further details}
  *
- * success callback format:
+ * @param {boolean} enable Boolean value to turn analytics on or off (mandatory).
+ * @param {function} success Function called on success, the callback parameter contains a the enabled value as a boolean (mandatory).
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example success callback format:
  *   success(enabled)
  *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that displays analytics enabled value:
+ * @example Example that displays analytics enabled value:
  *   estimote.beacons.isAnalyticsEnabled(function(enabled) {
  *      console.log('Analytics enabled: ' + enabled) })
  */
-estimote.beacons.isAnalyticsEnabled = function (success, error)
+estimote.beacons.isAnalyticsEnabled = function(success, error)
 {
 	exec(success,
 		error,
@@ -386,23 +384,22 @@ estimote.beacons.isAnalyticsEnabled = function (success, error)
 };
 
 /**
- * Test if App ID and App Token is set. For further details see:
- * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ * Test if App ID and App Token is set.
  *
- * @param success Function called on success (mandatory).
- * @param error Function called on error (non-mandatory).
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html|Further details}
  *
- * success callback format:
+ * @param {boolean} enable Boolean value to turn analytics on or off (mandatory).
+ * @param {function} success Function called on success, the callback parameter contains a the isAuthorized value as a boolean (mandatory).
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example success callback format:
  *   success(isAuthorized)
  *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that displays the authorisation value:
+ * @example Example that displays the authorisation value:
  *   estimote.beacons.isAuthorized(function(isAuthorized) {
  *      console.log('App ID and App Token is set: ' + isAuthorized) })
  */
-estimote.beacons.isAuthorized = function (success, error)
+estimote.beacons.isAuthorized = function(success, error)
 {
 	exec(success,
 		error,
@@ -415,24 +412,19 @@ estimote.beacons.isAuthorized = function (success, error)
 };
 
 /**
- * Set App ID and App Token. For further details see:
- * http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html
+ * Set App ID and App Token.
  *
- * @param success Function called on success (mandatory).
- * @param success Function called on success (mandatory).
- * @param success Function called on success (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTConfig.html|Further details}
  *
- * success callback format:
- *   success(isAuthorized)
+ * @param {string} appID The App ID (mandatory).
+ * @param {string} appToken The App Token (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that sets App ID and App Token:
+ * @example Example that sets App ID and App Token:
  *   estimote.beacons.setupAppIDAndAppToken('MyAppID', 'MyAppToken')
  */
-estimote.beacons.setupAppIDAndAppToken = function (appID, appToken, success, error)
+estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, error)
 {
 	exec(success,
 		error,
@@ -445,55 +437,82 @@ estimote.beacons.setupAppIDAndAppToken = function (appID, appToken, success, err
 };
 
 /**
+ * Beacon region object.
+ * @typedef {Object} BeaconRegion
+ * @property {string} identifier Region identifier
+ * (id set by the application, not related actual beacons).
+ * @property {string} uuid The UUID of the region.
+ * @property {number} major The UUID major value of the region.
+ * @property {number} major The UUID minor value of the region.
+ * @property {boolean} secure Supported on iOS for enabling
+ * secure beacons. Leaving it out defaults to false.
+ * To use secure beacons set the App ID and App Token using
+ * {@link estimote.beacons.setupAppIDAndAppToken}.
+ */
+
+/**
+ * Beacon info object. Consists of a region and an array of beacons.
+ * @typedef {Object} BeaconInfo
+ * @property {BeaconRegion} region Beacon region.
+ * @property {Beacon[]} beacons Array of {@link Beacon} objects.
+ */
+
+/**
+ * Beacon object. Different properties are available depending on
+ * platform (iOS/Android) and whether scanning (iOS) or ranging (iOS/Android).
+ * @typedef {Object} Beacon
+ * @property {number} major Major value of the beacon (ranging/scanning iOS/Android).
+ * @property {number} minor Minor value of the beacon (ranging/scanning iOS/Android).
+ * @property {number} color One of the estimote.beacons.BeaconColor* values (ranging/scanning iOS/Android).
+ * @property {number} rssi - The Received Signal Strength Indication (ranging/scanning, iOS/Android).
+ * @property {string} proximityUUID - UUID of the beacon (ranging iOS/Android)
+ * @property {number} distance Estimated distance from the beacon in meters (ranging iOS).
+ * @property {number} proximity One of estimote.beacons.Proximity* values (ranging iOS).
+ * @property {string} macAddress (scanning iOS, ranging Android).
+ * @property {number} measuredPower (scanning iOS, ranging Android).
+ * @property {string} name The name advertised by the beacon (ranging Android).
+ *
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTBeacon.html|Documentation of beacon properties on iOS}
+ * @see {@link http://estimote.github.io/Android-SDK/JavaDocs/index.html?com/estimote/sdk/Beacon.html|Documentation of beacon properties on Android}
+ */
+
+/**
+ * Region state object. This object is given as a result when
+ * monitoring for beacons.
+ * @typedef {Object} RegionState
+ * @property {string} identifier Region identifier
+ * (id set by the application, not related actual beacons).
+ * @property {string} uuid The UUID of the region.
+ * @property {number} major The UUID major value of the region.
+ * @property {number} major The UUID minor value of the region.
+ * @property {string} state One of
+ * {@link estimote.beacons.RegionStateInside},
+ * {@link estimote.beacons.RegionStateOutside},
+ * {@link estimote.beacons.RegionStateUnknown}.
+ */
+
+/**
  * Start scanning for beacons using CoreBluetooth.
  *
- * @param region Dictionary with region properties (mandatory).
- * @param success Function called when beacons are detected (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {BeaconRegion} region Dictionary with region properties (mandatory).
+ * @param {function} success Function called when beacons are detected,
+ * takes a  {@link BeaconInfo} object as parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * region format:
- *   {
- *     uuid: string,
- *     identifier: string,
- *     major: number,
- *     minor: number,
- *     secure: boolean
- *   }
+ * @example success callback format:
+ *   success(BeaconInfo)
  *
- * The region field 'secure' is supported on iOS for enabling
- * secure beacon regions. Leaving it out defaults to false.
- * See this article for further info:
- * https://community.estimote.com/hc/en-us/articles/204233603-How-security-feature-works
- *
- * success callback format:
- *   success(beaconInfo)
- *
- * beaconInfo format:
- *   {
- *     region: region,
- *     beacons: array of beacon
- *   }
- *
- * beacon format:
- *   {
- *     // See documented properties at:
- *     // http://estimote.github.io/iOS-SDK/Classes/ESTBeacon.html
- *   }
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that prints all discovered beacons and properties:
+ * @example Example that prints all discovered beacons and properties:
  *   estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
  *     {}, // Empty region matches all beacons.
- *     function(result) {
+ *     function(info) {
  *       console.log('Beacons discovered:')
- *       estimote.printObject(result) },
+ *       estimote.printObject(info) },
  *     function(errorMessage) {
- *       console.log('Discovery error: ' + errorMessage) }
- *   )
+ *       console.log('Discovery error: ' + errorMessage) })
  */
-estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
+estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function(
+	region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -512,19 +531,14 @@ estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function (region, succ
 /**
  * Stop CoreBluetooth scan.
  *
- * @param success Function called when beacons are detected (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called when
+ * beacons are detected (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops discovery:
+ * @example Example that stops discovery:
  *   estimote.beacons.stopEstimoteBeaconDiscovery()
  */
-estimote.beacons.stopEstimoteBeaconDiscovery = function (success, error)
+estimote.beacons.stopEstimoteBeaconDiscovery = function(success, error)
 {
 	exec(success,
 		error,
@@ -539,31 +553,24 @@ estimote.beacons.stopEstimoteBeaconDiscovery = function (success, error)
 /**
  * Start ranging beacons using CoreLocation.
  *
- * @param region Dictionary with region properties (mandatory).
- * @param success Function called when beacons are ranged (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {BeaconRegion} region Dictionary with region properties (mandatory).
+ * @param {function} success Function called when beacons are ranged,
+ * takes a {@link BeaconInfo} object as parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * See function startEstimoteBeaconsDiscoveryForRegion for region format.
+ * @example callback format:
+ *   success(BeaconInfo)
  *
- * success callback format:
- *   success(beaconInfo)
- *
- * See function startEstimoteBeaconsDiscoveryForRegion for beaconInfo format.
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that prints all beacons and properties:
+ * @example Example that prints all beacons and properties:
  *   estimote.beacons.startRangingBeaconsInRegion(
  *     {}, // Empty region matches all beacons.
- *     function(result) {
+ *     function(info) {
  *       console.log('Beacons ranged:')
- *       estimote.printObject(result) },
+ *       estimote.printObject(info) },
  *     function(errorMessage) {
- *       console.log('Ranging error: ' + errorMessage) }
- *   )
+ *       console.log('Ranging error: ' + errorMessage) })
  */
-estimote.beacons.startRangingBeaconsInRegion = function (region, success, error)
+estimote.beacons.startRangingBeaconsInRegion = function(region, success, error)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
 		return false;
@@ -582,20 +589,15 @@ estimote.beacons.startRangingBeaconsInRegion = function (region, success, error)
 /**
  * Stop ranging beacons using CoreLocation.
  *
- * @param region Dictionary with region properties (mandatory).
- * @param success Function called when ranging is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {BeaconRegion} region Dictionary with region properties (mandatory).
+ * @param {ErrorCallbackNoParams} [success] Function called when ranging
+ * is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops ranging:
+ * @example Example that stops ranging:
  *   estimote.beacons.stopRangingBeaconsInRegion({})
  */
-estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
+estimote.beacons.stopRangingBeaconsInRegion = function(region, success, error)
 {
 	if (!checkExecParamsRegion(region)) {
 		return false;
@@ -614,52 +616,29 @@ estimote.beacons.stopRangingBeaconsInRegion = function (region, success, error)
 /**
  * Start monitoring beacons using CoreLocation.
  *
- * @param region Dictionary with region properties (mandatory).
+ * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param success Function called when beacons are enter/exit the region (mandatory).
- * @param error Function called on error (mandatory).
- * @param notifyEntryStateOnDisplay Set to true to detect if you
- * are inside a region when the user turns display on (optional,
- * defaults to false, iOS only).
+ * @param {function} success Function called when beacons enter/exit the region,
+ * takes a {@link RegionState} object as parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
+ * @param {boolean} [notifyEntryStateOnDisplay=false] Set to true to detect if you
+ * are inside a region when the user turns display on, see
+ * {@link https://developer.apple.com/library/prerelease/ios/documentation/CoreLocation/Reference/CLBeaconRegion_class/index.html#//apple_ref/occ/instp/CLBeaconRegion/notifyEntryStateOnDisplay|iOS documentation}
+ * for further details (optional, defaults to false, iOS only).
  *
- * See function startEstimoteBeaconsDiscoveryForRegion for region format.
+ * @example success callback format:
+ *   success(RegionState)
  *
- * Details regarding parameter notifyEntryStateOnDisplay from the iOS documentation:
- *
- * 'When set to YES, the location manager sends beacon notifications when
- * the user turns on the display and the device is already inside the region.
- * These notifications are sent even if your app is not running. In that
- * situation, the system launches your app into the background so that it
- * can handle the notifications. In both situations, the location manager
- * calls the locationManager:didDetermineState:forRegion: method of its
- * delegate object.
- * The default value for this property is NO.
- *
- * success callback format:
- *   success(regionState)
- *
- * regionState format:
- *   {
- *     uuid: string,
- *     identifier: string,
- *     major: number,
- *     minor: number,
- *     state: string ['outside'|'inside'|'unknown']
- *   }
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that prints regionState properties:
+ * @example Example that prints regionState properties:
  *   estimote.beacons.startMonitoringForRegion(
  *     {}, // Empty region matches all beacons.
- *     function(result) {
+ *     function(state) {
  *       console.log('Region state:')
- *       estimote.printObject(result) },
+ *       estimote.printObject(state) },
  *     function(errorMessage) {
- *       console.log('Monitoring error: ' + errorMessage) }
- *   )
+ *       console.log('Monitoring error: ' + errorMessage) })
  */
-estimote.beacons.startMonitoringForRegion = function (
+estimote.beacons.startMonitoringForRegion = function(
 	region, success, error, notifyEntryStateOnDisplay)
 {
 	if (!checkExecParamsRegionSuccessError(region, success, error)) {
@@ -679,17 +658,12 @@ estimote.beacons.startMonitoringForRegion = function (
 /**
  * Stop monitoring beacons using CoreLocation.
  *
- * @param region Dictionary with region properties (mandatory).
- * @param success Function called when monitoring is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {BeaconRegion} region Dictionary with region properties (mandatory).
+ * @param {ErrorCallbackNoParams} [success] Function called when monitoring
+ * is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops monitoring:
+ * @example Example that stops monitoring:
  *   estimote.beacons.stopMonitoringForRegion({})
  */
 estimote.beacons.stopMonitoringForRegion = function (region, success, error)
@@ -710,110 +684,228 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 
 
 /*********************************************************/
-/************** Estimote Stickers Functions **************/
+/*************** Estimote Nearables Module ***************/
 /*********************************************************/
 
-
 /**
- * Nearable types.
+ * Nearable type.
  */
 estimote.nearables.NearableTypeUnknown = 0;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeDog = 1;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeCar = 2;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeFridge = 3;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeBag = 4;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeBike = 5;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeChair = 6;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeBed = 7;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeDoor = 8;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeShoe = 9;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeGeneric = 10;
+
+/**
+ * Nearable type.
+ */
 estimote.nearables.NearableTypeAll = 11;
 
 /**
- * Nearable zones.
+ * Nearable zone.
  */
 estimote.nearables.NearableZoneUnknown = 0;
+
+/**
+ * Nearable zone.
+ */
 estimote.nearables.NearableZoneImmediate = 1;
+
+/**
+ * Nearable zone.
+ */
 estimote.nearables.NearableZoneNear = 2;
+
+/**
+ * Nearable zone.
+ */
 estimote.nearables.NearableZoneFar = 3;
 
 /**
- * Nearable orientations.
+ * Nearable orientation.
  */
 estimote.nearables.NearableOrientationUnknown = 0;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationHorizontal = 1;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationHorizontalUpsideDown = 2;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationVertical = 3;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationVerticalUpsideDown = 4;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationLeftSide = 5;
+
+/**
+ * Nearable orientation.
+ */
 estimote.nearables.NearableOrientationRightSide = 6;
 
 /**
- * Nearable colours.
+ * Nearable colour.
  */
 estimote.nearables.NearableColorUnknown = 0;
+
+/**
+ * Nearable colour.
+ */
 estimote.nearables.NearableColorMintCocktail = 1;
-estimote.nearables.NearableColorIcyMarshmallow = 0;
-estimote.nearables.NearableColorBlueberryPie = 0;
-estimote.nearables.NearableColorSweetBeetroot = 0;
-estimote.nearables.NearableColorCandyFloss = 0;
-estimote.nearables.NearableColorLemonTart = 0;
+
+/**
+ * Nearable colour.
+ */
+estimote.nearables.NearableColorIcyMarshmallow = 2;
+
+/**
+ * Nearable colour.
+ */
+estimote.nearables.NearableColorBlueberryPie = 3;
+
+/**
+ * Nearable colour.
+ */
+estimote.nearables.NearableColorSweetBeetroot = 4;
+
+/**
+ * Nearable colour.
+ */
+estimote.nearables.NearableColorCandyFloss = 5;
+
+/**
+ * Nearable colour.
+ */
+estimote.nearables.NearableColorLemonTart = 6;
+
+/**
+ * Nearable object.
+ * @typedef {Object} Nearable
+ * @property {string} identifier Unique device identifier.
+ * @property {number} type Nearable type value.
+ * @property {string} nameForType Nearable type name.
+ * @property {number} color Nearable color value.
+ * @property {string} nameForColor Nearable color name.
+ * @property {string} hardwareVersion Revision of nearable hardware.
+ * @property {string} firmwareVersion Version of nearable firmware.
+ * @property {number} rssi Bluetooth signal strength. It can take
+ * value from -100 to 0. 127 value means RSSI reading error.
+ * @property {number} zone Zone indicating distance from the device.
+ * @property {number} idleBatteryVoltage Battery voltage when
+ * nearable is in idle state defined in Volts.
+ * @property {number} stressBatteryVoltage Battery voltage when
+ * nearable is under stress (sending packet) defined in Volts.
+ * @property {number} currentMotionStateDuration Time since last change
+ * of motion state (isMoving value change) returned in seconds.
+ * @property {number} previousMotionStateDuration Time of
+ * previous motion state returned in seconds.
+ * @property {boolean} isMoving Flag indicates if nearable is moving or not.
+ * @property {number} orientation Physical orientation of nearable in space.
+ * @property {number} xAcceleration X axis acceleration data.
+ * @property {number} yAcceleration Y axis acceleration data.
+ * @property {number} zAcceleration Z axis acceleration data.
+ * @property {number} temperature Ambient temperature of nearable.
+ * @property {number} power The power of the radio signal in dBm.
+ * @property {number} firmwareState Indicates if nearable is in Boot or App state.
+ *
+ * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTNearable.html|Detailed specification of Nearable properties}
+ */
+
+/**
+ * Identifier region state object.
+ * @typedef {Object} IdentifierRegionState
+ * @property {string} identifier Nearable identifier.
+ * @property {string} state One of 'outside', 'inside'.
+ */
+
+/**
+ * Type region state object.
+ * @typedef {Object} TypeRegionState
+ * @property {number} type One of the
+ * estimote.nearable.NearableType* constants.
+ * @property {string} state One of 'outside', 'inside'.
+ */
 
 /**
  * Start ranging for nearables with the given identifier.
  *
- * @param identifier String with nearable id (mandatory).
- * @param success Function called when the nearable with the
- * given id is ranged (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {string} identifier Nearable identifier (mandatory).
+ * @param {function} success Function called when the nearable with the
+ * given id is ranged, called with a {@link Nearable} as parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success(nearable)
+ * @example success callback format:
+ *   success(Nearable)
  *
- * error callback format:
- *   error(errorMessage)
- *
- * nearable format:
- *   {
- *     type: number,
- *     nameForType: string,
- *     color: number,
- *     nameForColor: string,
- *     identifier: string,
- *     hardwareVersion: string,
- *     firmwareVersion: string,
- *     rssi: number,
- *     zone: number,
- *     idleBatteryVoltage: number,
- *     stressBatteryVoltage: number,
- *     currentMotionStateDuration: number,
- *     previousMotionStateDuration: number,
- *     isMoving: bool,
- *     orientation: number,
- *     xAcceleration: number,
- *     yAcceleration: number,
- *     zAcceleration: number,
- *     temperature: number,
- *     power: number,
- *     channel: number,
- *     firmwareState: number
- *   }
- *
- * For detailed specification of Nearable properties see:
- * http://estimote.github.io/iOS-SDK/Classes/ESTNearable.html
- *
- * Example that prints ranged nearable:
+ * @example Example that prints ranged nearable:
  *   estimote.nearables.startRangingForIdentifier(
  *     '12e31',
  *     function(nearable) {
  *       console.log('Nearable ranged:')
  *       estimote.printObject(nearable) },
  *     function(errorMessage) {
- *       console.log('Ranging error: ' + errorMessage) }
- *   )
+ *       console.log('Ranging error: ' + errorMessage) })
  */
-estimote.nearables.startRangingForIdentifier = function (identifier, success, error)
+estimote.nearables.startRangingForIdentifier = function(identifier, success, error)
 {
 	exec(success,
 		error,
@@ -828,20 +920,15 @@ estimote.nearables.startRangingForIdentifier = function (identifier, success, er
 /**
  * Stop ranging for nearables with the given identifier.
  *
- * @param identifier String with nearable id (mandatory).
- * @param success Function called when ranging is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {string} identifier String with nearable id (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called
+ * when ranging is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops ranging:
+ * @example Example that stops ranging:
  *   estimote.nearables.stopRangingForIdentifier(identifier)
  */
-estimote.nearables.stopRangingForIdentifier = function (identifier, success, error)
+estimote.nearables.stopRangingForIdentifier = function(identifier, success, error)
 {
 	exec(success,
 		error,
@@ -856,33 +943,26 @@ estimote.nearables.stopRangingForIdentifier = function (identifier, success, err
 /**
  * Start ranging for nearables of the given type.
  *
- * @param type Nearable type - one of the
- * ESTNearableType* constants (mandatory).
- * @param success Function called when the nearable with the
- * given id is ranged (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {number} type Nearable type, one of the
+ * estimote.nearable.NearableType* constants (mandatory).
+ * @param {function} success Function called when the nearable with the
+ * given type is ranged, takes an array of {@link Nearable} as
+ * parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success(nearables)
+ * @example success callback format:
+ *   success(Nearable[])
  *
- * error callback format:
- *   error(errorMessage)
- *
- * nearables format: array of nearable
- *
- * nearable format: see function estimote.nearables.startRangingForIdentifier
- *
- * Example that prints all ranged nearables:
+ * @example Example that prints all ranged nearables:
  *   estimote.nearables.startRangingForType(
  *     estimote.nearables.NearableTypeAll,
  *     function(nearables) {
- *       console.log('Nearables ranged:')
+ *       console.log('Number of nearables ranged: ' + nearables.length)
  *       estimote.printObject(nearables) },
  *     function(errorMessage) {
- *       console.log('Ranging error: ' + errorMessage) }
- *   )
+ *       console.log('Ranging error: ' + errorMessage) })
  */
-estimote.nearables.startRangingForType = function (type, success, error)
+estimote.nearables.startRangingForType = function(type, success, error)
 {
 	exec(success,
 		error,
@@ -897,20 +977,16 @@ estimote.nearables.startRangingForType = function (type, success, error)
 /**
  * Stop ranging for nearables of the given type.
  *
- * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
- * @param success Function called when ranging is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {number} type Nearable type, one of the
+ * estimote.nearable.NearableType* constants (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called when
+ * ranging is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops ranging:
+ * @example Example that stops ranging:
  *   estimote.nearables.stopRangingForType(estimote.nearables.NearableTypeAll)
  */
-estimote.nearables.stopRangingForType = function (type, success, error)
+estimote.nearables.stopRangingForType = function(type, success, error)
 {
 	exec(success,
 		error,
@@ -925,19 +1001,14 @@ estimote.nearables.stopRangingForType = function (type, success, error)
 /**
  * Stop ranging all nearables.
  *
- * @param success Function called when ranging is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called when
+ * ranging is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops ranging:
+ * @example Example that stops ranging:
  *   estimote.nearables.stopRanging()
  */
-estimote.nearables.stopRanging = function (success, error)
+estimote.nearables.stopRanging = function(success, error)
 {
 	exec(success,
 		error,
@@ -952,24 +1023,16 @@ estimote.nearables.stopRanging = function (success, error)
 /**
  * Start monitoring for nearables with the given identifier.
  *
- * @param identifier String with nearable id (mandatory).
- * @param success Function called when the nearable with the
- * given id is monitored (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {string} identifier Nearable identifier to monitor for (mandatory).
+ * @param {function} success Function called when the nearable with the
+ * given identifier is monitored, called with a {@link IdentifierRegionState}
+ * as parameter (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success(identifierRegionState)
+ * @example success callback format:
+ *   success(IdentifierRegionState)
  *
- * identifierRegionState format:
- *   {
- *     identifier: string,
- *     state: string ['outside'|'inside']
- *   }
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that prints state for monitored identifier:
+ * @example Example that prints state for monitored identifier:
  *   estimote.nearables.startMonitoringForIdentifier(
  *     '12e31',
  *     function(state) {
@@ -994,17 +1057,12 @@ estimote.nearables.startMonitoringForIdentifier = function (identifier, success,
 /**
  * Stop monitoring for nearables with the given identifier.
  *
- * @param identifier String with nearable id (mandatory).
- * @param success Function called when monitoring is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {string} identifier Nearable identifier to stop monitor (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called
+ * when monitoring is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops monitoring:
+ * @example Example that stops monitoring:
  *   estimote.nearables.stopMonitoringForIdentifier(identifier)
  */
 estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, error)
@@ -1022,33 +1080,23 @@ estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, 
 /**
  * Start monitoring for nearables of the given type.
  *
- * @param type Nearable type - one of the ESTNearableType*
- * constants (mandatory).
- * @param success Function called when nearables with the given
- * type is monitored (mandatory).
- * @param error Function called on error (mandatory).
+ * @param {number} type Nearable type, one of the
+ * estimote.nearables.NearableType* constants (mandatory).
+ * @param {function} success Function called when nearables with the given
+ * type is monitored, called with a parameter {@link TypeRegionState} (mandatory).
+ * @param {ErrorCallback} error Function called on error (mandatory).
  *
- * success callback format:
- *   success(typeRegionState)
+ * @example success callback format:
+ *   success(TypeRegionState)
  *
- * typeRegionState format:
- *   {
- *     type: number, // one of the ESTNearableType* values
- *     state: string ['outside'|'inside']
- *   }
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that prints state for monitored type:
+ * @example  Example that prints state for monitored type:
  *   estimote.nearables.startMonitoringForType(
  *     estimote.nearables.NearableTypeAll,
  *     function(state) {
  *       console.log('Nearables monitored:')
  *       estimote.printObject(state) },
  *     function(errorMessage) {
- *       console.log('Monitoring error: ' + errorMessage) }
- *   )
+ *       console.log('Monitoring error: ' + errorMessage) })
  */
 estimote.nearables.startMonitoringForType = function (type, success, error)
 {
@@ -1065,17 +1113,13 @@ estimote.nearables.startMonitoringForType = function (type, success, error)
 /**
  * Stop monitoring for nearables of the given type.
  *
- * @param type Nearable type - one of the ESTNearableType* constants (mandatory).
- * @param success Function called when monitoring is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {number} type Nearable type, one of the
+ * estimote.nearables.NearableType* constants (mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called when
+ * monitoring is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops monitoring:
+ * @example Example that stops monitoring:
  *   estimote.nearables.stopMonitoringForType(estimote.nearables.NearableTypeAll)
  */
 estimote.nearables.stopMonitoringForType = function (type, success, error)
@@ -1093,16 +1137,11 @@ estimote.nearables.stopMonitoringForType = function (type, success, error)
 /**
  * Stop monitoring all nearables.
  *
- * @param success Function called when monitoring is stopped (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {SuccessCallbackNoParams} [success] Function called when
+ * monitoring is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * success callback format:
- *   success()
- *
- * error callback format:
- *   error(errorMessage)
- *
- * Example that stops monitoring:
+ * @example Example that stops monitoring:
  *   estimote.nearables.stopMonitoring()
  */
 estimote.nearables.stopMonitoring = function (success, error)
@@ -1118,19 +1157,46 @@ estimote.nearables.stopMonitoring = function (success, error)
 };
 
 /*********************************************************/
-/******************* Trigger Functions *******************/
+/*********************** Triggers ************************/
 /*********************************************************/
 
-estimote.triggers = {};
+/**
+ * Trigger rule type.
+ */
 estimote.triggers.RuleTypeGeneric = 1;
+
+/**
+ * Trigger rule type.
+ */
 estimote.triggers.RuleTypeNearableIdentifier = 2;
+
+/**
+ * Trigger rule type.
+ */
 estimote.triggers.RuleTypeNearableType = 4;
 
+/**
+ * Trigger object.
+ * @typedef {Object} Trigger
+ * @property {boolean} state Is true if the trigger holds, false if not.
+ */
+
+/**
+ * Trigger rule object.
+ * @typedef {Object} TriggerRule
+ * @property {boolean} state Set to true or false to set rule state.
+ */
+
+/**
+ * Used for generating rule ids.
+ * @private
+ */
 var ruleCounter = 0;
 
 /**
  * Helper function that creates an internal 'lightweight'
  * trigger object sent to the native side.
+ * @private
  */
 function helper_createTriggerObject(trigger)
 {
@@ -1155,6 +1221,7 @@ function helper_createTriggerObject(trigger)
 /**
  * Helper function that calls the update function of the rule
  * related to the event and then updates the native rule state.
+ * @private
  */
 function helper_updateTriggerRule(trigger, event)
 {
@@ -1174,6 +1241,7 @@ function helper_updateTriggerRule(trigger, event)
  * during an update event.
  * @param event Event object passed to the event update function.
  * @param state true if rule holds, false if rule does not hold.
+ * @private
  */
 function helper_updateRuleState(triggerIdentifier, ruleIdentifier, state)
 {
@@ -1188,10 +1256,10 @@ function helper_updateRuleState(triggerIdentifier, ruleIdentifier, state)
 /**
  * Create a trigger object.
  *
- * @param triggerIdentifier String that uniquely identifies the trigger.
- * You can choose any identifiers as long as they are unique
+ * @param {string} triggerIdentifier String that uniquely identifies
+ * the trigger. You can choose any identifiers as long as they are unique
  * within the application.
- * @param rules Array of rule objects that will be used by the trigger.
+ * @param {TriggerRule[]} Array of rule objects that will be used by the trigger.
  *
  * Example that stops monitoring:
  *   estimote.nearables.stopMonitoring()
@@ -1218,21 +1286,15 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 /**
  * Create a basic rule object.
  *
- * @param ruleUpdateFunction Function that is called when the
- * rule state should be updated. Specify your rule login in
- * this function.
+ * @param {function} ruleUpdateFunction Function that is called
+ * when the rule state should be updated. Specify your rule logic
+ * in this function. Takes a {@link TriggerRule} as parameter.
+ * To update rule state, set the rule.state field to true or false.
  *
- * Update callback function format:
- *   ruleUpdateFunction(rule)
+ * @returns {TriggerRule} Rule object.
  *
- * rule object format:
- *   {
- *     state: boolean // set to true or false to set rule state
- *   }
- *
- * The field of interest when writing the rule update function
- * is 'nearable', which is an object with all properties for
- * the nearable monitored by the rule.
+ * @example Update callback function format:
+ *   ruleUpdateFunction(TriggerRule)
  */
 estimote.triggers.createRule = function(ruleUpdateFunction)
 {
@@ -1247,21 +1309,22 @@ estimote.triggers.createRule = function(ruleUpdateFunction)
 /**
  * Create a rule object for a nearable identifier.
  *
- * @param nearableIdentifier String with the nearable identifier.
+ * @param {string} nearableIdentifier A nearable identifier.
  * This specifies the specific nearable that will be monitoried
  * by the rule.
- * @param ruleUpdateFunction Callback used to update the rule state.
- * Also see estimote.triggers.createRule().
- *
- * Update callback function format:
- *   ruleUpdateFunction(rule, nearable)
- *
- * The 'nearable' parameter is an object with fields for
- * the nearable monitored by the rule.
- *
+ * @param {function} ruleUpdateFunction Function that is called
+ * when the rule state should be updated. Specify your rule logic
+ * in this function.
+ * Takes a {@link TriggerRule} and a {@link Nearable} as parameters.
  * To update rule state, set the rule.state field to true or false.
+ *
+ * @returns {TriggerRule} Rule object.
+ *
+ * @example Update callback function format:
+ *   ruleUpdateFunction(rule, nearable)
  */
-estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpdateFunction)
+estimote.triggers.createRuleForIdentifier = function(
+	nearableIdentifier, ruleUpdateFunction)
 {
 	var rule = estimote.triggers.createRule(ruleUpdateFunction);
 	rule.ruleType = estimote.triggers.RuleTypeNearableIdentifier;
@@ -1272,19 +1335,19 @@ estimote.triggers.createRuleForIdentifier = function(nearableIdentifier, ruleUpd
 /**
  * Create a rule object for a nearable type.
  *
- * @param nearableType Number for the nearable type to monitor.
+ * @param {number} nearableType Nearable type to monitor.
  * This specifies the type of nearable that will be monitoried
  * by the rule.
- * @param ruleUpdateFunction Callback used to update the rule state.
- * Also see estimote.triggers.createRule().
- *
- * Update callback function format:
- *   ruleUpdateFunction(rule, nearable)
- *
- * The 'nearable' parameter is an object with fields for
- * the nearable monitored by the rule.
- *
+ * @param {function} ruleUpdateFunction Function that is called
+ * when the rule state should be updated. Specify your rule logic
+ * in this function.
+ * Takes a {@link TriggerRule} and a {@link Nearable} as parameters.
  * To update rule state, set the rule.state field to true or false.
+ *
+ * @returns {TriggerRule} Rule object.
+ *
+ * @example Update callback function format:
+ *   ruleUpdateFunction(rule, nearable)
  */
 estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 {
@@ -1297,20 +1360,17 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
 /**
  * Start monitoring a trigger.
  *
- * @param trigger Trigger object to monitor.
- * @param triggerCallback Function called when the trigger changes state.
- * @param errorCallback Function called on error.
- *
- * Format for triggerCallback:
- *   triggerCallback(trigger)
- *
+ * @param {Trigger} trigger Trigger object to monitor.
+ * @param {function} triggerCallback Function called when the trigger
+ * changes state. The callback takes the {@link Trigger} as parameter.
  * trigger.state contains the current state of the trigger, it is true
  * if the trigger holds, false if not.
+ * @param {ErrorCallback} errorCallback Function called on error.
  *
- * Format for errorCallback:
- *   errorCallback(errorMessage)
+ * @example Format for triggerCallback:
+ *   triggerCallback(Trigger)
  *
- * Code example:
+ * @example Code example:
  *
  *   // Called when trigger changes state.
  *   function onTriggerChangedState(trigger) {
@@ -1379,17 +1439,11 @@ estimote.triggers.startMonitoringForTrigger = function(
 /**
  * Stop monitoring a trigger.
  *
- * @param trigger Trigger to stop monitoring.
- * @param success Function called on success (non-mandatory).
- * @param error Function called on error (non-mandatory).
+ * @param {Trigger} trigger Trigger to stop monitoring.
+ * @param {SuccessCallback} [success] Function called on success (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
  *
- * Format for success function:
- *   success()
- *
- * Format for error function:
- *   error(errorMessage)
- *
- * Example call:
+ * @example Example call:
  *   estimote.triggers.stopMonitoringForTrigger(trigger)
  */
 estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
@@ -1405,11 +1459,12 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 };
 
 /*********************************************************/
-/**************** Trigger Rules Functions ****************/
+/**************** Trigger Rule Functions *****************/
 /*********************************************************/
 
-estimote.triggers.rules = {};
-
+/**
+ * Rule creation function.
+ */
 estimote.triggers.rules.nearableIsMoving = function()
 {
 	return function(rule, nearable) {
@@ -1417,6 +1472,9 @@ estimote.triggers.rules.nearableIsMoving = function()
 	};
 };
 
+/**
+ * Rule creation function.
+ */
 estimote.triggers.rules.nearableIsNotMoving = function()
 {
 	return function(rule, nearable) {
@@ -1424,13 +1482,24 @@ estimote.triggers.rules.nearableIsNotMoving = function()
 	};
 };
 
+/**
+ * Rule creation function. Monitor a temperature span.
+ * @param low Min temperature of span to detect.
+ * @param high Max temperature of span to detect.
+ */
 estimote.triggers.rules.nearableTemperatureBetween = function(low, high)
 {
 	return function(rule, nearable) {
-		rule.state = (nearable.temperature >= low) && (nearable.temperature <= high);
+		rule.state =
+			(nearable.temperature >= low) &&
+			(nearable.temperature <= high);
 	};
 };
 
+/**
+ * Rule creation function.
+ * @todo Not ready.
+ */
 estimote.triggers.rules.nearableInRange = function()
 {
 	var timer = null;
@@ -1453,6 +1522,10 @@ estimote.triggers.rules.nearableInRange = function()
 	};
 };
 
+/**
+ * Rule creation function.
+ * @todo Not ready.
+ */
 estimote.triggers.rules.nearableNotInRange = function()
 {
 	var timer = null;
@@ -1476,39 +1549,99 @@ estimote.triggers.rules.nearableNotInRange = function()
 };
 
 /*********************************************************/
+/******************* Helper Functions ********************/
+/*********************************************************/
+
+/**
+ * Internal helper function.
+ * @private
+ */
+function isString(value)
+{
+	return (typeof value == 'string' || value instanceof String);
+}
+
+/**
+ * Internal helper function.
+ * @private
+ */
+function isInt(value)
+{
+	return !isNaN(parseInt(value, 10)) &&
+		(parseFloat(value, 10) == parseInt(value, 10));
+}
+
+/**
+ * Internal helper function.
+ * @private
+ */
+function checkExecParamsRegionSuccessError(region, success, error)
+{
+	var caller = checkExecParamsRegionSuccessError.caller.name
+
+	if (typeof region != 'object') {
+		console.error('Error: region parameter is not an object in: ' + caller);
+		return false;
+	}
+
+	if (typeof success != 'function') {
+		console.error('Error: success parameter is not a function in: ' + caller);
+		return false;
+	}
+
+	if (typeof error != 'function') {
+		console.error('Error: error parameter is not a function in: ' + caller);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Internal helper function.
+ * @private
+ */
+function checkExecParamsSuccessError(success, error)
+{
+	var caller = checkExecParamsSuccessError.caller.name
+
+	if (typeof success != 'function') {
+		console.error('Error: success parameter is not a function in: ' + caller);
+		return false;
+	}
+
+	if (typeof error != 'function') {
+		console.error('Error: error parameter is not a function in: ' + caller);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Internal helper function.
+ * @private
+ */
+function checkExecParamsRegion(region)
+{
+	var caller = checkExecParamsRegion.caller.name
+
+	if (typeof region != 'object') {
+		console.error('Error: region parameter is not an object in: ' + caller);
+		return false;
+	}
+
+	return true;
+}
+
+/*********************************************************/
 /************** Unused/Old Beacon Functions **************/
 /*********************************************************/
 
+// These functions are from the original API and will eventually be
+// incorporated into the new API.
+
 /*
-EstimoteBeacons.getBeaconByIdx = function (idx, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (!isInt(idx)) {
-        console.error("EstimoteBeacons.getBeaconByIdx failure: index must be a valid integer");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.getBeaconByIdx failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.getBeaconByIdx failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "getBeaconByIdx",
-        [idx]
-    );
-};
-
 EstimoteBeacons.getClosestBeacon = function (successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
@@ -1748,21 +1881,6 @@ EstimoteBeacons.updateFirmwareOfConnectedBeacon = function (progressCallback, su
     }
 };
 
-EstimoteBeacons.getBeacons = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.getBeacons failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        function () {
-        },
-        "EstimoteBeacons",
-        "getBeacons",
-        []
-    );
-};
-
 EstimoteBeacons.startVirtualBeacon = function (major, minor, id, successCallback) {
     if (!isInt(major)) {
         console.error("EstimoteBeacons.startVirtualBeacon failure: major must be a valid integer");
@@ -1806,9 +1924,3 @@ EstimoteBeacons.stopVirtualBeacon = function(successCallback) {
     );
 };
 */
-
-// For backwards compatibility.
-estimote.beacons.printObject = estimote.printObject
-window.EstimoteBeacons = estimote.beacons;
-
-module.exports = estimote;
