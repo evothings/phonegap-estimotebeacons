@@ -90,7 +90,6 @@ estimote.triggers = estimote.triggers || {};
  * Submodule for trigger rules.
  * @namespace rules
  * @memberof estimote.triggers
- * @private
  */
 estimote.triggers.rules = estimote.triggers.rules || {};
 
