@@ -1,6 +1,30 @@
+//
 // API definition for Estimote Cordova/PhoneGap plugin.
 //
 // Use jsdoc to generate documentation.
+//
+// Install JSDoc on OS X (specify the actual JSDoc version you wish to use):
+//
+// sudo npm install -g jsdoc@"<=3.3.0"
+//
+// To install latest development version:
+//
+// sudo npm install -g git+https://github.com/jsdoc3/jsdoc.git
+//
+// JSDoc home page:
+//
+// https://github.com/jsdoc3/jsdoc
+//
+// Install the DocStrap template engine:
+//
+// sudo npm install -g ink-docstrap
+//
+// Run JSDoc to generate documentation (use the actual path of your
+// DocStrap installation):
+//
+// jsdoc -c ./conf.json -t /usr/local/lib/node_modules/ink-docstrap/template
+//
+// File conf.json contains JSDoc/DocStrap settings you can tweak.
 //
 
 var exec = cordova.require('cordova/exec');
@@ -8,6 +32,13 @@ var exec = cordova.require('cordova/exec');
 /*********************************************************/
 /***************** Estimote Namespaces *******************/
 /*********************************************************/
+
+
+/**
+ * Module name. This is just used for the documentation.
+ * You never use this name in your code.
+ * @module EstimotePlugin
+ */
 
 /**
  * Main exported module.

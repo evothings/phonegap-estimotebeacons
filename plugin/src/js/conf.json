@@ -1,0 +1,30 @@
+{
+	"tags": {
+		"allowUnknownTags": false
+	},
+	"source": {
+		"include": ["EstimoteBeacons.js", "README.md"],
+		"exclude": [],
+		"includePattern": ".+\\.js(doc)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"plugins": [],
+	"opts": {
+		"encoding": "utf8"
+	},
+	"templates": {
+		"systemName"            : "Estimote JavaScript Plugin",
+		"unused-footer"         : "{string}",
+		"unused-copyright"      : "{string}",
+		"navType"               : "vertical",
+		"theme"                 : "yeti",
+		"linenums"              : true,
+		"collapseSymbols"       : true,
+		"inverseNav"            : true,
+		"outputSourceFiles"     : true,
+		"unused-outputSourcePath" : "{boolean}",
+		"unused-dateFormat"     : "{string}",
+		"unused-highlightTutorialCode" : "{boolean}",
+		"unused-syntaxTheme"     : "{string}"
+	}
+}
