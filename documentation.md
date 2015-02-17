@@ -392,18 +392,10 @@ Here is a code example to give a taste of this style of coding. The trigger we m
         console.log('Trigger error: ' + errorMessage)
     }
 
-    // Rule function.
-    function nearableIsMoving(event) {
-        if (event.nearable.isMoving)
-            estimote.triggers.updateRuleState(event, true)
-        else
-            estimote.triggers.updateRuleState(event, false)
-    }
-
     // Trigger rule.
-    dogIsMovingRule = estimote.triggers.createRuleForType(
+    dogIsMovingRule = estimote.triggers.createRuleForNearable(
         estimote.nearables.NearableTypeDog,
-        nearableIsMoving)
+        estimote.triggers.rules.nearableIsMoving())
 
     // Trigger.
     trigger = estimote.triggers.createTrigger('DogTrigger', [dogIsMovingRule])
