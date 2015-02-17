@@ -26,6 +26,14 @@
 //
 // File conf.json contains JSDoc/DocStrap settings you can tweak.
 //
+// To eliminate the duplicated titles in the generated documentation,
+// insert this CSS into site.yeti.css (this is a temporary hack):
+//
+// /* Hide duplicated header titles. */
+//  #main h1:nth-child(2) {
+//      display: none;
+//  }
+//
 
 var exec = cordova.require('cordova/exec');
 
@@ -33,8 +41,8 @@ var exec = cordova.require('cordova/exec');
 /***************** Estimote Namespaces *******************/
 /*********************************************************/
 
-
-/**
+/****
+ * NOT USED - generated documentation is not correct.
  * Module name. This is just used for the documentation.
  * You never use this name in your code.
  * @module EstimotePlugin
