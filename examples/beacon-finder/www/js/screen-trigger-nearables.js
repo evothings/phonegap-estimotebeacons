@@ -39,7 +39,7 @@
 		$('#id-screen-trigger-nearables .style-item-list').empty();
 
 		// Create a rule.
-		var dogIsMovingRule = estimote.triggers.createRuleForType(
+		var dogIsMovingRule = estimote.triggers.createRuleForNearable(
 			estimote.nearables.NearableTypeDog,
 			estimote.triggers.rules.nearableIsMoving()
 			);

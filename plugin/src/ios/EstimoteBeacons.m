@@ -9,7 +9,11 @@
 
 #define EST_CDV_RULE_TYPE_GENERIC 1
 #define EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER 2
-#define EST_CDV_RULE_TYPE_NEARABLE_TYPE 4
+#define EST_CDV_RULE_TYPE_NEARABLE_TYPE 3
+#define EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_IDENTIFIER 4
+#define EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_TYPE 5
+#define EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_IDENTIFIER 6
+#define EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_TYPE 7
 
 // **************** Trigger object ****************
 
@@ -1699,7 +1703,7 @@ Example: http://192.168.0.101:4042
 		NSString* ruleIdentifier = jsRule[@"ruleIdentifier"];
 
 		// Create rule objects based on rule type.
-		if (ruleType & EST_CDV_RULE_TYPE_GENERIC)
+		if (ruleType == EST_CDV_RULE_TYPE_GENERIC)
 		{
 			ESTCDVRuleGeneric* rule = [ESTCDVRuleGeneric new];
 			rule.triggerIdentifier = triggerIdentifier;
@@ -1709,9 +1713,8 @@ Example: http://192.168.0.101:4042
 			[nativeRules addObject: rule];
 			NSLog(@"Adding EST_CDV_RULE_TYPE_GENERIC");
 		}
-		else if (ruleType & EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER)
+		else if (ruleType == EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER)
 		{
-		NSLog(@"jsRule nearableIdentifier; %@", jsRule[@"nearableIdentifier"]);
 			ESTCDVRuleNearable* rule = [[ESTCDVRuleNearable alloc]
 				initWithNearableIdentifier: jsRule[@"nearableIdentifier"]];
 			rule.triggerIdentifier = triggerIdentifier;
@@ -1721,7 +1724,7 @@ Example: http://192.168.0.101:4042
 			[nativeRules addObject: rule];
 			NSLog(@"Adding EST_CDV_RULE_TYPE_NEARABLE_IDENTIFIER");
 		}
-		else if (ruleType & EST_CDV_RULE_TYPE_NEARABLE_TYPE)
+		else if (ruleType == EST_CDV_RULE_TYPE_NEARABLE_TYPE)
 		{
 			ESTCDVRuleNearable* rule = [[ESTCDVRuleNearable alloc]
 				initWithNearableType: [jsRule[@"nearableType"] intValue]];
@@ -1731,6 +1734,34 @@ Example: http://192.168.0.101:4042
 			[trigger.nativeRules setValue: rule forKey: ruleIdentifier];
 			[nativeRules addObject: rule];
 			NSLog(@"Adding EST_CDV_RULE_TYPE_NEARABLE_TYPE");
+		}
+		else if (ruleType == EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_IDENTIFIER)
+		{
+			ESTProximityRule* rule = [ESTProximityRule
+				inRangeOfNearableIdentifier: jsRule[@"nearableIdentifier"]];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_IDENTIFIER");
+		}
+		else if (ruleType == EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_TYPE)
+		{
+			ESTProximityRule* rule = [ESTProximityRule
+				inRangeOfNearableType: [jsRule[@"nearableType"] intValue]];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_IN_RANGE_OF_NEARABLE_TYPE");
+		}
+		else if (ruleType == EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_IDENTIFIER)
+		{
+			ESTProximityRule* rule = [ESTProximityRule
+				outsideRangeOfNearableIdentifier: jsRule[@"nearableIdentifier"]];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_IDENTIFIER");
+		}
+		else if (ruleType == EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_TYPE)
+		{
+			ESTProximityRule* rule = [ESTProximityRule
+				outsideRangeOfNearableType: [jsRule[@"nearableType"] intValue]];
+			[nativeRules addObject: rule];
+			NSLog(@"Adding EST_CDV_RULE_TYPE_OUTSIDE_RANGE_OF_NEARABLE_TYPE");
 		}
 	}
 

@@ -90,6 +90,7 @@ estimote.triggers = estimote.triggers || {};
  * Submodule for trigger rules.
  * @namespace rules
  * @memberof estimote.triggers
+ * @private
  */
 estimote.triggers.rules = estimote.triggers.rules || {};
 
@@ -937,7 +938,7 @@ estimote.nearables.NearableColorLemonTart = 6;
  *
  * @example Example that prints ranged nearable:
  *   estimote.nearables.startRangingForIdentifier(
- *     '12e31',
+ *     '7d42563606f7fc76',
  *     function(nearable) {
  *       console.log('Nearable ranged:')
  *       estimote.printObject(nearable) },
@@ -1073,7 +1074,7 @@ estimote.nearables.stopRanging = function(success, error)
  *
  * @example Example that prints state for monitored identifier:
  *   estimote.nearables.startMonitoringForIdentifier(
- *     '12e31',
+ *     '7d42563606f7fc76',
  *     function(state) {
  *       console.log('Nearable monitored:')
  *       estimote.printObject(state) },
@@ -1201,18 +1202,45 @@ estimote.nearables.stopMonitoring = function (success, error)
 
 /**
  * Trigger rule type.
+ * @private
  */
 estimote.triggers.RuleTypeGeneric = 1;
 
 /**
  * Trigger rule type.
+ * @private
  */
 estimote.triggers.RuleTypeNearableIdentifier = 2;
 
 /**
  * Trigger rule type.
+ * @private
  */
-estimote.triggers.RuleTypeNearableType = 4;
+estimote.triggers.RuleTypeNearableType = 3;
+
+/**
+ * Trigger rule type.
+ * @private
+ */
+estimote.triggers.RuleTypeInRangeOfNearableIdentifier = 4;
+
+/**
+ * Trigger rule type.
+ * @private
+ */
+estimote.triggers.RuleTypeInRangeOfNearableType = 5;
+
+/**
+ * Trigger rule type.
+ * @private
+ */
+estimote.triggers.RuleTypeOutsideRangeOfNearableIdentifier = 6;
+
+/**
+ * Trigger rule type.
+ * @private
+ */
+estimote.triggers.RuleTypeOutsideRangeOfNearableType = 7;
 
 /**
  * Trigger object.
@@ -1292,6 +1320,9 @@ function helper_updateRuleState(triggerIdentifier, ruleIdentifier, state)
 	);
 }
 
+// For interactive debugging.
+//window.helper_updateRuleState = helper_updateRuleState;
+
 /**
  * Create a trigger object.
  *
@@ -1346,53 +1377,113 @@ estimote.triggers.createRule = function(ruleUpdateFunction)
 };
 
 /**
- * Create a rule object for a nearable identifier.
+ * Create a rule object for a nearable.
  *
- * @param {string} nearableIdentifier A nearable identifier.
- * This specifies the specific nearable that will be monitoried
+ * @param {string|number} nearableIdentifierOrType A nearable
+ * identifier or type.
+ * This specifies the nearable that will be monitoried
  * by the rule.
  * @param {function} ruleUpdateFunction Function that is called
  * when the rule state should be updated. Specify your rule logic
  * in this function.
  * Takes a {@link TriggerRule} and a {@link Nearable} as parameters.
+ * Note that the Nearable param can be undefined.
  * To update rule state, set the rule.state field to true or false.
  *
  * @returns {TriggerRule} Rule object.
  *
  * @example Update callback function format:
- *   ruleUpdateFunction(rule, nearable)
+ *   ruleUpdateFunction(TriggerRule, Nearable)
+ *
+ * @example Rule creation for dog that moves:
+ *   var rule = estimote.triggers.createRuleForNearable(
+ *       estimote.nearables.NearableTypeDog,
+ *       estimote.triggers.rules.nearableIsMoving())
  */
-estimote.triggers.createRuleForIdentifier = function(
-	nearableIdentifier, ruleUpdateFunction)
+estimote.triggers.createRuleForNearable = function(
+	nearableIdentifierOrType, ruleUpdateFunction)
 {
 	var rule = estimote.triggers.createRule(ruleUpdateFunction);
-	rule.ruleType = estimote.triggers.RuleTypeNearableIdentifier;
-	rule.nearableIdentifier = nearableIdentifier;
+
+	if (typeof nearableIdentifierOrType == 'string')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeNearableIdentifier;
+		rule.nearableIdentifier = nearableIdentifierOrType;
+	}
+	else if (typeof nearableIdentifierOrType == 'number')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeNearableType;
+		rule.nearableType = nearableIdentifierOrType;
+	}
+	else
+	{
+		return null;
+	}
+
 	return rule;
 };
 
 /**
- * Create a rule object for a nearable type.
+ * Create in range rule for nearable.
  *
- * @param {number} nearableType Nearable type to monitor.
- * This specifies the type of nearable that will be monitoried
+ * @param {string|number} nearableIdentifierOrType A nearable
+ * identifier or type.
+ * This specifies the nearable that will be monitoried
  * by the rule.
- * @param {function} ruleUpdateFunction Function that is called
- * when the rule state should be updated. Specify your rule logic
- * in this function.
- * Takes a {@link TriggerRule} and a {@link Nearable} as parameters.
- * To update rule state, set the rule.state field to true or false.
  *
- * @returns {TriggerRule} Rule object.
- *
- * @example Update callback function format:
- *   ruleUpdateFunction(rule, nearable)
+ * @example
+ *   var rule = estimote.triggers.createRuleForInRangeOfNearable(
+ *       estimote.nearables.NearableTypeDog)
  */
-estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
+estimote.triggers.createRuleForInRangeOfNearable = function(nearableIdentifierOrType)
 {
-	var rule = estimote.triggers.createRule(ruleUpdateFunction);
-	rule.ruleType = estimote.triggers.RuleTypeNearableType;
-	rule.nearableType = nearableType;
+	var rule = estimote.triggers.createRuleForNearable(
+		nearableIdentifierOrType,
+		null);
+
+	if (typeof nearableIdentifierOrType == 'string')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeInRangeOfNearableIdentifier;
+		rule.nearableIdentifier = nearableIdentifierOrType;
+	}
+	else if (typeof nearableIdentifierOrType == 'number')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeInRangeOfNearableType;
+		rule.nearableType = nearableIdentifierOrType;
+	}
+
+	return rule;
+};
+
+/**
+ * Create out of range rule for nearable type.
+ *
+ * @param {string|number} nearableIdentifierOrType A nearable
+ * identifier or type.
+ * This specifies the nearable that will be monitoried
+ * by the rule.
+ *
+ * @example
+ *   var rule = estimote.triggers.createRuleForOutsideRangeOfNearable(
+ *       estimote.nearables.NearableTypeDog)
+ */
+estimote.triggers.createRuleForOutsideRangeOfNearable = function(nearableIdentifierOrType)
+{
+	var rule = estimote.triggers.createRuleForNearable(
+		nearableIdentifierOrType,
+		null);
+
+	if (typeof nearableIdentifierOrType == 'string')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeOutsideRangeOfNearableIdentifier;
+		rule.nearableIdentifier = nearableIdentifierOrType;
+	}
+	else if (typeof nearableIdentifierOrType == 'number')
+	{
+		rule.ruleType = estimote.triggers.RuleTypeOutsideRangeOfNearableType;
+		rule.nearableType = nearableIdentifierOrType;
+	}
+
 	return rule;
 };
 
@@ -1424,9 +1515,10 @@ estimote.triggers.createRuleForType = function(nearableType, ruleUpdateFunction)
  *       console.log('Trigger error: ' + errorMessage)
  *   }
  *
- *   // Rule function.
+ *   // Rule function. The nearable param can
+ *   // be undefined so we check for this.
  *   function nearableIsMoving(rule, nearable) {
- *       rule.state = nearable.isMoving
+ *       rule.state = nearable && nearable.isMoving
  *   }
  *
  *   // Trigger rule.
@@ -1507,7 +1599,7 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 estimote.triggers.rules.nearableIsMoving = function()
 {
 	return function(rule, nearable) {
-		rule.state = nearable.isMoving;
+		rule.state = nearable && nearable.isMoving;
 	};
 };
 
@@ -1517,7 +1609,7 @@ estimote.triggers.rules.nearableIsMoving = function()
 estimote.triggers.rules.nearableIsNotMoving = function()
 {
 	return function(rule, nearable) {
-		rule.state = !nearable.isMoving;
+		rule.state = nearable && !nearable.isMoving;
 	};
 };
 
@@ -1530,60 +1622,103 @@ estimote.triggers.rules.nearableTemperatureBetween = function(low, high)
 {
 	return function(rule, nearable) {
 		rule.state =
+			nearable &&
 			(nearable.temperature >= low) &&
 			(nearable.temperature <= high);
 	};
 };
 
 /**
- * Rule creation function.
- * @todo Not ready.
+ * Rule creation function. Monitor a temperature.
+ * @param temp Rule triggers when nearable reads below this temperature.
  */
-estimote.triggers.rules.nearableInRange = function()
+estimote.triggers.rules.nearableTemperatureLowerThan = function(temp)
 {
-	var timer = null;
+	return function(rule, nearable) {
+		rule.state =
+			nearable &&
+			(nearable.temperature < temp);
+	};
+};
 
-	return function(rule, nearable, event) {
-		if (0 != nearable.zone) {
-			rule.state = true;
-		}
-		// If there are no updates within the given
-		// time delay, the nearble is out of range.
-		timer && clearTimeout(timer);
-		timer = setTimeout(function() {
-			timer = null;
-			rule.state = false;
-			helper_updateRuleState(
-				event.triggerIdentifier,
-				event.ruleIdentifier,
-				rule.state);
-		}, 2000);
+/**
+ * Rule creation function. Monitor a temperature.
+ * @param temp Rule triggers when nearable reads above this temperature.
+ */
+estimote.triggers.rules.nearableTemperatureGreaterThan = function(temp)
+{
+	return function(rule, nearable) {
+	console.log('nearable.temperature :' + nearable.temperature)
+		rule.state =
+			nearable &&
+			(nearable.temperature > temp);
 	};
 };
 
 /**
  * Rule creation function.
- * @todo Not ready.
  */
-estimote.triggers.rules.nearableNotInRange = function()
+estimote.triggers.rules.nearableIsClose = function()
 {
-	var timer = null;
-
-	return function(rule, nearable, event) {
-		if (0 != nearable.zone) {
+	return function(rule, nearable, event)
+	{
+		if (!nearable)
+		{
+			// Nearable is undefined and out of range.
 			rule.state = false;
+			return;
 		}
-		// If there are no updates within the given
-		// time delay, the nearble is out of range.
-		timer && clearTimeout(timer);
-		timer = setTimeout(function() {
-			timer = null;
-			rule.state = true;
-			helper_updateRuleState(
-				event.triggerIdentifier,
-				event.ruleIdentifier,
-				rule.state);
-		}, 2000);
+
+		// We track values where the nerable is not close.
+		// If we get more than five of them in a row the nearble
+		// is not considered close anymore.
+
+		if (!rule.notCloseTracker) { rule.notCloseTracker = 0; }
+
+		if (nearable.zone != estimote.nearables.NearableZoneImmediate &&
+			nearable.zone != estimote.nearables.NearableZoneNear)
+		{
+			++rule.notCloseTracker;
+		}
+		else
+		{
+			rule.notCloseTracker = 0;
+		}
+
+		rule.state = rule.notCloseTracker < 5;
+	};
+};
+
+/**
+ * Rule creation function.
+ */
+estimote.triggers.rules.nearableIsInRange = function()
+{
+	return function(rule, nearable, event)
+	{
+		if (!nearable)
+		{
+			// Nearable is undefined and out of range.
+			rule.state = false;
+			return;
+		}
+
+		// We track values where the nerable is not in range.
+		// If we get more than five of them in a row the nearble
+		// is not considered in range any more.
+
+		if (!rule.notInRangeTracker) { rule.notInRangeTracker = 0; }
+
+		if (nearable.zone == estimote.nearables.NearableZoneUnknown)
+		{
+			++rule.notInRangeTracker;
+		}
+		else
+		{
+			rule.notInRangeTracker = 0;
+		}
+
+		rule.state = rule.notInRangeTracker < 5;
 	};
 };
 
