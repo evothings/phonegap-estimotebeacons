@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.7.1 (Feb 17, 2015)
+
+* Improved trigger support
+* Updated documentation
+
 ## Version 0.7.0 (Feb 11, 2015)
 
 * Update to Estimote iOS SDK 2.4.0

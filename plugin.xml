@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	id="pl.makingwaves.estimotebeacons"
-	version="0.7.0">
+	version="0.7.1">
 
 	<name>EstimoteBeacons</name>
 	<description>Cordova/PhoneGap plugin for Estimote beacons.</description>
