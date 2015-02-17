@@ -26,7 +26,7 @@ See the instructions in the Beacon Finder [README file](examples/beacon-finder/R
 
 The file [documentation.md](documentation.md) contains an overview of the plugin API.
 
-Documentation of all functions is available in the JavaScript API implementation file [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js)
+Documentation of all functions is available in the JavaScript API implementation file [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js). There is also [JSDoc generated documentation](http://evomedia.evothings.com/jsdoc/phonegap-estimotebeacons/) available.
 
 ## Develop beacon apps using live reload
 

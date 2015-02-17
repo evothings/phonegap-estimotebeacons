@@ -6,6 +6,11 @@ The JS API has been updated and now consists of two modules ,"estimote.beacons" 
 
 See file [changelog.md](changelog.md) for a list of all updates.
 
+## JavaScript API documentation
+
+In addition to this document [JSDoc generated documentation](http://evomedia.evothings.com/jsdoc/phonegap-estimotebeacons/) is available. This is based on the documentation comments in file
+[EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js)
+
 ## Basic usage
 
 Beacon ranging example:
@@ -374,7 +379,6 @@ The actual trigger monitoring callback function is called when the trigger as a 
 
 Here is a code example to give a taste of this style of coding. The trigger we monitor for tells us if our dos is moving or is still (assuming we have attached a Dog Sticker to our dog ;)
 
-
     // Called when trigger changes state.
     function onTriggerChangedState(trigger) {
         if (trigger.state)
@@ -389,7 +393,7 @@ Here is a code example to give a taste of this style of coding. The trigger we m
     }
 
     // Rule function.
-    function dogIsMovingFunction(event) {
+    function nearableIsMoving(event) {
         if (event.nearable.isMoving)
             estimote.triggers.updateRuleState(event, true)
         else
@@ -397,12 +401,12 @@ Here is a code example to give a taste of this style of coding. The trigger we m
     }
 
     // Trigger rule.
-    dogRule = estimote.triggers.createRuleForType(
+    dogIsMovingRule = estimote.triggers.createRuleForType(
         estimote.nearables.NearableTypeDog,
-        dogIsMovingFunction)
+        nearableIsMoving)
 
     // Trigger.
-    trigger = estimote.triggers.createTrigger('DogTrigger', [dogRule])
+    trigger = estimote.triggers.createTrigger('DogTrigger', [dogIsMovingRule])
 
     // Start monitoring for trigger.
     estimote.triggers.startMonitoringForTrigger(
@@ -413,8 +417,3 @@ Here is a code example to give a taste of this style of coding. The trigger we m
 And here is how to stop monitoring a trigger:
 
     estimote.triggers.stopMonitoringForTrigger(trigger)
-
-## JavaScript API documentation
-
-Documentation of the functions in the JavaScript API is available in the implementation file:
-[EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js)
