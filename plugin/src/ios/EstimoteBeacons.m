@@ -3,6 +3,8 @@
 #import "ESTNearableDefinitions.h"
 #import "ESTConfig.h"
 
+#pragma mark - Estimote Triggers Declarations
+
 /*********************************************************/
 /************ Estimote Triggers Declarations *************/
 /*********************************************************/
@@ -50,15 +52,18 @@
 
 @end
 
+#pragma mark - Estimote Beacons Interface
+
 /*********************************************************/
-/******** EstimoteBeacons Cordova Imlementation **********/
+/************** Estimote Beacons Interface ***************/
 /*********************************************************/
 
 @interface EstimoteBeacons ()
 <	ESTBeaconManagerDelegate,
 	ESTBeaconDelegate,
 	ESTNearableManagerDelegate,
-	ESTTriggerManagerDelegate >
+	ESTTriggerManagerDelegate,
+	CBCentralManagerDelegate >
 
 /**
  * The beacon manager in the Estimote API.
@@ -122,7 +127,19 @@
  */
 @property NSMutableDictionary* triggers;
 
+/**
+ * Bluetooth manager.
+ */
+@property CBCentralManager* bluetoothManager;
+
+/**
+ * Variable that tracks Bluetooth state.
+ */
+@property bool bluetoothState;
+
 @end
+
+#pragma mark - Estimote Beacons Implementation
 
 @implementation EstimoteBeacons
 
@@ -137,6 +154,7 @@
 	[self beacons_pluginInitialize];
 	[self nearables_pluginInitialize];
 	[self triggers_pluginInitialize];
+	[self bluetooth_pluginInitialize];
 
 	return self;
 }
@@ -150,6 +168,7 @@
 	[self beacons_onReset];
 	[self nearables_onReset];
 	[self triggers_onReset];
+	[self bluetooth_onReset];
 }
 
 /*********************************************************/
@@ -795,7 +814,7 @@ Example: http://192.168.0.101:4042
 }
 
 /**
- * Request authorisation for use also when app is in background.
+ * Get authorisation status.
  */
 - (void) beacons_authorizationStatus:(CDVInvokedUrlCommand*)command
 {
@@ -909,6 +928,8 @@ Example: http://192.168.0.101:4042
 		sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
 		callbackId: command.callbackId];
 }
+
+#pragma mark - Estimote Nearbles Implementation
 
 /*********************************************************/
 /************ Estimote Nearbles Implementation ***********/
@@ -1614,6 +1635,8 @@ Example: http://192.168.0.101:4042
 		callbackId: command.callbackId];
 }
 
+#pragma mark - Estimote Triggers Implementation
+
 /*********************************************************/
 /************ Estimote Triggers Implementation ***********/
 /*********************************************************/
@@ -1853,7 +1876,59 @@ Example: http://192.168.0.101:4042
 	[self sendTriggerEventToJavaScript: event];
 }
 
+#pragma mark - Bluetooth State Implementation
+
+/*********************************************************/
+/************ Bluetooth State Implementation *************/
+/*********************************************************/
+
+/**
+ * Read Bluetooth state.
+ */
+- (void) bluetooth_bluetoothState: (CDVInvokedUrlCommand*)command
+{
+	// Return value to JavaScript.
+	[self.commandDelegate
+		sendPluginResult: [CDVPluginResult
+			resultWithStatus: CDVCommandStatus_OK
+			messageAsBool: self.bluetoothState]
+		callbackId: command.callbackId];
+}
+
+- (void) bluetooth_pluginInitialize
+{
+	// Create CoreBluetooth manager.
+	self.bluetoothManager = [[CBCentralManager alloc]
+		initWithDelegate: self
+		queue: dispatch_get_main_queue()
+		options: @{CBCentralManagerOptionShowPowerAlertKey: @(NO)}];
+
+	// This sets the initial state.
+	[self centralManagerDidUpdateState: self.bluetoothManager];
+}
+
+- (void) bluetooth_onReset
+{
+	self.bluetoothManager = nil;
+}
+
+#pragma mark - Bluetooth on/off handler
+
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central
+{
+	if ([central state] == CBCentralManagerStatePoweredOn)
+	{
+		self.bluetoothState = YES;
+	}
+	else
+	{
+		self.bluetoothState = NO;
+	}
+}
+
 @end // End of implementation of class EstimoteBeacons
+
+#pragma mark - Trigger object
 
 // **************** Trigger object ****************
 

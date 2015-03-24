@@ -129,6 +129,41 @@ estimote.printObject = function(obj, printFun)
 };
 
 /*********************************************************/
+/************** Generic Bluetooth Functions **************/
+/*********************************************************/
+
+/**
+ * Ask for the Bluetooth state. Implemented on iOS.
+ * If Bluetooth is off, this call initially displays a
+ * dialog to the user in addition to returning the value
+ * false to the success callback.
+ * @todo Is there a way to make the dialog not show?
+ *
+ * @param {function} [success] Function called on success.
+ * Takes a boolean parameter. Format success(boolean).
+ * If true Bluetooth is on, if false it is off.
+ * @param {ErrorCallback} [error] Function called on error.
+ *
+ * @example
+ * estimote.bluetoothState(
+ *   function(result) {
+ *      console.log('Bluetooth state: ' + result) },
+ *   function(errorMessage) {
+ *      console.log('Error: ' + errorMessage) })
+ */
+estimote.bluetoothState = function(success, error)
+{
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'bluetooth_bluetoothState',
+		[]
+	);
+
+	return true;
+};
+
+/*********************************************************/
 /*************** Basic Callback Functions ****************/
 /*********************************************************/
 
