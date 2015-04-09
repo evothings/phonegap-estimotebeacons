@@ -129,7 +129,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		final CallbackContext callbackContext)
 		throws JSONException
 	{
-		Log.i(LOGTAG, "startRangingBeaconsInRegion whoeha");
+		Log.i(LOGTAG, "startRangingBeaconsInRegion");
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
 
@@ -140,9 +140,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		// Currently, if ranging callback already exists we
 		// do nothing, just return.
 		String key = regionHashMapKey(region);
-		//if (null != mRangingCallbackContexts.get(key)) {
-	  //		return;
-		//}
+		if (null != mRangingCallbackContexts.get(key)) {
+			return;
+		}
 
 		// Add callback to hash map.
 		mRangingCallbackContexts.put(key, callbackContext);
