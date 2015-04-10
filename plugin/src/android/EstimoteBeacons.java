@@ -134,7 +134,7 @@ public class EstimoteBeacons extends CordovaPlugin
                 Runnable rnblBtDialog = new Runnable() {
                     public void run() {
                         Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        cordova.startActivityForResult((CordovaPlugin) this, enableIntent, REQUEST_ENABLE_BT);
+                        cordova.startActivityForResult((CordovaPlugin) EstimoteBeacons.this, enableIntent, REQUEST_ENABLE_BT);
                     }
                 };
                 cordova.getActivity().runOnUiThread(rnblBtDialog);
