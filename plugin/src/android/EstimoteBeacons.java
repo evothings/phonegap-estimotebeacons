@@ -29,7 +29,9 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
 
+	private Context       mEstimoteContext;
 	private BeaconManager mBeaconManager;
+	private EstimoteSDK   mEstimoteSDK;
 
 	private boolean mIsConnected = false;
 
@@ -49,8 +51,11 @@ public class EstimoteBeacons extends CordovaPlugin
 
 		super.initialize(cordova, webView);
 
+		// store context for use elsewhere, e.g. in EstimoteSDK initialization
+		mEstimoteContext = webView.getContext();
+
 		if (mBeaconManager == null) {
-			mBeaconManager = new BeaconManager(webView.getContext());
+			mBeaconManager = new BeaconManager(mEstimoteContext);
 		}
 
 		mBeaconManager.setErrorListener(new BeaconManager.ErrorListener() {
@@ -114,6 +119,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else if ("beacons_stopMonitoringForRegion".equals(action)) {
 			stopMonitoringForRegion(args, callbackContext);
+		}
+		else if ("beacons_setupAppIDAndAppToken".equals(action)) {
+			setupAppIDAndAppToken(args, callbackContext);
 		}
 		else {
 			return false;
@@ -342,6 +350,31 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else {
 			callbackContext.error("Not connected");
+		}
+	}
+
+	/**
+	 * Authenticate with Estimote Cloud
+	 */
+	private void setupAppIDAndAppToken(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "setupAppIDAndAppToken");
+
+		if (mEstimoteSDK == null) {
+			mEstimoteSDK = new EstimoteSDK();
+
+			String appID = cordovaArgs.getString(0);
+			String appToken = cordovaArgs.getString(1);
+			mEstimoteSDK.initialize(mEstimoteContext, appID, appToken);
+
+			PluginResult r = new PluginResult(PluginResult.Status.OK);
+			callbackContext.sendPluginResult(r);
+		} else {
+			// todo consider including helpful info e.g. appID
+			callbackContext.error("already authenticated to Estimote Cloud");
 		}
 	}
 
