@@ -756,6 +756,14 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 	return true;
 };
 
+// AIDANTODO
+// todo: write connect to beacon fn, accepting either macAddress or uuid/maj/min
+// n.b. call individual writeProximityUuid/Major/Minor fns, as iOS does not
+// expose a shorthand
+// todo: write writeRegion fn, accepts uuid/maj/min obj
+// todo: write writeProximityUuid fn, accepts uuid
+// todo: write writeMajor fn, accepts major
+// todo: write writeMinor fn, accepts minor
 
 /*********************************************************/
 /*************** Estimote Nearables Module ***************/

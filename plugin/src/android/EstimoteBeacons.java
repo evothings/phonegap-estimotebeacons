@@ -345,6 +345,13 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 	}
 
+  // AIDANTODO
+  // todo: write connect to beacon fn via macaddress
+  // todo: write connect to beacon fn via uuid/maj/min
+  // todo: write writeProximityUuid fn
+  // todo: write writeMajor fn
+  // todo: write writeMinor fn
+
 	/**
 	 * Create JSON object representing beacon info.
 	 *
