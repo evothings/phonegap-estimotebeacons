@@ -765,6 +765,49 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 // todo: write writeMajor fn, accepts major
 // todo: write writeMinor fn, accepts minor
 
+/**
+ * Connect to Estimote Beacon
+ *
+ * @param {Beacon} beacon Beacon to connect to.
+ * @param {ErrorCallbackNoParams} [success] Function called when monitoring
+ * is stopped (optional).
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example Example that connects with MAC address:
+ *   estimote.beacons.connectToBeacon(FF:0F:F0:00:F0:00);
+ * @example Example that connects with BeaconRegion:
+ *   estimote.beacons.connectToBeacon({
+ *     proximityUUID: '000000FF-F00F-0FF0-F000-000FF0F00000',
+ *     major: 1,
+ *     minor: 1
+ *   });
+ */
+estimote.beacons.connectToBeacon = function (beacon, success, error, disconnect)
+{
+  var targetFunction, wrappedSuccess;
+
+  if (typeof beacon !== 'object') {
+    return false;
+  }
+
+  wrappedSuccess = function(response) {
+    if (response.didAuthenticate) {
+      success(response.beaconInfo);
+    } else if (response.didDisconnect) {
+      disconnect();
+    }
+  };
+
+  exec(wrappedSuccess,
+    error,
+    'EstimoteBeacons',
+    'beacons_connectToBeacon',
+    [beacon]
+  );
+
+	return true;
+};
+
 /*********************************************************/
 /*************** Estimote Nearables Module ***************/
 /*********************************************************/

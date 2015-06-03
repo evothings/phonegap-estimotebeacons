@@ -10,6 +10,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.estimote.sdk.*;
+import com.estimote.sdk.cloud.model.*;
+import com.estimote.sdk.connection.*;
+import com.estimote.sdk.exception.*;
 
 import org.apache.cordova.*;
 import org.json.JSONArray;
@@ -29,9 +32,10 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
 
-	private Context       mEstimoteContext;
-	private BeaconManager mBeaconManager;
-	private EstimoteSDK   mEstimoteSDK;
+	private Context          mEstimoteContext;
+	private BeaconManager    mBeaconManager;
+	private EstimoteSDK      mEstimoteSDK;
+	private BeaconConnection mConnectedBeacon;
 
 	private boolean mIsConnected = false;
 
@@ -122,6 +126,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else if ("beacons_setupAppIDAndAppToken".equals(action)) {
 			setupAppIDAndAppToken(args, callbackContext);
+		}
+		else if ("beacons_connectToBeacon".equals(action)) {
+			connectToBeacon(args, callbackContext);
 		}
 		else {
 			return false;
@@ -378,12 +385,157 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 	}
 
-  // AIDANTODO
-  // todo: write connect to beacon fn via macaddress
-  // todo: write connect to beacon fn via uuid/maj/min
-  // todo: write writeProximityUuid fn
-  // todo: write writeMajor fn
-  // todo: write writeMinor fn
+ 	/**
+	 * Connect to beacon
+	 */
+	private void connectToBeacon(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "connectToBeacon");
+
+		JSONObject json = cordovaArgs.getJSONObject(0);
+
+		// todo: pause any currently ranging / monitoring regions
+		//   many android devices share an antenna for ble & wifi, so cannot
+		//   simultaneously use both: https://github.com/Estimote/Android-SDK/issues/46#issuecomment-42805364
+
+		// define callbacks
+		BeaconConnection.ConnectionCallback connectionCallbacks =
+			new BeaconConnection.ConnectionCallback() {
+			@Override public void onAuthenticated(BeaconInfo beaconInfo) {
+				try {
+					// init response param
+					JSONObject responseParam = new JSONObject();
+					responseParam.put("didAuthenticate", true);
+
+					// init json beaconInfo
+					JSONObject jsonInfo = new JSONObject();
+					jsonInfo.put(
+						"batteryLifeExpectancyInDays",
+						beaconInfo.batteryLifeExpectancyInDays
+					);
+					jsonInfo.put("color", beaconInfo.color.toString());
+					jsonInfo.put("macAddress", beaconInfo.macAddress);
+					jsonInfo.put("major", beaconInfo.major);
+					jsonInfo.put("minor", beaconInfo.minor);
+					jsonInfo.put("name", beaconInfo.name);
+					jsonInfo.put("uuid", beaconInfo.uuid);
+
+					// init json beaconInfo.settings
+					BeaconInfoSettings settings = beaconInfo.settings;
+					JSONObject jsonSettings = new JSONObject();
+					jsonSettings.put(
+						"advertisingIntervalMillis",
+						settings.advertisingIntervalMillis
+					);
+					jsonSettings.put("batteryLevel", settings.batteryLevel);
+					jsonSettings.put(
+						"broadcastingPower",
+						settings.broadcastingPower
+					);
+					jsonSettings.put("firmware", settings.firmware);
+					jsonSettings.put("hardware", settings.hardware);
+
+					// finish up response param
+					jsonInfo.put("settings", jsonSettings);
+					responseParam.put("beaconInfo", jsonInfo);
+
+					// pass back to web
+					// todo: retain callbackContext (for disconnect)
+					PluginResult r = new PluginResult(
+						PluginResult.Status.OK,
+						responseParam
+					);
+					callbackContext.sendPluginResult(r);
+				} catch (JSONException e) {
+					String msg;
+					msg = "connection succeeded, could not marshall object: ";
+					msg = msg.concat(e.toString());
+
+					callbackContext.error(msg);
+				}
+			}
+
+			@Override public void onAuthenticationError(
+				EstimoteDeviceException exception)
+			{
+				callbackContext.error(exception.toString());
+			}
+
+			@Override public void onDisconnected() {
+				try {
+					// todo: resume paused ranging/monitoring
+
+					// init response param
+					JSONObject responseParam = new JSONObject();
+					responseParam.put("didDisconnect", true);
+
+					// pass back to web
+					PluginResult r = new PluginResult(
+						PluginResult.Status.OK,
+						responseParam
+					);
+					callbackContext.sendPluginResult(r);
+				} catch (JSONException e) {
+					String msg;
+					msg = "disconnected, could not marshall object: ";
+					msg = msg.concat(e.toString());
+
+					callbackContext.error(msg);
+				}
+			}
+		};
+
+		String macAddress = json.optString("macAddress", "");
+		String proximityUUID = json.optString("proximityUUID", "");
+		int major = json.optInt("major", -1);
+		int minor = json.optInt("minor", -1);
+
+		// try with macAddress first
+		if (!macAddress.equals("")) {
+			mConnectedBeacon = new BeaconConnection(
+				mEstimoteContext,
+				macAddress,
+				connectionCallbacks
+			);
+
+		// else try uuid + major + minor
+		} else if (!proximityUUID.equals("") && major > -1 && minor > -1) {
+			Beacon beacon = new Beacon(
+				proximityUUID,
+				"",
+				"",
+				major,
+				minor,
+				0,
+				0
+			);
+
+			mConnectedBeacon = new BeaconConnection(
+				mEstimoteContext,
+				beacon,
+				connectionCallbacks
+			);
+
+		// else fail
+		} else {
+			callbackContext.error("could not connect to beacon");
+			return;
+		}
+
+		mConnectedBeacon.authenticate();
+		return;
+	}
+
+	// AIDANTODO
+	// todo: write pauseRangingAndMonitoring
+	// todo: write resumeRangingAndMonitoring
+	// todo: write disconnectConnectedBeacon
+	// todo: write writeProximityUuid fn
+	// todo: write writeMajor fn
+	// todo: write writeMinor fn
 
 	/**
 	 * Create JSON object representing beacon info.
