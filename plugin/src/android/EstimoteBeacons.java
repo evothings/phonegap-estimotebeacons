@@ -475,7 +475,7 @@ public class EstimoteBeacons extends CordovaPlugin
 
 		mConnectedBeacon = new BeaconConnection(
 			cordova.getActivity(),
-			beacon.getMacAddress().concat("foo"),
+			beacon,
 			new PluginConnectingListener(callbackContext)
 		);
 
