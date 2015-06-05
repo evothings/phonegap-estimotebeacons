@@ -20,6 +20,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,7 +34,6 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
 
-	private Context          mEstimoteContext;
 	private BeaconManager    mBeaconManager;
 	private EstimoteSDK      mEstimoteSDK;
 	private BeaconConnection mConnectedBeacon;
@@ -45,6 +46,8 @@ public class EstimoteBeacons extends CordovaPlugin
 	private HashMap<String, CallbackContext> mMonitoringCallbackContexts =
 		new HashMap<String, CallbackContext>();
 
+	// todo: consider using pluginInitialize instead, per Cordova recommendation
+	//   https://github.com/apache/cordova-android/blob/master/framework/src/org/apache/cordova/CordovaPlugin.java#L60-L61
 	/**
 	 * Plugin initialiser.
 	 */
@@ -54,12 +57,8 @@ public class EstimoteBeacons extends CordovaPlugin
 		Log.i(LOGTAG, "initialize");
 
 		super.initialize(cordova, webView);
-
-		// store context for use elsewhere, e.g. in EstimoteSDK initialization
-		mEstimoteContext = webView.getContext();
-
 		if (mBeaconManager == null) {
-			mBeaconManager = new BeaconManager(mEstimoteContext);
+			mBeaconManager = new BeaconManager(cordova.getActivity());
 		}
 
 		mBeaconManager.setErrorListener(new BeaconManager.ErrorListener() {
@@ -171,6 +170,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else {
 			Log.i(LOGTAG, "connect");
+
+			// todo: consider whether this holds up to several startRanging(...)
+			//   calls before onServiceReady() fires
 			mBeaconManager.connect(new BeaconManager.ServiceReadyCallback() {
 				@Override
 				public void onServiceReady() {
@@ -256,6 +258,8 @@ public class EstimoteBeacons extends CordovaPlugin
 		final CallbackContext callbackContext)
 		throws JSONException
 	{
+		// todo: throw error if paused
+
 		Log.i(LOGTAG, "startMonitoringForRegion");
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
@@ -375,7 +379,7 @@ public class EstimoteBeacons extends CordovaPlugin
 
 			String appID = cordovaArgs.getString(0);
 			String appToken = cordovaArgs.getString(1);
-			mEstimoteSDK.initialize(mEstimoteContext, appID, appToken);
+			mEstimoteSDK.initialize(cordova.getActivity(), appID, appToken);
 
 			PluginResult r = new PluginResult(PluginResult.Status.OK);
 			callbackContext.sendPluginResult(r);
@@ -723,7 +727,14 @@ public class EstimoteBeacons extends CordovaPlugin
 				return;
 			}
 
-			mConnectingCallbackContext.error(e.toString());
+			// pass back to js
+			mConnectingCallbackContext.error(e.getMessage());
+
+			// print stacktrace to android logs
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			Log.i(LOGTAG, sw.toString());
 		}
 
 		@Override public void onDisconnected() {
