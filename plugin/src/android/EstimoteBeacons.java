@@ -41,6 +41,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	private EstimoteSDK       mEstimoteSDK;
 
 	private ArrayList<Beacon> mRangedBeacons;
+	private BeaconConnection  mConnectedBeacon;
 
 	private boolean mIsConnected = false;
 	private boolean mIsPaused    = false;
@@ -398,7 +399,60 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 	}
 
- 	/**
+	/**
+	 * Find beacon in rangedBeacons, with MAC address
+	 */
+	private Beacon findBeacon(String macAddress) {
+		Log.i(LOGTAG, "findBeacon(String)");
+		for (Iterator<Beacon> i = mRangedBeacons.iterator(); i.hasNext();) {
+			Beacon beacon = i.next();
+			if (beacon.getMacAddress().equals(macAddress)) {
+				return beacon;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Find beacon in rangedBeacons, with region params
+	 */
+	private Beacon findBeacon(String proximityUUID, int major, int minor) {
+		Log.i(LOGTAG, "findBeacon(String, int, int)");
+		for (Iterator<Beacon> i = mRangedBeacons.iterator(); i.hasNext();) {
+			Beacon beacon = i.next();
+			if (beacon.getProximityUUID().equals(proximityUUID) &&
+					beacon.getMajor() == major &&
+					beacon.getMinor() == minor) {
+				return beacon;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Find beacon in rangedBeacons, from JSON
+	 */
+	private Beacon findBeacon(JSONObject json) throws JSONException {
+		String macAddress = json.optString("macAddress", "");
+
+		if (!macAddress.equals("")) {
+			return findBeacon(macAddress);
+		} else {
+			String proximityUUID = json.optString("proximityUUID", "");
+			int major = json.optInt("major", -1);
+			int minor = json.optInt("minor", -1);
+
+			if (!proximityUUID.equals("") && major > -1 && minor > -1) {
+				return findBeacon(proximityUUID, major, minor);
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Connect to beacon
 	 */
 	private void connectToBeacon(
@@ -410,48 +464,26 @@ public class EstimoteBeacons extends CordovaPlugin
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
 
-		// todo: pause any currently ranging / monitoring regions
-		//   many android devices share an antenna for ble & wifi, so cannot
-		//   simultaneously use both: https://github.com/Estimote/Android-SDK/issues/46#issuecomment-42805364
+		// todo: is this needed?
+		//pauseRangingAndMonitoring();
 
-		String macAddress = json.optString("macAddress", "");
-		String proximityUUID = json.optString("proximityUUID", "");
-		int major = json.optInt("major", -1);
-		int minor = json.optInt("minor", -1);
-
-		// try with macAddress first
-		if (!macAddress.equals("")) {
-			mConnectedBeacon = new BeaconConnection(
-				mEstimoteContext,
-				macAddress,
-				new PluginConnectingListener(callbackContext)
-			);
-
-		// else try uuid + major + minor
-		} else if (!proximityUUID.equals("") && major > -1 && minor > -1) {
-			Beacon beacon = new Beacon(
-				proximityUUID,
-				"",
-				"",
-				major,
-				minor,
-				0,
-				0
-			);
-
-			mConnectedBeacon = new BeaconConnection(
-				mEstimoteContext,
-				beacon,
-				new PluginConnectingListener(callbackContext)
-			);
-
-		// else fail
-		} else {
-			callbackContext.error("could not connect to beacon");
+		Beacon beacon = findBeacon(json);
+		if (beacon == null) {
+			callbackContext.error("could not find beacon");
 			return;
 		}
 
+		mConnectedBeacon = new BeaconConnection(
+			cordova.getActivity(),
+			beacon.getMacAddress().concat("foo"),
+			new PluginConnectingListener(callbackContext)
+		);
+
 		mConnectedBeacon.authenticate();
+
+		return;
+	}
+
 	// todo: consider exposing pause && resume methods to plugin via cordova
 	// todo: confirm resume works properly:
 	//   pause pauses, but does it cache correctly?
