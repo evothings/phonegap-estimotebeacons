@@ -22,8 +22,11 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Plugin class for the Estimote Beacon plugin.
@@ -34,11 +37,13 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
 
-	private BeaconManager    mBeaconManager;
-	private EstimoteSDK      mEstimoteSDK;
-	private BeaconConnection mConnectedBeacon;
+	private BeaconManager     mBeaconManager;
+	private EstimoteSDK       mEstimoteSDK;
+
+	private ArrayList<Beacon> mRangedBeacons;
 
 	private boolean mIsConnected = false;
+	private boolean mIsPaused    = false;
 
 	// Maps that keep track of Cordova callbacks.
 	private HashMap<String, CallbackContext> mRangingCallbackContexts =
@@ -67,6 +72,8 @@ public class EstimoteBeacons extends CordovaPlugin
 				Log.e(LOGTAG, "BeaconManager error: " + errorId);
 			}
 		});
+
+		mRangedBeacons = new ArrayList<Beacon>();
 	}
 
 	/**
@@ -144,6 +151,8 @@ public class EstimoteBeacons extends CordovaPlugin
 		throws JSONException
 	{
 		Log.i(LOGTAG, "startRangingBeaconsInRegion");
+
+		// todo: callback.error if paused
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
 
@@ -443,12 +452,106 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 
 		mConnectedBeacon.authenticate();
+	// todo: consider exposing pause && resume methods to plugin via cordova
+	// todo: confirm resume works properly:
+	//   pause pauses, but does it cache correctly?
+	/**
+	 * Pause any active ranging and monitoring regions
+	 *
+	 * Several android devices share an antenna for ble & wifi, so cannot
+	 * simultaneously use both: https://github.com/Estimote/Android-SDK/issues/46#issuecomment-42805364
+	 */
+	private void pauseRangingAndMonitoring() {
+		Log.i(LOGTAG, "pauseRangingAndMonitoring");
+
+		// return if already paused
+		if (mIsPaused) {
+			return;
+		}
+
+		mIsPaused = true;
+
+		// pause ranging
+		Set<String> rangingKeys = mRangingCallbackContexts.keySet();
+		for (Iterator<String> i = rangingKeys.iterator(); i.hasNext();) {
+			String key = i.next();
+			Region region = createRegion(key);
+
+			try {
+				mBeaconManager.stopRanging(region);
+			} catch(android.os.RemoteException e) {
+				CallbackContext callbackContext =
+					mRangingCallbackContexts.get(key);
+
+				String msg = "could not stop ranging for region " + key + ": ";
+				msg = msg.concat(e.toString());
+				callbackContext.error(msg);
+			}
+		}
+
+		// pause monitoring
+		Set<String> monitoringKeys = mMonitoringCallbackContexts.keySet();
+		for (Iterator<String> i = monitoringKeys.iterator(); i.hasNext();) {
+			String key = i.next();
+			Region region = createRegion(key);
+
+			try {
+				mBeaconManager.stopMonitoring(region);
+			} catch(android.os.RemoteException e) {
+				CallbackContext callbackContext =
+					mMonitoringCallbackContexts.get(key);
+
+				String msg = "could not stop monitoring for region " + key + ": ";
+				msg = msg.concat(e.toString());
+				callbackContext.error(msg);
+			}
+		}
+
+		// todo: is this necessary?
+		//disconnectBeaconManager();
+
+		return;
+	}
+
+	/**
+	 * Resume paused ranging and monitoring regions
+	 */
+	private void resumeRangingAndMonitoring() {
+		Log.i(LOGTAG, "resumeRangingAndMonitoring");
+
+		if (!mIsPaused) {
+			return;
+		}
+
+		mIsPaused = false;
+
+		// todo: ensure callbackContext is retained
+		// resume ranging
+		Set<String> rangingKeys = mRangingCallbackContexts.keySet();
+		for (Iterator<String> i = rangingKeys.iterator(); i.hasNext();) {
+			String key = i.next();
+			Region region = createRegion(key);
+			CallbackContext callbackContext = mRangingCallbackContexts.get(key);
+
+			startRanging(region, callbackContext);
+		}
+
+		// resume monitoring
+		Set<String> monitoringKeys = mMonitoringCallbackContexts.keySet();
+		for (Iterator<String> i = monitoringKeys.iterator(); i.hasNext();) {
+			String key = i.next();
+			Region region = createRegion(key);
+
+			CallbackContext callbackContext =
+				mMonitoringCallbackContexts.get(key);
+
+			startMonitoring(region, callbackContext);
+		}
+
 		return;
 	}
 
 	// AIDANTODO
-	// todo: write pauseRangingAndMonitoring
-	// todo: write resumeRangingAndMonitoring
 	// todo: write disconnectConnectedBeacon
 	// todo: write writeProximityUuid fn
 	// todo: write writeMajor fn
@@ -541,7 +644,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		String uuid = region.getProximityUUID();
 		int major = null != region.getMajor() ? region.getMajor().intValue() : 0;
 		int minor = null != region.getMinor() ? region.getMinor().intValue() : 0;
-		return uuid + "-" + major + "-" + minor;
+
+		// use % for easier decomposition
+		return uuid + "%" + major + "%" + minor;
 	}
 
 	/**
@@ -554,6 +659,24 @@ public class EstimoteBeacons extends CordovaPlugin
 			optUInt16Null(json, "major"),
 			optUInt16Null(json, "minor"));
 	}
+
+	/**
+	 * Create a Region object from HashMap key.
+	 */
+	private Region createRegion(String key) {
+		// todo: consider how not to clobber identifier, if important
+
+		String[] regionValues = key.split("%");
+		int major = Integer.parseInt(regionValues[1]);
+		int minor = Integer.parseInt(regionValues[2]);
+
+		return new Region(
+			ESTIMOTE_SAMPLE_REGION_ID,
+			regionValues[0],
+			major,
+			minor);
+	}
+
 
 	/**
 	 * Returns the value mapped by name if it exists and is a positive integer
@@ -581,6 +704,10 @@ public class EstimoteBeacons extends CordovaPlugin
 			Log.i(LOGTAG, "onBeaconsDiscovered");
 
 			try {
+				// store in plugin
+				mRangedBeacons.clear();
+				mRangedBeacons.addAll(beacons);
+
 				// Find region callback.
 				String key = regionHashMapKey(region);
 				CallbackContext rangingCallback = mRangingCallbackContexts.get(key);
@@ -665,6 +792,8 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 
 		@Override public void onAuthenticated(BeaconInfo beaconInfo) {
+			Log.i(LOGTAG, "i can haz auth!");
+
 			if (mConnectingCallbackContext == null) {
 				return;
 			}
@@ -723,6 +852,8 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 
 		@Override public void onAuthenticationError(EstimoteDeviceException e) {
+			resumeRangingAndMonitoring();
+
 			if (mConnectingCallbackContext == null) {
 				return;
 			}
