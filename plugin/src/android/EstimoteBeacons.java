@@ -43,8 +43,9 @@ public class EstimoteBeacons extends CordovaPlugin
 	private ArrayList<Beacon> mRangedBeacons;
 	private BeaconConnection  mConnectedBeacon;
 
-	private boolean mIsConnected = false;
-	private boolean mIsPaused    = false;
+	private boolean           mIsConnected = false;
+    private CallbackContext   mBeaconConnectionCallback;
+    private CallbackContext   mBeaconDisconnectionCallback;
 
 	// Maps that keep track of Cordova callbacks.
 	private HashMap<String, CallbackContext> mRangingCallbackContexts =
@@ -96,6 +97,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	 */
 	public void onDestroy() {
 		Log.i(LOGTAG, "onDestroy");
+		disconnectConnectedBeacon();
 		disconnectBeaconManager();
 	}
 
@@ -137,6 +139,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		else if ("beacons_connectToBeacon".equals(action)) {
 			connectToBeacon(args, callbackContext);
 		}
+		else if ("beacons_disconnectConnectedBeacon".equals(action)) {
+			disconnectConnectedBeacon(args, callbackContext);
+		}
 		else {
 			return false;
 		}
@@ -152,8 +157,6 @@ public class EstimoteBeacons extends CordovaPlugin
 		throws JSONException
 	{
 		Log.i(LOGTAG, "startRangingBeaconsInRegion");
-
-		// todo: callback.error if paused
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
 
@@ -268,8 +271,6 @@ public class EstimoteBeacons extends CordovaPlugin
 		final CallbackContext callbackContext)
 		throws JSONException
 	{
-		// todo: throw error if paused
-
 		Log.i(LOGTAG, "startMonitoringForRegion");
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
@@ -452,6 +453,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		return null;
 	}
 
+	// todo: consider mac address only version?
 	/**
 	 * Connect to beacon
 	 */
@@ -464,19 +466,23 @@ public class EstimoteBeacons extends CordovaPlugin
 
 		JSONObject json = cordovaArgs.getJSONObject(0);
 
-		// todo: is this needed?
-		//pauseRangingAndMonitoring();
-
 		Beacon beacon = findBeacon(json);
 		if (beacon == null) {
 			callbackContext.error("could not find beacon");
 			return;
 		}
 
+		// beacons are jealous creatures and don't like competition
+		if (mConnectedBeacon != null &&
+			!mConnectedBeacon.getMacAddress().equals(beacon.getMacAddress())) {
+			disconnectConnectedBeacon();
+		}
+
+        mBeaconConnectionCallback = callbackContext;
 		mConnectedBeacon = new BeaconConnection(
 			cordova.getActivity(),
 			beacon,
-			new PluginConnectingListener(callbackContext)
+			new PluginConnectingListener()
 		);
 
 		mConnectedBeacon.authenticate();
@@ -484,107 +490,35 @@ public class EstimoteBeacons extends CordovaPlugin
 		return;
 	}
 
-	// todo: consider exposing pause && resume methods to plugin via cordova
-	// todo: confirm resume works properly:
-	//   pause pauses, but does it cache correctly?
 	/**
-	 * Pause any active ranging and monitoring regions
-	 *
-	 * Several android devices share an antenna for ble & wifi, so cannot
-	 * simultaneously use both: https://github.com/Estimote/Android-SDK/issues/46#issuecomment-42805364
+	 * Disconnect connected beacon
 	 */
-	private void pauseRangingAndMonitoring() {
-		Log.i(LOGTAG, "pauseRangingAndMonitoring");
+	private void disconnectConnectedBeacon() {
+		Log.i(LOGTAG, "disconnectConnectedBeacon");
 
-		// return if already paused
-		if (mIsPaused) {
-			return;
-		}
-
-		mIsPaused = true;
-
-		// pause ranging
-		Set<String> rangingKeys = mRangingCallbackContexts.keySet();
-		for (Iterator<String> i = rangingKeys.iterator(); i.hasNext();) {
-			String key = i.next();
-			Region region = createRegion(key);
-
-			try {
-				mBeaconManager.stopRanging(region);
-			} catch(android.os.RemoteException e) {
-				CallbackContext callbackContext =
-					mRangingCallbackContexts.get(key);
-
-				String msg = "could not stop ranging for region " + key + ": ";
-				msg = msg.concat(e.toString());
-				callbackContext.error(msg);
-			}
-		}
-
-		// pause monitoring
-		Set<String> monitoringKeys = mMonitoringCallbackContexts.keySet();
-		for (Iterator<String> i = monitoringKeys.iterator(); i.hasNext();) {
-			String key = i.next();
-			Region region = createRegion(key);
-
-			try {
-				mBeaconManager.stopMonitoring(region);
-			} catch(android.os.RemoteException e) {
-				CallbackContext callbackContext =
-					mMonitoringCallbackContexts.get(key);
-
-				String msg = "could not stop monitoring for region " + key + ": ";
-				msg = msg.concat(e.toString());
-				callbackContext.error(msg);
-			}
-		}
-
-		// todo: is this necessary?
-		//disconnectBeaconManager();
-
-		return;
+		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
+            mConnectedBeacon.close();
+            mConnectedBeacon = null;
+        }
 	}
 
 	/**
-	 * Resume paused ranging and monitoring regions
+	 * Disconnect connected beacon, c/o Cordova
 	 */
-	private void resumeRangingAndMonitoring() {
-		Log.i(LOGTAG, "resumeRangingAndMonitoring");
+	private void disconnectConnectedBeacon(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "disconnectConnectedBeacon (cordova)");
 
-		if (!mIsPaused) {
-			return;
-		}
-
-		mIsPaused = false;
-
-		// todo: ensure callbackContext is retained
-		// resume ranging
-		Set<String> rangingKeys = mRangingCallbackContexts.keySet();
-		for (Iterator<String> i = rangingKeys.iterator(); i.hasNext();) {
-			String key = i.next();
-			Region region = createRegion(key);
-			CallbackContext callbackContext = mRangingCallbackContexts.get(key);
-
-			startRanging(region, callbackContext);
-		}
-
-		// resume monitoring
-		Set<String> monitoringKeys = mMonitoringCallbackContexts.keySet();
-		for (Iterator<String> i = monitoringKeys.iterator(); i.hasNext();) {
-			String key = i.next();
-			Region region = createRegion(key);
-
-			CallbackContext callbackContext =
-				mMonitoringCallbackContexts.get(key);
-
-			startMonitoring(region, callbackContext);
-		}
-
-		return;
+        mBeaconDisconnectionCallback = callbackContext;
+		disconnectConnectedBeacon();
 	}
+
+
 
 	// AIDANTODO
-	// todo: write disconnectConnectedBeacon
 	// todo: write writeProximityUuid fn
 	// todo: write writeMajor fn
 	// todo: write writeMinor fn
@@ -814,117 +748,100 @@ public class EstimoteBeacons extends CordovaPlugin
 	/**
 	 * Listener for beacon connection events
 	 */
-	class PluginConnectingListener
-		implements BeaconConnection.ConnectionCallback
-	{
-		CallbackContext mConnectingCallbackContext = null;
+	class PluginConnectingListener implements BeaconConnection.ConnectionCallback
+    {
+        @Override public void onAuthenticated(BeaconInfo beaconInfo) {
+            CallbackContext callback = mBeaconConnectionCallback;
 
-		public PluginConnectingListener(CallbackContext callbackContext) {
-			mConnectingCallbackContext = callbackContext;
-		}
+            if (callback == null) {
+                return;
+            }
 
-		@Override public void onAuthenticated(BeaconInfo beaconInfo) {
-			Log.i(LOGTAG, "i can haz auth!");
+            try {
+                JSONObject json = new JSONObject();
 
-			if (mConnectingCallbackContext == null) {
-				return;
-			}
+                // add beaconInfo
+                json.put(
+                        "batteryLifeExpectancyInDays",
+                        beaconInfo.batteryLifeExpectancyInDays
+                        );
+                json.put("color", beaconInfo.color.toString());
+                json.put("macAddress", beaconInfo.macAddress);
+                json.put("major", beaconInfo.major);
+                json.put("minor", beaconInfo.minor);
+                json.put("name", beaconInfo.name);
+                json.put("uuid", beaconInfo.uuid);
 
-			try {
-				// init response param
-				JSONObject responseParam = new JSONObject();
-				responseParam.put("didAuthenticate", true);
+                Log.i(LOGTAG, "2");
+                // add beaconInfo.settings
+                BeaconInfoSettings settings = beaconInfo.settings;
+                JSONObject jsonSettings = new JSONObject();
+                jsonSettings.put(
+                        "advertisingIntervalMillis",
+                        settings.advertisingIntervalMillis
+                        );
+                jsonSettings.put("batteryLevel", settings.batteryLevel);
+                jsonSettings.put(
+                        "broadcastingPower",
+                        settings.broadcastingPower
+                        );
+                jsonSettings.put("firmware", settings.firmware);
+                jsonSettings.put("hardware", settings.hardware);
 
-				// init json beaconInfo
-				JSONObject jsonInfo = new JSONObject();
-				jsonInfo.put(
-					"batteryLifeExpectancyInDays",
-					beaconInfo.batteryLifeExpectancyInDays
-				);
-				jsonInfo.put("color", beaconInfo.color.toString());
-				jsonInfo.put("macAddress", beaconInfo.macAddress);
-				jsonInfo.put("major", beaconInfo.major);
-				jsonInfo.put("minor", beaconInfo.minor);
-				jsonInfo.put("name", beaconInfo.name);
-				jsonInfo.put("uuid", beaconInfo.uuid);
+                Log.i(LOGTAG, "3");
+                // finish up response param
+                json.put("settings", jsonSettings);
 
-				// init json beaconInfo.settings
-				BeaconInfoSettings settings = beaconInfo.settings;
-				JSONObject jsonSettings = new JSONObject();
-				jsonSettings.put(
-					"advertisingIntervalMillis",
-					settings.advertisingIntervalMillis
-				);
-				jsonSettings.put("batteryLevel", settings.batteryLevel);
-				jsonSettings.put(
-					"broadcastingPower",
-					settings.broadcastingPower
-				);
-				jsonSettings.put("firmware", settings.firmware);
-				jsonSettings.put("hardware", settings.hardware);
+                Log.i(LOGTAG, "4");
+                Log.i(LOGTAG, json.toString());
+                // pass back to web
+                PluginResult r = new PluginResult(PluginResult.Status.OK, json);
+                callback.sendPluginResult(r);
+            } catch (JSONException e) {
+                Log.i(LOGTAG, "inError");
+                String msg;
+                msg = "connection succeeded, could not marshall object: ";
+                msg = msg.concat(e.getMessage());
 
-				// finish up response param
-				jsonInfo.put("settings", jsonSettings);
-				responseParam.put("beaconInfo", jsonInfo);
+                callback.error(msg);
+            }
 
-				// pass back to web
-				PluginResult r = new PluginResult(
-					PluginResult.Status.OK,
-					responseParam
-				);
-				r.setKeepCallback(true);
-				mConnectingCallbackContext.sendPluginResult(r);
-			} catch (JSONException e) {
-				String msg;
-				msg = "connection succeeded, could not marshall object: ";
-				msg = msg.concat(e.toString());
+            // cleanup
+            mBeaconConnectionCallback = null;
+        }
 
-				mConnectingCallbackContext.error(msg);
-			}
-		}
+        @Override public void onAuthenticationError(EstimoteDeviceException e) {
+            CallbackContext callback = mBeaconConnectionCallback;
 
-		@Override public void onAuthenticationError(EstimoteDeviceException e) {
-			resumeRangingAndMonitoring();
+            if (callback == null) {
+                return;
+            }
 
-			if (mConnectingCallbackContext == null) {
-				return;
-			}
+            // pass back to js
+            callback.error(e.getMessage());
 
-			// pass back to js
-			mConnectingCallbackContext.error(e.getMessage());
+            // print stacktrace to android logs
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            Log.e(LOGTAG, sw.toString());
 
-			// print stacktrace to android logs
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			Log.i(LOGTAG, sw.toString());
-		}
+            // cleanup
+            mBeaconConnectionCallback = null;
+        }
 
-		@Override public void onDisconnected() {
-			if (mConnectingCallbackContext == null) {
-				return;
-			}
+        @Override public void onDisconnected() {
+            CallbackContext callback = mBeaconDisconnectionCallback;
 
-			try {
-				resumeRangingAndMonitoring();
+            if (callback == null) {
+                return;
+            }
 
-				// init response param
-				JSONObject responseParam = new JSONObject();
-				responseParam.put("didDisconnect", true);
+            PluginResult r = new PluginResult(PluginResult.Status.OK);
+            callback.sendPluginResult(r);
 
-				// pass back to web
-				PluginResult r = new PluginResult(
-					PluginResult.Status.OK,
-					responseParam
-				);
-				mConnectingCallbackContext.sendPluginResult(r);
-			} catch (JSONException e) {
-				String msg;
-				msg = "disconnected, could not marshall object: ";
-				msg = msg.concat(e.toString());
-
-				mConnectingCallbackContext.error(msg);
-			}
-		}
-	}
+            // cleanup
+            mBeaconDisconnectionCallback = null;
+        }
+    }
 }

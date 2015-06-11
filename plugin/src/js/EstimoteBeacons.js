@@ -757,7 +757,6 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 };
 
 // AIDANTODO
-// todo: write connect to beacon fn, accepting either macAddress or uuid/maj/min
 // n.b. call individual writeProximityUuid/Major/Minor fns, as iOS does not
 // expose a shorthand
 // todo: write writeRegion fn, accepts uuid/maj/min obj
@@ -782,23 +781,13 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
  *     minor: 1
  *   });
  */
-estimote.beacons.connectToBeacon = function (beacon, success, error, disconnect)
+estimote.beacons.connectToBeacon = function (beacon, success, error)
 {
-  var targetFunction, wrappedSuccess;
-
   if (typeof beacon !== 'object') {
     return false;
   }
 
-  wrappedSuccess = function(response) {
-    if (response.didAuthenticate) {
-      success(response.beaconInfo);
-    } else if (response.didDisconnect) {
-      disconnect();
-    }
-  };
-
-  exec(wrappedSuccess,
+  exec(success,
     error,
     'EstimoteBeacons',
     'beacons_connectToBeacon',
@@ -806,6 +795,28 @@ estimote.beacons.connectToBeacon = function (beacon, success, error, disconnect)
   );
 
 	return true;
+};
+
+/**
+ * Disconnect from connected Estimote Beacon
+ *
+ * @param {ErrorCallbackNoParams} [success] Function called when beacon
+ * disconnection request has been init'ed.
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example Example that disconnects from beacon:
+ *   estimote.beacons.disconnectConnectedBeacon();
+ */
+estimote.beacons.disconnectConnectedBeacon = function (success, error)
+{
+  exec(success,
+    error,
+    'EstimoteBeacons',
+    'beacons_disconnectConnectedBeacon',
+    []
+  );
+
+  return true;
 };
 
 /*********************************************************/
