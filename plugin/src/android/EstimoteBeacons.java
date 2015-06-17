@@ -142,7 +142,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else if ("beacons_disconnectConnectedBeacon".equals(action)) {
 			disconnectConnectedBeacon(args, callbackContext);
-		} //todo
+		}
 		else if ("beacons_writeConnectedProximityUUID".equals(action)) {
 			writeConnectedProximityUUID(args, callbackContext);
 		}
@@ -739,42 +739,59 @@ public class EstimoteBeacons extends CordovaPlugin
 		return jsonArray;
 	}
 
+    private String regionHashMapKey(String uuid, Integer major, Integer minor) {
+        if (uuid == null) {
+            uuid = "0";
+        }
+
+        if (major == null) {
+            major = 0;
+        }
+
+        if (minor == null) {
+            minor = 0;
+        }
+
+		// use % for easier decomposition
+        return uuid + "%" + major + "%" + minor;
+    }
+
 	private String regionHashMapKey(Region region)
 	{
 		String uuid = region.getProximityUUID();
-		int major = null != region.getMajor() ? region.getMajor().intValue() : 0;
-		int minor = null != region.getMinor() ? region.getMinor().intValue() : 0;
+		Integer major = region.getMajor();
+		Integer minor = region.getMinor();
 
-		// use % for easier decomposition
-		return uuid + "%" + major + "%" + minor;
+		return regionHashMapKey(uuid, major, minor);
 	}
 
 	/**
 	 * Create a Region object from Cordova arguments.
 	 */
 	private Region createRegion(JSONObject json) {
-		return new Region(
-			json.optString("identifier", ESTIMOTE_SAMPLE_REGION_ID),
-			json.optString("uuid", ESTIMOTE_PROXIMITY_UUID),
-			optUInt16Null(json, "major"),
-			optUInt16Null(json, "minor"));
+        // null ranges all regions, if unset
+        String uuid = json.optString("uuid", null);
+        Integer major = optUInt16Null(json, "major");
+        Integer minor = optUInt16Null(json, "minor");
+
+        String identifier = json.optString(
+            "identifier",
+            regionHashMapKey(uuid, major, minor)
+        );
+
+		return new Region(identifier, uuid, major, minor);
 	}
 
 	/**
 	 * Create a Region object from HashMap key.
 	 */
 	private Region createRegion(String key) {
-		// todo: consider how not to clobber identifier, if important
-
 		String[] regionValues = key.split("%");
+        String uuid = regionValues[0];
 		int major = Integer.parseInt(regionValues[1]);
 		int minor = Integer.parseInt(regionValues[2]);
 
-		return new Region(
-			ESTIMOTE_SAMPLE_REGION_ID,
-			regionValues[0],
-			major,
-			minor);
+		return new Region(key, uuid, major, minor);
 	}
 
 
