@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Plugin class for the Estimote Beacon plugin.
@@ -41,7 +42,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	private EstimoteSDK       mEstimoteSDK;
 
 	private ArrayList<Beacon> mRangedBeacons;
-	private BeaconConnection  mConnectedBeacon;
+	private BeaconConnected   mConnectedBeacon;
 
 	private boolean           mIsConnected = false;
     private CallbackContext   mBeaconConnectionCallback;
@@ -141,6 +142,15 @@ public class EstimoteBeacons extends CordovaPlugin
 		}
 		else if ("beacons_disconnectConnectedBeacon".equals(action)) {
 			disconnectConnectedBeacon(args, callbackContext);
+		} //todo
+		else if ("beacons_writeConnectedProximityUUID".equals(action)) {
+			writeConnectedProximityUUID(args, callbackContext);
+		}
+		else if ("beacons_writeConnectedMajor".equals(action)) {
+			writeConnectedMajor(args, callbackContext);
+		}
+		else if ("beacons_writeConnectedMinor".equals(action)) {
+			writeConnectedMinor(args, callbackContext);
 		}
 		else {
 			return false;
@@ -478,8 +488,8 @@ public class EstimoteBeacons extends CordovaPlugin
 			disconnectConnectedBeacon();
 		}
 
-        mBeaconConnectionCallback = callbackContext;
-		mConnectedBeacon = new BeaconConnection(
+		mBeaconConnectionCallback = callbackContext;
+		mConnectedBeacon = new BeaconConnected(
 			cordova.getActivity(),
 			beacon,
 			new PluginConnectingListener()
@@ -497,9 +507,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		Log.i(LOGTAG, "disconnectConnectedBeacon");
 
 		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
-            mConnectedBeacon.close();
-            mConnectedBeacon = null;
-        }
+			mConnectedBeacon.close();
+			mConnectedBeacon = null;
+		}
 	}
 
 	/**
@@ -512,16 +522,140 @@ public class EstimoteBeacons extends CordovaPlugin
 	{
 		Log.i(LOGTAG, "disconnectConnectedBeacon (cordova)");
 
-        mBeaconDisconnectionCallback = callbackContext;
+		mBeaconDisconnectionCallback = callbackContext;
 		disconnectConnectedBeacon();
 	}
 
+	/**
+	 * Write Proximity UUID to connected beacon
+	 */
+	private void writeConnectedProximityUUID(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "writeConnectedProximityUUID");
 
+		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
+            String uuid = cordovaArgs.getString(0);
 
-	// AIDANTODO
-	// todo: write writeProximityUuid fn
-	// todo: write writeMajor fn
-	// todo: write writeMinor fn
+            Log.i(LOGTAG, uuid);
+            Log.i(LOGTAG, mConnectedBeacon.getBeacon().getProximityUUID());
+            Log.i(LOGTAG, String.valueOf(uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())));
+
+            // already correct, skip
+            if (uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())) {
+                PluginResult r = new PluginResult(PluginResult.Status.OK);
+                callbackContext.sendPluginResult(r);
+            }
+
+            try {
+                UUID.fromString(uuid);
+            } catch (Exception e) {
+                callbackContext.error(e.getMessage());
+            }
+
+            BeaconConnection.WriteCallback writeCallback;
+            writeCallback = new BeaconConnection.WriteCallback() {
+                @Override
+                public void onSuccess() {
+                    PluginResult r = new PluginResult(PluginResult.Status.OK);
+                    callbackContext.sendPluginResult(r);
+                }
+
+                @Override
+                public void onError(EstimoteDeviceException e) {
+                    callbackContext.error(e.getMessage());
+                }
+            };
+
+            mConnectedBeacon.writeProximityUuid(uuid, writeCallback);
+        }
+	}
+
+	/**
+	 * Write Major to connected beacon
+	 */
+	private void writeConnectedMajor(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "writeConnectedMajor");
+
+		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
+            int major = cordovaArgs.getInt(0);
+
+            // already correct, skip
+            if (major == mConnectedBeacon.getBeacon().getMajor()) {
+                PluginResult r = new PluginResult(PluginResult.Status.OK);
+                callbackContext.sendPluginResult(r);
+            }
+
+           if (major == 0) {
+                callbackContext.error("major cannot be 0");
+                return;
+            }
+
+            BeaconConnection.WriteCallback writeCallback;
+            writeCallback = new BeaconConnection.WriteCallback() {
+                @Override
+                public void onSuccess() {
+                    PluginResult r = new PluginResult(PluginResult.Status.OK);
+                    callbackContext.sendPluginResult(r);
+                }
+
+                @Override
+                public void onError(EstimoteDeviceException e) {
+                    callbackContext.error(e.getMessage());
+                }
+            };
+
+            mConnectedBeacon.writeMajor(major, writeCallback);
+        }
+	}
+
+	/**
+	 * Write Minor to connected beacon
+	 */
+	private void writeConnectedMinor(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "writeConnectedMinor");
+
+		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
+            int minor = cordovaArgs.getInt(0);
+
+            // already correct, skip
+            if (minor == mConnectedBeacon.getBeacon().getMinor()) {
+                PluginResult r = new PluginResult(PluginResult.Status.OK);
+                callbackContext.sendPluginResult(r);
+            }
+
+            if (minor == 0) {
+                callbackContext.error("minor cannot be 0");
+                return;
+            }
+
+            BeaconConnection.WriteCallback writeCallback;
+            writeCallback = new BeaconConnection.WriteCallback() {
+                @Override
+                public void onSuccess() {
+                    PluginResult r = new PluginResult(PluginResult.Status.OK);
+                    callbackContext.sendPluginResult(r);
+                }
+
+                @Override
+                public void onError(EstimoteDeviceException e) {
+                    callbackContext.error(e.getMessage());
+                }
+            };
+
+            mConnectedBeacon.writeMinor(minor, writeCallback);
+        }
+	}
 
 	/**
 	 * Create JSON object representing beacon info.
@@ -842,6 +976,23 @@ public class EstimoteBeacons extends CordovaPlugin
 
             // cleanup
             mBeaconDisconnectionCallback = null;
+        }
+    }
+
+    public class BeaconConnected extends BeaconConnection {
+        private Beacon mBeacon;
+
+        public BeaconConnected(
+            Context context,
+            Beacon beacon,
+            BeaconConnection.ConnectionCallback connectionCallback
+        ) {
+            super(context, beacon, connectionCallback);
+            this.mBeacon = beacon;
+        }
+
+        public Beacon getBeacon() {
+            return mBeacon;
         }
     }
 }

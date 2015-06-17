@@ -756,14 +756,6 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 	return true;
 };
 
-// AIDANTODO
-// n.b. call individual writeProximityUuid/Major/Minor fns, as iOS does not
-// expose a shorthand
-// todo: write writeRegion fn, accepts uuid/maj/min obj
-// todo: write writeProximityUuid fn, accepts uuid
-// todo: write writeMajor fn, accepts major
-// todo: write writeMinor fn, accepts minor
-
 /**
  * Connect to Estimote Beacon
  *
@@ -817,6 +809,68 @@ estimote.beacons.disconnectConnectedBeacon = function (success, error)
   );
 
   return true;
+};
+
+/**
+ * Write proximity UUID to connected Estimote Beacon
+ *
+ * @param {String} uuid String to write as new UUID
+ * @param {ErrorCallbackNoParams} [success] Function called when beacon
+ * disconnection request has been init'ed.
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example Example that writes constant ESTIMOTE_PROXIMITY_UUID:
+ *   estimote.beacons.writeConnectedProximityUUID(ESTIMOTE_PROXIMITY_UUID);
+ */
+estimote.beacons.writeConnectedProximityUUID = function (uuid, success, error) {
+  exec(success,
+    error,
+    'EstimoteBeacons',
+    'beacons_writeConnectedProximityUUID',
+
+    // force lowercase because some uuidgen's have poor email etiquette
+    [uuid.toLowerCase()]
+  );
+};
+
+/**
+ * Write major to connected Estimote Beacon
+ *
+ * @param {Number} major Integer to write as new major
+ * @param {ErrorCallbackNoParams} [success] Function called when beacon
+ * disconnection request has been init'ed.
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example Example that writes 1:
+ *   estimote.beacons.writeConnectedMajor(1);
+ */
+estimote.beacons.writeConnectedMajor = function (major, success, error) {
+  exec(success,
+    error,
+    'EstimoteBeacons',
+    'beacons_writeConnectedMajor',
+    [major]
+  );
+};
+
+/**
+ * Write minor to connected Estimote Beacon
+ *
+ * @param {Number} minor Integer to write as new minor
+ * @param {ErrorCallbackNoParams} [success] Function called when beacon
+ * disconnection request has been init'ed.
+ * @param {ErrorCallback} [error] Function called on error (optional).
+ *
+ * @example Example that writes 1:
+ *   estimote.beacons.writeConnectedMinor(1);
+ */
+estimote.beacons.writeConnectedMinor = function (minor, success, error) {
+  exec(success,
+    error,
+    'EstimoteBeacons',
+    'beacons_writeConnectedMinor',
+    [minor]
+  );
 };
 
 /*********************************************************/
