@@ -9,6 +9,9 @@ package com.evothings;
 import android.content.Context;
 import android.util.Log;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+
 import com.estimote.sdk.*;
 import com.estimote.sdk.cloud.model.*;
 import com.estimote.sdk.connection.*;
@@ -37,22 +40,26 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String LOGTAG = "EstimoteBeacons";
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
+	private static final int REQUEST_ENABLE_BLUETOOTH = 1;
 
 	private BeaconManager     mBeaconManager;
 	private EstimoteSDK       mEstimoteSDK;
+	private CordovaInterface  mCordovaInterface;
 
 	private ArrayList<Beacon> mRangedBeacons;
 	private BeaconConnected   mConnectedBeacon;
-
 	private boolean           mIsConnected = false;
-    private CallbackContext   mBeaconConnectionCallback;
-    private CallbackContext   mBeaconDisconnectionCallback;
 
-	// Maps that keep track of Cordova callbacks.
+
+	// Maps and variables that keep track of Cordova callbacks.
 	private HashMap<String, CallbackContext> mRangingCallbackContexts =
 		new HashMap<String, CallbackContext>();
 	private HashMap<String, CallbackContext> mMonitoringCallbackContexts =
 		new HashMap<String, CallbackContext>();
+
+	private CallbackContext   mBluetoothStateCallbackContext;
+	private CallbackContext   mBeaconConnectionCallback;
+	private CallbackContext   mBeaconDisconnectionCallback;
 
 	// todo: consider using pluginInitialize instead, per Cordova recommendation
 	//   https://github.com/apache/cordova-android/blob/master/framework/src/org/apache/cordova/CordovaPlugin.java#L60-L61
@@ -65,6 +72,10 @@ public class EstimoteBeacons extends CordovaPlugin
 		Log.i(LOGTAG, "initialize");
 
 		super.initialize(cordova, webView);
+
+		mCordovaInterface = cordova;
+		mCordovaInterface.setActivityResultCallback(this);
+
 		if (mBeaconManager == null) {
 			mBeaconManager = new BeaconManager(cordova.getActivity());
 		}
@@ -152,10 +163,78 @@ public class EstimoteBeacons extends CordovaPlugin
 		else if ("beacons_writeConnectedMinor".equals(action)) {
 			writeConnectedMinor(args, callbackContext);
 		}
+		else if ("bluetooth_bluetoothState".equals(action)) {
+			checkBluetoothState(args, callbackContext);
+		}
 		else {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * If Bluetooth is off, open a Bluetooth dialog.
+	 */
+	private void checkBluetoothState(
+		CordovaArgs cordovaArgs,
+		final CallbackContext callbackContext)
+		throws JSONException
+	{
+		Log.i(LOGTAG, "checkBluetoothState");
+
+		// Check that no Bluetooth state request is in progress.
+		if (null != mBluetoothStateCallbackContext) {
+			callbackContext.error("Bluetooth state request already in progress");
+			return;
+		}
+
+		// Check if Bluetooth is enabled.
+		//BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		if (!mBeaconManager.isBluetoothEnabled()) {
+			// Open Bluetooth dialog on the UI thread.
+			final CordovaPlugin self = this;
+			mBluetoothStateCallbackContext = callbackContext;
+			Runnable openBluetoothDialog = new Runnable() {
+				public void run() {
+					Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+					mCordovaInterface.startActivityForResult(
+						self,
+						enableIntent,
+						REQUEST_ENABLE_BLUETOOTH);
+				}
+			};
+			mCordovaInterface.getActivity().runOnUiThread(openBluetoothDialog);
+		}
+		else {
+			// Bluetooth is enabled, return the result to JavaScript,
+			sendResultForBluetoothEnabled(callbackContext);
+		}
+	}
+
+	/**
+	 * Check if Bluetooth is enabled and return result to JavaScript.
+	 */
+	public void sendResultForBluetoothEnabled(CallbackContext callbackContext)
+	{
+		if (mBeaconManager.isBluetoothEnabled()) {
+			callbackContext.success(1);
+		}
+		else {
+			callbackContext.success(0);
+		}
+	}
+
+	/**
+	 * Called when the Bluetooth dialog is closed.
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent)
+	{
+		Log.i(LOGTAG, "onActivityResult");
+		if (REQUEST_ENABLE_BLUETOOTH == requestCode) {
+			sendResultForBluetoothEnabled(mBluetoothStateCallbackContext);
+			mBluetoothStateCallbackContext = null;
+		}
 	}
 
 	/**
@@ -293,7 +372,9 @@ public class EstimoteBeacons extends CordovaPlugin
 		// do nothing, just return.
 		String key = regionHashMapKey(region);
 		if (null != mMonitoringCallbackContexts.get(key)) {
-			return;
+			Log.i(LOGTAG, "Monitor already active for this region. Re-registering");
+			// Remove monitoring callback from hash map.
+			mMonitoringCallbackContexts.remove(key);
 		}
 
 		// Add callback to hash map.
@@ -662,8 +743,8 @@ public class EstimoteBeacons extends CordovaPlugin
 	 *
 	 * beaconInfo format:
 	 * {
-	 *     region: region,
-	 *     beacons: array of beacon
+	 *	 region: region,
+	 *	 beacons: array of beacon
 	 * }
 	 */
 	private JSONObject makeJSONBeaconInfo(Region region, List<Beacon> beacons)
@@ -865,8 +946,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		@Override
 		public void onExitedRegion(Region region) {
 			// Note that results are not delivered on UI thread.
-
-			Log.i(LOGTAG, "onEnteredRegion");
+			Log.i(LOGTAG, "onExitedRegion");
 
 			sendRegionInfo(region, "outside");
 		}
