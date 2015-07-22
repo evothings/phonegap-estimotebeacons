@@ -1,4 +1,3 @@
-// API definition for Estimote Cordova/PhoneGap plugin.
 //
 // Use jsdoc to generate documentation.
 //
@@ -517,10 +516,6 @@ estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, erro
  * @property {string} uuid The UUID of the region.
  * @property {number} major The UUID major value of the region.
  * @property {number} major The UUID minor value of the region.
- * @property {boolean} secure Supported on iOS for enabling
- * secure beacons. Leaving it out defaults to false.
- * To use secure beacons set the App ID and App Token using
- * {@link estimote.beacons.setupAppIDAndAppToken}.
  */
 
 /**
@@ -679,6 +674,50 @@ estimote.beacons.stopRangingBeaconsInRegion = function(region, success, error)
 };
 
 /**
+ * Start ranging secure beacons. Available on iOS.
+ * This function has the same parameters/behaviour as
+ * {@link estimote.beacons.startRangingBeaconsInRegion}.
+ * To use secure beacons set the App ID and App Token using
+ * {@link estimote.beacons.setupAppIDAndAppToken}.
+ */
+estimote.beacons.startRangingSecureBeaconsInRegion = function(region, success, error)
+{
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_startRangingSecureBeaconsInRegion',
+		[region]
+	);
+
+	return true;
+};
+
+/**
+ * Stop ranging secure beacons. Available on iOS.
+ * This function has the same parameters/behaviour as
+ * {@link estimote.beacons.stopRangingBeaconsInRegion}.
+ */
+estimote.beacons.stopRangingSecureBeaconsInRegion = function(region, success, error)
+{
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_stopRangingSecureBeaconsInRegion',
+		[region]
+	);
+
+	return true;
+};
+
+/**
  * Start monitoring beacons. Available on iOS and Android.
  *
  * @param {BeaconRegion} region Dictionary with region properties (mandatory).
@@ -741,6 +780,53 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 		error,
 		'EstimoteBeacons',
 		'beacons_stopMonitoringForRegion',
+		[region]
+	);
+
+	return true;
+};
+
+/**
+ * Start monitoring secure beacons. Available on iOS.
+ * This function has the same parameters/behaviour as
+ * estimote.beacons.startMonitoringForRegion.
+ * To use secure beacons set the App ID and App Token using
+ * {@link estimote.beacons.setupAppIDAndAppToken}.
+ * @see {@link estimote.beacons.startMonitoringForRegion}
+ */
+estimote.beacons.startSecureMonitoringForRegion = function(
+	region, success, error, notifyEntryStateOnDisplay)
+{
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_startSecureMonitoringForRegion',
+		[region, !!notifyEntryStateOnDisplay]
+	);
+
+	return true;
+};
+
+
+/**
+ * Stop monitoring secure beacons. Available on iOS.
+ * This function has the same parameters/behaviour as
+ * {@link estimote.beacons.stopMonitoringForRegion}.
+ */
+estimote.beacons.stopSecureMonitoringForRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		'EstimoteBeacons',
+		'beacons_stopSecureMonitoringForRegion',
 		[region]
 	);
 

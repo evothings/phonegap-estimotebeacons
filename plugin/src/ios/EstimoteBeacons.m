@@ -1,10 +1,13 @@
 #import <Cordova/CDV.h>
 #import <EstimoteSDK/ESTUtilityManager.h>
 #import <EstimoteSDK/ESTBeaconManager.h>
+#import <EstimoteSDK/ESTSecureBeaconManager.h>
 #import <EstimoteSDK/ESTNearableManager.h>
 #import <EstimoteSDK/ESTTriggerManager.h>
 #import <EstimoteSDK/ESTNearableDefinitions.h>
 #import <EstimoteSDK/ESTCloudManager.h>
+#import <EstimoteSDK/ESTEddystone.h>
+#import <EstimoteSDK/ESTEddystoneManager.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 
 #import "EstimoteBeacons.h"
@@ -81,6 +84,16 @@
  * The beacon manager in the Estimote API.
  */
 @property (nonatomic, strong) ESTBeaconManager* beaconManager;
+
+/**
+ * Secure beacon manager in the Estimote API.
+ */
+@property (nonatomic, strong) ESTSecureBeaconManager* secureBeaconManager;
+
+/**
+ * EddyStone manager in the Estimote API.
+ */
+@property (nonatomic, strong) ESTEddystoneManager* eddystoneManager;
 
 /**
  * Callback id for startEstimoteBeaconsDiscoveryForRegion.
@@ -198,9 +211,14 @@
 	// Crete beacon manager instance.
 	self.beaconManager = [ESTBeaconManager new];
 	self.beaconManager.delegate = self;
-
 	// This will skip beacons with proximity CLProximityUnknown when ranging.
 	self.beaconManager.avoidUnknownStateBeacons = YES;
+
+	// Crete secure beacon manager instance.
+	self.secureBeaconManager = [ESTSecureBeaconManager new];
+	self.secureBeaconManager.delegate = self;
+
+	// TODO: Create eddystoneBeaconManager and implement related methods.
 
 	// Variables that track callback ids.
 	self.callbackId_beaconsDiscovery = nil;
@@ -529,6 +547,48 @@
  */
 - (void) beacons_startRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
 {
+	[self
+		beacons_impl_startRangingBeaconsInRegion:command
+		manager:self.beaconManager];
+}
+
+/**
+ * Stop CoreLocation ranging.
+ */
+- (void) beacons_stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+{
+
+	[self
+		beacons_impl_stopRangingBeaconsInRegion:command
+		manager:self.beaconManager];
+}
+
+/**
+ * Start secure CoreLocation ranging.
+ */
+- (void) beacons_startRangingSecureBeaconsInRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_startRangingBeaconsInRegion:command
+		manager:self.secureBeaconManager];
+}
+
+/**
+ * Stop secure CoreLocation ranging.
+ */
+- (void) beacons_stopRangingSecureBeaconsInRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_stopRangingBeaconsInRegion:command
+		manager:self.secureBeaconManager];
+}
+
+/**
+ * Start CoreLocation ranging.
+ */
+- (void) beacons_impl_startRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+	manager:(id)aManager
+{
 	//NSLog(@"OBJC startRangingBeaconsInRegion");
 
 	// Get region dictionary passed from JavaScript and
@@ -537,7 +597,7 @@
 	CLBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
 	// Stop any ongoing ranging for the given region.
-	[self helper_stopRangingBeaconsInRegion:region];
+	[self helper_stopRangingBeaconsInRegion:region manager:aManager];
 
 	// Save callback id for the region.
 	[self.callbackIds_beaconsRanging
@@ -545,13 +605,14 @@
 		forKey:[self regionDictionaryKey:region]];
 
 	// Start ranging.
-	[self.beaconManager startRangingBeaconsInRegion:region];
+	[aManager startRangingBeaconsInRegion:region];
 }
 
 /**
  * Stop CoreLocation ranging.
  */
-- (void) beacons_stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_impl_stopRangingBeaconsInRegion:(CDVInvokedUrlCommand*)command
+	manager:(id)aManager
 {
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -559,7 +620,7 @@
 	CLBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
 	// Stop ranging.
-	[self helper_stopRangingBeaconsInRegion:region];
+	[self helper_stopRangingBeaconsInRegion:region manager:aManager];
 
 	// Respond to JavaScript with OK.
 	[self.commandDelegate
@@ -568,9 +629,10 @@
 }
 
 - (void) helper_stopRangingBeaconsInRegion:(CLBeaconRegion*)region
+	manager:(id)aManager
 {
 	// Stop ranging the region.
-	[self.beaconManager stopRangingBeaconsInRegion:region];
+	[aManager stopRangingBeaconsInRegion:region];
 
 	// Clear any existing callback.
 	NSString* callbackId = [self.callbackIds_beaconsRanging
@@ -594,7 +656,7 @@
 /**
  * CoreLocation ranging event.
  */
-- (void) beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(id)manager
 	didRangeBeacons:(NSArray*)beacons
 	inRegion:(CLBeaconRegion*)region
 {
@@ -624,7 +686,7 @@
 /**
  * CoreLocation ranging error event.
  */
-- (void) beaconManager:(ESTBeaconManager*)manager
+- (void) beaconManager:(id)manager
 	rangingBeaconsDidFailForRegion:(CLBeaconRegion*)region
 	withError:(NSError*)error
 {
@@ -642,7 +704,7 @@
 	}
 
 	// Stop ranging and clear callback.
-	[self helper_stopRangingBeaconsInRegion:region];
+	[self helper_stopRangingBeaconsInRegion:region manager:manager];
 }
 
 #pragma mark - CoreLocation monitoring
@@ -651,6 +713,46 @@
  * Start CoreLocation monitoring.
  */
 - (void) beacons_startMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_startMonitoringForRegion:command
+		manager:self.beaconManager];
+}
+
+/**
+ * Stop CoreLocation monitoring.
+ */
+- (void) beacons_stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_stopMonitoringForRegion:command
+		manager:self.beaconManager];
+}
+/**
+ * Start secure CoreLocation monitoring.
+ */
+- (void) beacons_startSecureMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_startMonitoringForRegion:command
+		manager:self.secureBeaconManager];
+}
+
+/**
+ * Stop secure CoreLocation monitoring.
+ */
+- (void) beacons_stopSecureMonitoringForRegion:(CDVInvokedUrlCommand*)command
+{
+	[self
+		beacons_impl_stopMonitoringForRegion:command
+		manager:self.secureBeaconManager];
+}
+
+/**
+ * Start CoreLocation monitoring.
+ */
+- (void) beacons_impl_startMonitoringForRegion:(CDVInvokedUrlCommand*)command
+	manager:(id)aManager
 {
 	//NSLog(@"OBJC startMonitoringForRegion");
 
@@ -663,7 +765,7 @@
 	region.notifyEntryStateOnDisplay = (BOOL)[command argumentAtIndex:1];
 
 	// Stop any ongoing monitoring for the given region.
-	[self helper_stopMonitoringForRegion:region];
+	[self helper_stopMonitoringForRegion:region manager:aManager];
 
 	// Save callback id for the region.
 	[self.callbackIds_beaconsMonitoring
@@ -671,16 +773,17 @@
 		forKey:[self regionDictionaryKey:region]];
 
 	// Start monitoring.
-	[self.beaconManager startMonitoringForRegion:region];
+	[aManager startMonitoringForRegion:region];
 
 	// This will get the initial state faster.
-	[self.beaconManager requestStateForRegion:region];
+	[aManager requestStateForRegion:region];
 }
 
 /**
  * Stop CoreLocation monitoring.
  */
-- (void) beacons_stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_impl_stopMonitoringForRegion:(CDVInvokedUrlCommand*)command
+	manager:(id)aManager
 {
 	// Get region dictionary passed from JavaScript and
 	// create a beacon region object.
@@ -688,7 +791,7 @@
 	CLBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
 
 	// Stop monitoring.
-	[self helper_stopMonitoringForRegion:region];
+	[self helper_stopMonitoringForRegion:region manager:aManager];
 
 	// Respond to JavaScript with OK.
 	[self.commandDelegate
@@ -697,9 +800,10 @@
 }
 
 - (void) helper_stopMonitoringForRegion:(CLBeaconRegion*)region
+	manager:(id)aManager
 {
 	// Stop monitoring the region.
-	[self.beaconManager stopMonitoringForRegion:region];
+	[aManager stopMonitoringForRegion:region];
 
 	// Clear any existing callback.
 	NSString* callbackId = [self.callbackIds_beaconsMonitoring
@@ -720,19 +824,19 @@
 	}
 }
 
-- (void) beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(id)manager
 	didStartMonitoringForRegion:(CLBeaconRegion *)region
 {
 	// Not used.
 }
 
-- (void) beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(id)manager
 	didEnterRegion:(CLBeaconRegion *)region
 {
 	// Not used.
 }
 
-- (void) beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(id)manager
 	didExitRegion:(CLBeaconRegion *)region
 {
 	// Not used.
@@ -741,9 +845,9 @@
 /**
  * CoreLocation monitoring event.
  */
-- (void) beaconManager:(ESTBeaconManager *)manager
+- (void) beaconManager:(id)manager
 	didDetermineState:(CLRegionState)state
-	forRegion:(CLBeaconRegion *)region
+	forRegion:(CLBeaconRegion*)region
 {
 	//NSLog(@"OBJC didDetermineStateforRegion");
 
@@ -787,9 +891,9 @@
 /**
  * CoreLocation monitoring error event.
  */
-- (void) beaconManager:(ESTBeaconManager *)manager
-	monitoringDidFailForRegion:(CLBeaconRegion *)region
-	withError:(NSError *)error
+- (void) beaconManager:(id)manager
+	monitoringDidFailForRegion:(CLBeaconRegion*)region
+	withError:(NSError*)error
 {
 	// Send error message before callback is cleared.
 	NSString* callbackId = [self.callbackIds_beaconsMonitoring
@@ -805,7 +909,7 @@
 	}
 
 	// Stop monitoring and clear callback.
-	[self helper_stopMonitoringForRegion:region];
+	[self helper_stopMonitoringForRegion:region manager:manager];
 }
 
 #pragma mark - CoreLocation authorization
