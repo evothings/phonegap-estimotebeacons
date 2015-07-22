@@ -66,10 +66,10 @@
 
 @interface EstimoteBeacons ()
 <	ESTUtilityManagerDelegate,
-    ESTBeaconManagerDelegate,
+	ESTBeaconManagerDelegate,
 	ESTBeaconManagerDelegate,
 	ESTNearableManagerDelegate,
-    ESTTriggerManagerDelegate,
+	ESTTriggerManagerDelegate,
 	CBCentralManagerDelegate >
 
 /**
@@ -191,9 +191,9 @@
 {
 	//NSLog(@"OBJC EstimoteBeacons pluginInitialize");
 
-    // Crete utility manager instance.
-    self.utilityManager = [ESTUtilityManager new];
-    self.utilityManager.delegate = self;
+	// Crete utility manager instance.
+	self.utilityManager = [ESTUtilityManager new];
+	self.utilityManager.delegate = self;
 
 	// Crete beacon manager instance.
 	self.beaconManager = [ESTBeaconManager new];
@@ -240,53 +240,53 @@
 
 	// Get region values.
 	for (id key in regionDict)
-    {
+	{
 		NSString* value = regionDict[key];
 		if ([key isEqualToString:@"uuid"])
-        {
+		{
 			uuid = [[NSUUID alloc] initWithUUIDString: value];
-        }
+		}
 		else if ([key isEqualToString:@"identifier"])
-        {
+		{
 			identifier = value;
-        }
+		}
 		else if ([key isEqualToString:@"major"])
-        {
+		{
 			major = [value integerValue];
 			majorIsDefined = YES; }
 		else if ([key isEqualToString:@"minor"])
-        {
+		{
 			minor = [value integerValue];
 			minorIsDefined = YES; }
 		else if ([key isEqualToString:@"secure"])
-        {
+		{
 			secure = [value boolValue];
 			secureIsDefined = YES;
-        }
-    }
+		}
+	}
 
 	// Create a beacon region object.
 	if (majorIsDefined && minorIsDefined)
-    {
+	{
 		return [[CLBeaconRegion alloc]
 			initWithProximityUUID: uuid
 			major: major
 			minor: minor
-            identifier: identifier];
-    }
+			identifier: identifier];
+	}
 	else if (majorIsDefined)
-    {
+	{
 		return [[CLBeaconRegion alloc]
 			initWithProximityUUID: uuid
-            major: major
-            identifier: identifier];
-    }
+			major: major
+			identifier: identifier];
+	}
 	else
-    {
+	{
 		return [[CLBeaconRegion alloc]
-            initWithProximityUUID: uuid
-            identifier: identifier];
-    }
+			initWithProximityUUID: uuid
+			identifier: identifier];
+	}
 }
 
 /**
@@ -317,37 +317,55 @@
 }
 
 /**
- * Create a dictionary from a beacon object (used to
+ * Create a dictionary from a CLBeacon object (used to
  * pass beacon data back to JavaScript).
- * TODO: CLBeacon misses many or the properties the
- * removed ESTBeacon class had. Find an alternative
- * way to get the e.g. the colour of a beacon.
  */
-- (NSDictionary*) beaconToDictionary:(CLBeacon*)beacon
+- (NSDictionary*) coreLocationBeaconToDictionary:(CLBeacon*)beacon
 {
-	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:32];
+	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:8];
 
-	// Properties always available.
 	[dict setValue:beacon.major forKey:@"major"];
 	[dict setValue:beacon.minor forKey:@"minor"];
-	//[dict setValue:[NSNumber numberWithInteger:beacon.color] forKey:@"color"];
 	[dict setValue:[NSNumber numberWithInteger:beacon.rssi] forKey:@"rssi"];
-	//[dict setValue:[NSNumber numberWithInteger:beacon.connectionStatus] forKey:@"connectionStatus"];
-
-	// Properties available after CoreLocation based scan.
-	[dict setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"]; // TODO: Check nil value?
-	//[dict setValue:beacon.distance forKey:@"distance"];
+	[dict setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
 	[dict setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
 
-	// Properties available after CoreBluetooth based scan.
-	//[dict setValue:beacon.macAddress forKey:@"macAddress"];
-	//[dict setValue:beacon.measuredPower forKey:@"measuredPower"];
-	//[dict setValue:[NSNumber numberWithInt:beacon.firmwareState] forKey:@"firmwareState"];
+	return dict;
+}
+
+/**
+ * Create a dictionary from an ESTBluetoothBeacon object (used to
+ * pass beacon data back to JavaScript).
+ */
+- (NSDictionary*) bluetoothBeaconToDictionary:(ESTBluetoothBeacon*)beacon
+{
+	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:8];
+		[dict setValue:beacon.major forKey:@"major"];
+	[dict setValue:beacon.minor forKey:@"minor"];
+	[dict setValue:[NSNumber numberWithInteger:beacon.rssi] forKey:@"rssi"];
+	[dict setValue:beacon.macAddress forKey:@"macAddress"];
+	[dict setValue:beacon.measuredPower forKey:@"measuredPower"];
+	[dict setValue:[NSNumber numberWithInteger:beacon.firmwareState] forKey:@"firmwareState"];
+
+	// Properties available on ESTBluetoothBeacon but not used.
+	//@property (nonatomic, strong) CBPeripheral *peripheral;
+	//@property (nonatomic, strong) NSDate *discoveryDate;
+	//@property (nonatomic, strong) NSData *advertisementData;
+
+	// TODO: Use new way to find beacon colour.
+	//[dict setValue:[NSNumber numberWithInteger:beacon.color] forKey:@"color"];
+
+	// TODO: Is it possible to find UUID and proximity/distance with new API?
+	//[dict setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
+	//[dict setValue:beacon.distance forKey:@"distance"];
+	//[dict setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
+
 
 	// Properties available after connecting.
+	// TODO: These are obtained in a different way using SDK 3.3.1. Research how to implement.
 	/*
-    if (ESTConnectionStatusConnected == beacon.connectionStatus)
-    {
+	if (ESTConnectionStatusConnected == beacon.connectionStatus)
+	{
 		[dict setValue:beacon.name forKey:@"name"];
 		[dict setValue:beacon.motionProximityUUID.UUIDString forKey:@"name"]; // TODO: Check nil value?
 		[dict setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
@@ -371,7 +389,24 @@
 }
 
 /**
- * Create a dictionary object from a region.
+ * Create a dictionary object with ESTBluetoothBeacon beacons.
+ */
+- (NSDictionary*) dictionaryWithBeacons:(NSArray*)beacons
+{
+	// Convert beacons to a an array of property-value objects.
+	NSMutableArray* beaconArray = [NSMutableArray array];
+	for (ESTBluetoothBeacon* beacon in beacons)
+	{
+		[beaconArray addObject:[self bluetoothBeaconToDictionary:beacon]];
+	}
+
+	return @{
+		@"beacons" : beaconArray
+		};
+}
+
+/**
+ * Create a dictionary object with a CLBeaconRegion and CLBeacon beacons.
  */
 - (NSDictionary*) dictionaryWithRegion:(CLBeaconRegion*)region
 	andBeacons:(NSArray*)beacons
@@ -380,15 +415,15 @@
 	NSMutableArray* beaconArray = [NSMutableArray array];
 	for (CLBeacon* beacon in beacons)
 	{
-		[beaconArray addObject:[self beaconToDictionary:beacon]];
+		[beaconArray addObject:[self coreLocationBeaconToDictionary:beacon]];
 	}
 
 	NSDictionary* regionDictionary = [self regionToDictionary:region];
 
 	return @{
-		@"region" : regionDictionary,
-		@"beacons" : beaconArray
-		};
+			 @"region" : regionDictionary,
+			 @"beacons" : beaconArray
+			 };
 }
 
 #pragma mark - CoreBluetooth discovery
@@ -396,14 +431,9 @@
 /**
  * Start CoreBluetooth discovery.
  */
-- (void) beacons_startEstimoteBeaconsDiscoveryForRegion:(CDVInvokedUrlCommand*)command
+- (void) beacons_startEstimoteBeaconDiscovery:(CDVInvokedUrlCommand*)command
 {
-	//NSLog(@"OBJC startEstimoteBeaconsDiscoveryForRegion ");
-
-	// Get region dictionary passed from JavaScript and
-	// create a beacon region object.
-	NSDictionary* regionDictionary = [command argumentAtIndex:0];
-	//CLBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
+	//NSLog(@"OBJC startEstimoteBeaconDiscovery");
 
 	// Stop any ongoing discovery.
 	[self helper_stopEstimoteBeaconDiscovery];
@@ -456,17 +486,14 @@
 /**
  * CoreBluetooth discovery event.
  */
-- (void) beaconManager:(ESTBeaconManager*)manager
-	didDiscoverBeacons:(NSArray*)beacons
-	inRegion:(CLBeaconRegion*)region
+- (void) utilityManager:(ESTUtilityManager*)manager
+	 didDiscoverBeacons:(NSArray*)beacons
 {
 	if ([beacons count] > 0
 		&& nil != self.callbackId_beaconsDiscovery)
 	{
 		// Create dictionary with result.
-		NSDictionary* resultDictionary = [self
-			dictionaryWithRegion:region
-			andBeacons:beacons];
+		NSDictionary* resultDictionary = [self dictionaryWithBeacons:beacons];
 
 		// Pass result to JavaScript callback.
 		CDVPluginResult* result = [CDVPluginResult
@@ -482,8 +509,7 @@
 /**
  * CoreBluetooth discovery error event.
  */
-- (void) beaconManager:(ESTBeaconManager*)manager
-	didFailDiscoveryInRegion:(CLBeaconRegion*)region
+- (void)utilityManagerDidFailDiscovery:(ESTUtilityManager*)manager
 {
 	// Pass error to JavaScript.
 	if (self.callbackId_beaconsDiscovery != nil)
@@ -495,27 +521,6 @@
 			callbackId:self.callbackId_beaconsDiscovery];
 	}
 }
-
-/*
-Above code is tested using these snippets in Evothings Studio:
-
-EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
-	{},
-	function(beacons){console.log('success ' + beacons[0].major + ' ' + beacons[0].minor)},
-	function(){console.log('error')}
-	)
-
-EstimoteBeacons.stopEstimoteBeaconDiscovery(
-	function(){console.log('success')},
-	function(){console.log('error')}
-	)
-
-Use JavaScript tools to evaluate in Evothings Workbench.
-Requires a Cordova app built with the plugin to test.
-Make the app connect to the Workbench by entering
-the Workbench ip-address/port as the Cordova main URL.
-Example: http://192.168.0.101:4042
-*/
 
 #pragma mark - CoreLocation ranging
 
@@ -812,8 +817,8 @@ Example: http://192.168.0.101:4042
 {
 	//NSLog(@"OBJC requestWhenInUseAuthorization");
 
-    // Only applicable on iOS 8 and above.
-    if (IsAtLeastiOSVersion(@"8.0"))
+	// Only applicable on iOS 8 and above.
+	if (IsAtLeastiOSVersion(@"8.0"))
 	{
 		[self.beaconManager requestWhenInUseAuthorization];
 	}
@@ -832,8 +837,8 @@ Example: http://192.168.0.101:4042
 {
 	//NSLog(@"OBJC requestAlwaysAuthorization");
 
-    // Only applicable on iOS 8 and above.
-    if (IsAtLeastiOSVersion(@"8.0"))
+	// Only applicable on iOS 8 and above.
+	if (IsAtLeastiOSVersion(@"8.0"))
 	{
 		[self.beaconManager requestAlwaysAuthorization];
 	}
@@ -856,8 +861,8 @@ Example: http://192.168.0.101:4042
 	// TODO: Should we use the real value also on iOS 7? Is it available?
 	CLAuthorizationStatus status = kCLAuthorizationStatusNotDetermined;
 
-    // Only available on iOS 8 and above.
-    if (IsAtLeastiOSVersion(@"8.0"))
+	// Only available on iOS 8 and above.
+	if (IsAtLeastiOSVersion(@"8.0"))
 	{
 		status = [ESTBeaconManager authorizationStatus];
 	}
@@ -1264,7 +1269,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSString* key in self.callbackIds_nearablesRangingIdentifier)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey:key];
+		NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey:key];
 		if (nil != callbackId)
 		{
 			// Pass error message to JavaScript.
@@ -1278,7 +1283,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSNumber* key in self.callbackIds_nearablesRangingType)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey:key];
+		NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey:key];
 		if (nil != callbackId)
 		{
 			// Pass error message to JavaScript.
@@ -1303,7 +1308,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSString* key in self.callbackIds_nearablesRangingIdentifier)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey: key];
+		NSString* callbackId = [self.callbackIds_nearablesRangingIdentifier objectForKey: key];
 		if (nil != callbackId)
 		{
 			// Clear callback on the JS side.
@@ -1318,7 +1323,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSNumber* key in self.callbackIds_nearablesRangingType)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey: key];
+		NSString* callbackId = [self.callbackIds_nearablesRangingType objectForKey: key];
 		if (nil != callbackId)
 		{
 			// Clear callback on the JS side.
@@ -1590,7 +1595,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSString* key in self.callbackIds_nearablesMonitoringIdentifier)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey:key];
+		NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey:key];
 		if (nil != callbackId)
 		{
 			// Pass error message to JavaScript.
@@ -1604,7 +1609,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSNumber* key in self.callbackIds_nearablesMonitoringType)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey:key];
+		NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey:key];
 		if (nil != callbackId)
 		{
 			// Pass error message to JavaScript.
@@ -1629,7 +1634,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSString* key in self.callbackIds_nearablesMonitoringIdentifier)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey: key];
+		NSString* callbackId = [self.callbackIds_nearablesMonitoringIdentifier objectForKey: key];
 		if (nil != callbackId)
 		{
 			// Clear callback on the JS side.
@@ -1644,7 +1649,7 @@ Example: http://192.168.0.101:4042
 
 	for (NSNumber* key in self.callbackIds_nearablesMonitoringType)
 	{
-    	NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey: key];
+		NSString* callbackId = [self.callbackIds_nearablesMonitoringType objectForKey: key];
 		if (nil != callbackId)
 		{
 			// Clear callback on the JS side.
@@ -1687,7 +1692,7 @@ Example: http://192.168.0.101:4042
 {
 	for (NSString* key in self.triggers)
 	{
-    	ESTCDVTrigger* trigger = self.triggers[key];
+		ESTCDVTrigger* trigger = self.triggers[key];
 		if (nil != trigger)
 		{
 			[self.triggerManager stopMonitoringForTriggerWithIdentifier:
@@ -1983,7 +1988,7 @@ Example: http://192.168.0.101:4042
 {
 	NSLog(@"ESTCDVRuleGeneric update");
 
-    [super update];
+	[super update];
 
 	NSMutableDictionary* event = [NSMutableDictionary dictionaryWithCapacity: 8];
 
@@ -2004,7 +2009,7 @@ Example: http://192.168.0.101:4042
 {
 	NSLog(@"ESTCDVRuleNearable updateWithNearable");
 
-    [super updateWithNearable: nearable];
+	[super updateWithNearable: nearable];
 
 	NSMutableDictionary* event = [NSMutableDictionary dictionaryWithCapacity: 8];
 

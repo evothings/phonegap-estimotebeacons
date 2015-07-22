@@ -1,4 +1,3 @@
-//
 // API definition for Estimote Cordova/PhoneGap plugin.
 //
 // Use jsdoc to generate documentation.
@@ -527,7 +526,7 @@ estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, erro
 /**
  * Beacon info object. Consists of a region and an array of beacons.
  * @typedef {Object} BeaconInfo
- * @property {BeaconRegion} region Beacon region.
+ * @property {BeaconRegion} region Beacon region. Not available when scanning on iOS.
  * @property {Beacon[]} beacons Array of {@link Beacon} objects.
  */
 
@@ -536,18 +535,17 @@ estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, erro
  * platform (iOS/Android) and whether scanning (iOS) or ranging (iOS/Android).
  * @typedef {Object} Beacon
  * @property {number} major Major value of the beacon (ranging/scanning iOS/Android).
- * @property {number} minor Minor value of the beacon (ranging/scanning iOS/Android).
  * @property {number} color One of the estimote.beacons.BeaconColor* values (ranging/scanning iOS/Android).
  * @property {number} rssi - The Received Signal Strength Indication (ranging/scanning, iOS/Android).
  * @property {string} proximityUUID - UUID of the beacon (ranging iOS/Android)
- * @property {number} distance Estimated distance from the beacon in meters (ranging iOS).
  * @property {number} proximity One of estimote.beacons.Proximity* values (ranging iOS).
  * @property {string} macAddress (scanning iOS, ranging Android).
  * @property {number} measuredPower (scanning iOS, ranging Android).
  * @property {string} name The name advertised by the beacon (ranging Android).
- *
- * @see {@link http://estimote.github.io/iOS-SDK/Classes/ESTBeacon.html|Documentation of beacon properties on iOS}
- * @see {@link http://estimote.github.io/Android-SDK/JavaDocs/index.html?com/estimote/sdk/Beacon.html|Documentation of beacon properties on Android}
+ * @property {number} color One of the estimote.beacons.BeaconColor* values (ranging/scanning iOS/Android).
+ * TODO: Not available on beacon object, find out how to implement in Estimote iOS SDK 3.3.1.
+ * @property {number} distance Estimated distance from the beacon in meters (ranging iOS).
+ * TODO: Not available on beacon object, find out how to implement in Estimote iOS SDK 3.3.1.
  */
 
 /**
@@ -566,44 +564,37 @@ estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, erro
  */
 
 /**
- * Start scanning for beacons using CoreBluetooth.
+ * Start scanning for all nearby beacons using CoreBluetooth (no region object is used).
+ * Available on iOS.
  *
- * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param {function} success Function called when beacons are detected,
- * takes a  {@link BeaconInfo} object as parameter (mandatory).
+ * takes a {@link BeaconInfo} object as parameter (mandatory).
  * @param {ErrorCallback} error Function called on error (mandatory).
  *
  * @example success callback format:
  *   success(BeaconInfo)
  *
  * @example Example that prints all discovered beacons and properties:
- *   estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
- *     {}, // Empty region matches all beacons.
+ *   estimote.beacons.startEstimoteBeaconDiscovery(
  *     function(info) {
  *       console.log('Beacons discovered:')
  *       estimote.printObject(info) },
  *     function(errorMessage) {
  *       console.log('Discovery error: ' + errorMessage) })
  */
-estimote.beacons.startEstimoteBeaconsDiscoveryForRegion = function(
-	region, success, error)
-{
-	if (!checkExecParamsRegionSuccessError(region, success, error)) {
-		return false;
-	}
-
-	exec(success,
+estimote.beacons.startEstimoteBeaconDiscovery = function(success, error)
+{	exec(success,
 		error,
 		'EstimoteBeacons',
-		'beacons_startEstimoteBeaconsDiscoveryForRegion',
-		[region]
+		'beacons_startEstimoteBeaconDiscovery',
+		[]
 	);
 
 	return true;
 };
 
 /**
- * Stop CoreBluetooth scan.
+ * Stop CoreBluetooth scan. Available on iOS.
  *
  * @param {SuccessCallbackNoParams} [success] Function called when
  * beacons are detected (optional).
@@ -625,7 +616,7 @@ estimote.beacons.stopEstimoteBeaconDiscovery = function(success, error)
 };
 
 /**
- * Start ranging beacons using CoreLocation.
+ * Start ranging beacons. Available on iOS and Android.
  *
  * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param {function} success Function called when beacons are ranged,
@@ -661,7 +652,7 @@ estimote.beacons.startRangingBeaconsInRegion = function(region, success, error)
 };
 
 /**
- * Stop ranging beacons using CoreLocation.
+ * Stop ranging beacons. Available on iOS and Android.
  *
  * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param {ErrorCallbackNoParams} [success] Function called when ranging
@@ -688,7 +679,7 @@ estimote.beacons.stopRangingBeaconsInRegion = function(region, success, error)
 };
 
 /**
- * Start monitoring beacons using CoreLocation.
+ * Start monitoring beacons. Available on iOS and Android.
  *
  * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param success Function called when beacons are enter/exit the region (mandatory).
@@ -730,7 +721,7 @@ estimote.beacons.startMonitoringForRegion = function(
 };
 
 /**
- * Stop monitoring beacons using CoreLocation.
+ * Stop monitoring beacons. Available on iOS and Android.
  *
  * @param {BeaconRegion} region Dictionary with region properties (mandatory).
  * @param {ErrorCallbackNoParams} [success] Function called when monitoring
@@ -757,7 +748,7 @@ estimote.beacons.stopMonitoringForRegion = function (region, success, error)
 };
 
 /**
- * Connect to Estimote Beacon
+ * Connect to Estimote Beacon. Available on Android.
  *
  * @param {Beacon} beacon Beacon to connect to.
  * @param {ErrorCallbackNoParams} [success] Function called when monitoring
@@ -790,7 +781,7 @@ estimote.beacons.connectToBeacon = function (beacon, success, error)
 };
 
 /**
- * Disconnect from connected Estimote Beacon
+ * Disconnect from connected Estimote Beacon. Available on Android.
  *
  * @param {ErrorCallbackNoParams} [success] Function called when beacon
  * disconnection request has been init'ed.
@@ -812,7 +803,7 @@ estimote.beacons.disconnectConnectedBeacon = function (success, error)
 };
 
 /**
- * Write proximity UUID to connected Estimote Beacon
+ * Write proximity UUID to connected Estimote Beacon. Available on Android.
  *
  * @param {String} uuid String to write as new UUID
  * @param {ErrorCallbackNoParams} [success] Function called when beacon
@@ -834,7 +825,7 @@ estimote.beacons.writeConnectedProximityUUID = function (uuid, success, error) {
 };
 
 /**
- * Write major to connected Estimote Beacon
+ * Write major to connected Estimote Beacon. Available on Android.
  *
  * @param {Number} major Integer to write as new major
  * @param {ErrorCallbackNoParams} [success] Function called when beacon
@@ -854,7 +845,7 @@ estimote.beacons.writeConnectedMajor = function (major, success, error) {
 };
 
 /**
- * Write minor to connected Estimote Beacon
+ * Write minor to connected Estimote Beacon. Available on Android.
  *
  * @param {Number} minor Integer to write as new minor
  * @param {ErrorCallbackNoParams} [success] Function called when beacon
@@ -1076,7 +1067,7 @@ estimote.nearables.NearableColorLemonTart = 6;
  */
 
 /**
- * Start ranging for nearables with the given identifier.
+ * Start ranging for nearables with the given identifier. Available on iOS.
  *
  * @param {string} identifier Nearable identifier (mandatory).
  * @param {function} success Function called when the nearable with the
@@ -1108,7 +1099,7 @@ estimote.nearables.startRangingForIdentifier = function(identifier, success, err
 };
 
 /**
- * Stop ranging for nearables with the given identifier.
+ * Stop ranging for nearables with the given identifier. Available on iOS.
  *
  * @param {string} identifier String with nearable id (mandatory).
  * @param {SuccessCallbackNoParams} [success] Function called
@@ -1131,7 +1122,7 @@ estimote.nearables.stopRangingForIdentifier = function(identifier, success, erro
 };
 
 /**
- * Start ranging for nearables of the given type.
+ * Start ranging for nearables of the given type. Available on iOS.
  *
  * @param {number} type Nearable type, one of the
  * estimote.nearable.NearableType* constants (mandatory).
@@ -1165,7 +1156,7 @@ estimote.nearables.startRangingForType = function(type, success, error)
 };
 
 /**
- * Stop ranging for nearables of the given type.
+ * Stop ranging for nearables of the given type. Available on iOS.
  *
  * @param {number} type Nearable type, one of the
  * estimote.nearable.NearableType* constants (mandatory).
@@ -1189,7 +1180,7 @@ estimote.nearables.stopRangingForType = function(type, success, error)
 };
 
 /**
- * Stop ranging all nearables.
+ * Stop ranging all nearables. Available on iOS.
  *
  * @param {SuccessCallbackNoParams} [success] Function called when
  * ranging is stopped (optional).
@@ -1211,7 +1202,7 @@ estimote.nearables.stopRanging = function(success, error)
 };
 
 /**
- * Start monitoring for nearables with the given identifier.
+ * Start monitoring for nearables with the given identifier. Available on iOS.
  *
  * @param {string} identifier Nearable identifier to monitor for (mandatory).
  * @param {function} success Function called when the nearable with the
@@ -1245,7 +1236,7 @@ estimote.nearables.startMonitoringForIdentifier = function (identifier, success,
 };
 
 /**
- * Stop monitoring for nearables with the given identifier.
+ * Stop monitoring for nearables with the given identifier. Available on iOS.
  *
  * @param {string} identifier Nearable identifier to stop monitor (mandatory).
  * @param {SuccessCallbackNoParams} [success] Function called
@@ -1268,7 +1259,7 @@ estimote.nearables.stopMonitoringForIdentifier = function (identifier, success, 
 };
 
 /**
- * Start monitoring for nearables of the given type.
+ * Start monitoring for nearables of the given type. Available on iOS.
  *
  * @param {number} type Nearable type, one of the
  * estimote.nearables.NearableType* constants (mandatory).
@@ -1301,7 +1292,7 @@ estimote.nearables.startMonitoringForType = function (type, success, error)
 };
 
 /**
- * Stop monitoring for nearables of the given type.
+ * Stop monitoring for nearables of the given type. Available on iOS.
  *
  * @param {number} type Nearable type, one of the
  * estimote.nearables.NearableType* constants (mandatory).
@@ -1325,7 +1316,7 @@ estimote.nearables.stopMonitoringForType = function (type, success, error)
 };
 
 /**
- * Stop monitoring all nearables.
+ * Stop monitoring all nearables. Available on iOS.
  *
  * @param {SuccessCallbackNoParams} [success] Function called when
  * monitoring is stopped (optional).
@@ -1474,7 +1465,7 @@ function helper_updateRuleState(triggerIdentifier, ruleIdentifier, state)
 //window.helper_updateRuleState = helper_updateRuleState;
 
 /**
- * Create a trigger object.
+ * Create a trigger object. Available on iOS.
  *
  * @param {string} triggerIdentifier String that uniquely identifies
  * the trigger. You can choose any identifiers as long as they are unique
@@ -1504,7 +1495,7 @@ estimote.triggers.createTrigger = function(triggerIdentifier, rules)
 };
 
 /**
- * Create a basic rule object.
+ * Create a basic rule object. Available on iOS.
  *
  * @param {function} ruleUpdateFunction Function that is called
  * when the rule state should be updated. Specify your rule logic
@@ -1527,7 +1518,7 @@ estimote.triggers.createRule = function(ruleUpdateFunction)
 };
 
 /**
- * Create a rule object for a nearable.
+ * Create a rule object for a nearable. Available on iOS.
  *
  * @param {string|number} nearableIdentifierOrType A nearable
  * identifier or type.
@@ -1574,7 +1565,7 @@ estimote.triggers.createRuleForNearable = function(
 };
 
 /**
- * Create in range rule for nearable.
+ * Create in range rule for nearable. Available on iOS.
  *
  * @param {string|number} nearableIdentifierOrType A nearable
  * identifier or type.
@@ -1606,7 +1597,7 @@ estimote.triggers.createRuleForInRangeOfNearable = function(nearableIdentifierOr
 };
 
 /**
- * Create out of range rule for nearable type.
+ * Create out of range rule for nearable type. Available on iOS.
  *
  * @param {string|number} nearableIdentifierOrType A nearable
  * identifier or type.
@@ -1638,7 +1629,7 @@ estimote.triggers.createRuleForOutsideRangeOfNearable = function(nearableIdentif
 };
 
 /**
- * Start monitoring a trigger.
+ * Start monitoring a trigger. Available on iOS.
  *
  * @param {Trigger} trigger Trigger object to monitor.
  * @param {function} triggerCallback Function called when the trigger
@@ -1718,7 +1709,7 @@ estimote.triggers.startMonitoringForTrigger = function(
 };
 
 /**
- * Stop monitoring a trigger.
+ * Stop monitoring a trigger. Available on iOS.
  *
  * @param {Trigger} trigger Trigger to stop monitoring.
  * @param {SuccessCallback} [success] Function called on success (optional).
@@ -1744,7 +1735,7 @@ estimote.triggers.stopMonitoringForTrigger = function(trigger, success, error)
 /*********************************************************/
 
 /**
- * Rule creation function.
+ * Rule creation function. Available on iOS.
  */
 estimote.triggers.rules.nearableIsMoving = function()
 {
@@ -1754,7 +1745,7 @@ estimote.triggers.rules.nearableIsMoving = function()
 };
 
 /**
- * Rule creation function.
+ * Rule creation function. Available on iOS.
  */
 estimote.triggers.rules.nearableIsNotMoving = function()
 {
@@ -1764,7 +1755,7 @@ estimote.triggers.rules.nearableIsNotMoving = function()
 };
 
 /**
- * Rule creation function. Monitor a temperature span.
+ * Rule creation function. Monitor a temperature span. Available on iOS.
  * @param low Min temperature of span to detect.
  * @param high Max temperature of span to detect.
  */
@@ -1779,7 +1770,7 @@ estimote.triggers.rules.nearableTemperatureBetween = function(low, high)
 };
 
 /**
- * Rule creation function. Monitor a temperature.
+ * Rule creation function. Monitor a temperature. Available on iOS.
  * @param temp Rule triggers when nearable reads below this temperature.
  */
 estimote.triggers.rules.nearableTemperatureLowerThan = function(temp)
@@ -1792,7 +1783,7 @@ estimote.triggers.rules.nearableTemperatureLowerThan = function(temp)
 };
 
 /**
- * Rule creation function. Monitor a temperature.
+ * Rule creation function. Monitor a temperature. Available on iOS.
  * @param temp Rule triggers when nearable reads above this temperature.
  */
 estimote.triggers.rules.nearableTemperatureGreaterThan = function(temp)
@@ -1806,7 +1797,7 @@ estimote.triggers.rules.nearableTemperatureGreaterThan = function(temp)
 };
 
 /**
- * Rule creation function.
+ * Rule creation function. Available on iOS.
  */
 estimote.triggers.rules.nearableIsClose = function()
 {
@@ -1840,7 +1831,7 @@ estimote.triggers.rules.nearableIsClose = function()
 };
 
 /**
- * Rule creation function.
+ * Rule creation function. Available on iOS.
  */
 estimote.triggers.rules.nearableIsInRange = function()
 {
@@ -1957,294 +1948,3 @@ function checkExecParamsRegion(region)
 
 	return true;
 }
-
-/*********************************************************/
-/************** Unused/Old Beacon Functions **************/
-/*********************************************************/
-
-// These functions are from the original API and will eventually be
-// incorporated into the new API.
-
-/*
-EstimoteBeacons.getClosestBeacon = function (successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.getClosestBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.getClosestBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "getClosestBeacon",
-        []
-    );
-};
-
-EstimoteBeacons.getConnectedBeacon = function (successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.getConnectedBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.getConnectedBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "getConnectedBeacon",
-        []
-    );
-};
-
-EstimoteBeacons.connectToBeacon = function (major, minor, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (!isInt(major)) {
-        console.error("EstimoteBeacons.connectToBeacon failure: major must be a valid integer");
-        return;
-    }
-
-    if (!isInt(minor)) {
-        console.error("EstimoteBeacons.connectToBeacon failure: minor must be a valid integer");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.connectToBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.connectToBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "connectToBeacon",
-        [major, minor]
-    );
-};
-
-EstimoteBeacons.connectToBeaconByMacAddress = function (macAddress, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.connectToBeaconByMacAddress failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.connectToBeaconByMacAddress failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "connectToBeaconByMacAddress",
-        [macAddress]
-    );
-};
-
-EstimoteBeacons.disconnectFromBeacon = function (successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.disconnectFromBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.disconnectFromBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "disconnectFromBeacon",
-        []
-    );
-};
-
-EstimoteBeacons.setAdvIntervalOfConnectedBeacon = function (advInterval, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (!isInt(advInterval)) {
-        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: advInterval must be a valid integer");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.setAdvIntervalOfConnectedBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "setAdvIntervalOfConnectedBeacon",
-        [advInterval]
-    );
-};
-
-EstimoteBeacons.setPowerOfConnectedBeacon = function (power, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (!isInt(power)) {
-        console.error("EstimoteBeacons.setPowerOfConnectedBeacon failure: power must be a valid integer");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.setPowerOfConnectedBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.setPowerOfConnectedBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "setPowerOfConnectedBeacon",
-        [power]
-    );
-};
-
-EstimoteBeacons.updateFirmwareOfConnectedBeacon = function (progressCallback, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.updateFirmwareOfConnectedBeacon failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.updateFirmwareOfConnectedBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    var progressInterval;
-
-    exec(function () {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-            }
-
-            successCallback.apply(this, arguments);
-        },
-        function () {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-            }
-
-            errorCallback.apply(this, arguments);
-        },
-        "EstimoteBeacons",
-        "updateFirmwareOfConnectedBeacon",
-        []
-    );
-
-    if (typeof progressCallback === "function") {
-        progressInterval = setInterval(function () {
-            exec(progressCallback,
-                function (error) {
-                    console.error("Error", error);
-                },
-                "EstimoteBeacons",
-                "getFirmwareUpdateProgress",
-                []
-            );
-        }, 100);
-    }
-};
-
-EstimoteBeacons.startVirtualBeacon = function (major, minor, id, successCallback) {
-    if (!isInt(major)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: major must be a valid integer");
-        return;
-    }
-
-    if (!isInt(minor)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: minor must be a valid integer");
-        return;
-    }
-
-    if(!isString(id)) {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: id must be a string");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.startVirtualBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        function(){},
-        "EstimoteBeacons",
-        "startVirtualBeacon",
-        [major, minor, id]
-    );
-};
-
-EstimoteBeacons.stopVirtualBeacon = function(successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopVirtualBeacon failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        function(){},
-        "EstimoteBeacons",
-        "stopVirtualBeacon",
-        []
-    );
-};
-*/
