@@ -50,10 +50,7 @@
 		$('#id-screen-scan-beacons .style-item-list').empty();
 
 		// Start scanning.
-		estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
-			{}, // Empty region matches all beacons.
-			onScan,
-			onError);
+		estimote.beacons.startEstimoteBeaconDiscovery(onScan, onError);
 	};
 
 	app.stopScanningBeacons = function()
