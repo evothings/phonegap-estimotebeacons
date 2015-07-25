@@ -216,27 +216,52 @@ estimote.beacons.BeaconColorUnknown = 0;
 /**
  * Beacon colour.
  */
-estimote.beacons.BeaconColorMint = 1;
+estimote.beacons.BeaconColorMintCocktail = 1;
 
 /**
  * Beacon colour.
  */
-estimote.beacons.BeaconColorIce = 2;
+estimote.beacons.BeaconColorIcyMarshmallow = 2;
 
 /**
  * Beacon colour.
  */
-estimote.beacons.BeaconColorBlueberry = 3;
+estimote.beacons.BeaconColorBlueberryPie = 3;
 
 /**
  * Beacon colour.
  */
-estimote.beacons.BeaconColorWhite = 4;
+estimote.beacons.BeaconColorSweetBeetroot = 4;
 
 /**
  * Beacon colour.
  */
-estimote.beacons.BeaconColorTransparent = 5;
+estimote.beacons.BeaconColorCandyFloss = 5;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorLemonTart = 6;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorVanillaJello = 7;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorLiquoriceSwirl = 8;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorWhite = 9;
+
+/**
+ * Beacon colour.
+ */
+estimote.beacons.BeaconColorTransparent = 10;
 
 /**
  * Region state.
@@ -537,10 +562,7 @@ estimote.beacons.setupAppIDAndAppToken = function(appID, appToken, success, erro
  * @property {string} macAddress (scanning iOS, ranging Android).
  * @property {number} measuredPower (scanning iOS, ranging Android).
  * @property {string} name The name advertised by the beacon (ranging Android).
- * @property {number} color One of the estimote.beacons.BeaconColor* values (ranging/scanning iOS/Android).
- * TODO: Not available on beacon object, find out how to implement in Estimote iOS SDK 3.3.1.
  * @property {number} distance Estimated distance from the beacon in meters (ranging iOS).
- * TODO: Not available on beacon object, find out how to implement in Estimote iOS SDK 3.3.1.
  */
 
 /**

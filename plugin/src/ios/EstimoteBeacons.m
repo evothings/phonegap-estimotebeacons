@@ -91,7 +91,20 @@
 @property (nonatomic, strong) ESTSecureBeaconManager* secureBeaconManager;
 
 /**
+ * Estimote Cloud manager.
+ */
+@property (nonatomic, strong) ESTCloudManager* cloudManager;
+
+/**
+ * Dictionary with beacon colors fetched from the cloud.
+ * Contains mappings @"UUID:major:minor" -> NSNumber (ESTColor).
+ * During fetching of value mapping is @"UUID:major:minor" -> ESTColorUnknown
+ */
+@property NSMutableDictionary* beaconColors;
+
+/**
  * EddyStone manager in the Estimote API.
+ * TODO: Implement Eddystone support.
  */
 @property (nonatomic, strong) ESTEddystoneManager* eddystoneManager;
 
@@ -218,6 +231,10 @@
 	self.secureBeaconManager = [ESTSecureBeaconManager new];
 	self.secureBeaconManager.delegate = self;
 
+	// Create clound manager.
+	self.cloudManager = [ESTCloudManager new];
+	self.beaconColors = [NSMutableDictionary new];
+
 	// TODO: Create eddystoneBeaconManager and implement related methods.
 
 	// Variables that track callback ids.
@@ -340,13 +357,49 @@
  */
 - (NSDictionary*) coreLocationBeaconToDictionary:(CLBeacon*)beacon
 {
+	/////////////////////////////////////////////////////
+	// Get beacon color. Fetch color async if not set. //
+	/////////////////////////////////////////////////////
+
+	// Create key for color dictionary.
+	NSString* beaconKey = [NSString stringWithFormat: @"%@:%@:%@",
+		beacon.proximityUUID.UUIDString,
+		beacon.major,
+		beacon.minor];
+
+	// We store colors in this dictionary.
+	NSNumber* beaconColor = self.beaconColors[beaconKey];
+
+	// Check if color is set.
+	if (nil == beaconColor)
+	{
+		// Color is not set. Set color to unknown to begin with.
+		self.beaconColors[beaconKey] = [NSNumber numberWithInt: ESTColorUnknown];
+
+		// Fetch color from cloud.
+		[self.cloudManager
+			fetchColorForBeacon:beacon
+			completion:^(NSObject *value, NSError *error)
+			{
+				// TODO: Check error? Where are errors documented?
+				// Any threading problems setting color value async?
+				self.beaconColors[beaconKey] = value;
+			}];
+	}
+
+	//////////////////////////////////////////////
+	// Store beacon properties in a dictionary. //
+	//////////////////////////////////////////////
+
 	NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:8];
 
+	[dict setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
 	[dict setValue:beacon.major forKey:@"major"];
 	[dict setValue:beacon.minor forKey:@"minor"];
 	[dict setValue:[NSNumber numberWithInteger:beacon.rssi] forKey:@"rssi"];
-	[dict setValue:beacon.proximityUUID.UUIDString forKey:@"proximityUUID"];
 	[dict setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
+	[dict setValue:[NSNumber numberWithDouble:beacon.accuracy] forKey:@"distance"];
+	[dict setValue:beaconColor forKey:@"color"];
 
 	return dict;
 }
@@ -370,7 +423,7 @@
 	//@property (nonatomic, strong) NSDate *discoveryDate;
 	//@property (nonatomic, strong) NSData *advertisementData;
 
-	// TODO: Use new way to find beacon colour.
+	// TODO: How to find beacon color during Bluetooth scan?
 	//[dict setValue:[NSNumber numberWithInteger:beacon.color] forKey:@"color"];
 
 	// TODO: Is it possible to find UUID and proximity/distance with new API?
@@ -378,38 +431,13 @@
 	//[dict setValue:beacon.distance forKey:@"distance"];
 	//[dict setValue:[NSNumber numberWithInt:beacon.proximity] forKey:@"proximity"];
 
-
-	// Properties available after connecting.
-	// TODO: These are obtained in a different way using SDK 3.3.1. Research how to implement.
-	/*
-	if (ESTConnectionStatusConnected == beacon.connectionStatus)
-	{
-		[dict setValue:beacon.name forKey:@"name"];
-		[dict setValue:beacon.motionProximityUUID.UUIDString forKey:@"name"]; // TODO: Check nil value?
-		[dict setValue:[NSNumber numberWithChar:[beacon.power charValue]] forKey:@"power"];
-		[dict setValue:beacon.advInterval forKey:@"advInterval"];
-		[dict setValue:beacon.batteryLevel forKey:@"batteryLevel"];
-		[dict setValue:beacon.remainingLifetime forKey:@"remainingLifetime"];
-		[dict setValue:[NSNumber numberWithInt:beacon.batteryType] forKey:@"batteryType"];
-		[dict setValue:beacon.hardwareVersion forKey:@"hardwareVersion"];
-		[dict setValue:beacon.firmwareVersion forKey:@"firmwareVersion"];
-		[dict setValue:[NSNumber numberWithInt:beacon.firmwareUpdateInfo] forKey:@"firmwareUpdateInfo"];
-		[dict setValue:[NSNumber numberWithBool:beacon.isMoving] forKey:@"isMoving"];
-		[dict setValue:[NSNumber numberWithBool:beacon.isAccelerometerAvailable] forKey:@"isAccelerometerAvailable"];
-		[dict setValue:[NSNumber numberWithBool:beacon.isAccelerometerEditAvailable] forKey:@"isAccelerometerEditAvailable"];
-		[dict setValue:[NSNumber numberWithBool:beacon.accelerometerEnabled] forKey:@"accelerometerEnabled"];
-		[dict setValue:[NSNumber numberWithInt:beacon.basicPowerMode] forKey:@"basicPowerMode"];
-		[dict setValue:[NSNumber numberWithInt:beacon.smartPowerMode] forKey:@"smartPowerMode"];
-	}
-	*/
-
 	return dict;
 }
 
 /**
  * Create a dictionary object with ESTBluetoothBeacon beacons.
  */
-- (NSDictionary*) dictionaryWithBeacons:(NSArray*)beacons
+- (NSDictionary*) dictionaryWithBluetoothBeacons:(NSArray*)beacons
 {
 	// Convert beacons to a an array of property-value objects.
 	NSMutableArray* beaconArray = [NSMutableArray array];
@@ -511,7 +539,7 @@
 		&& nil != self.callbackId_beaconsDiscovery)
 	{
 		// Create dictionary with result.
-		NSDictionary* resultDictionary = [self dictionaryWithBeacons:beacons];
+		NSDictionary* resultDictionary = [self dictionaryWithBluetoothBeacons:beacons];
 
 		// Pass result to JavaScript callback.
 		CDVPluginResult* result = [CDVPluginResult

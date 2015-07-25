@@ -7,12 +7,18 @@ var app = (function()
 	// Application data.
 	app.currentScreenId = null;
 	app.beaconColorStyles = [
-		'style-color-unknown style-color-unknown-text',
-		'style-color-mint style-color-mint-text',
-		'style-color-ice style-color-ice-text',
-		'style-color-blueberry-dark style-color-blueberry-dark-text',
-		'style-color-white style-color-white-text',
-		'style-color-transparent style-color-transparent-text'];
+		'style-color-unknown style-color-unknown-text',        // BeaconColorUnknown
+		'style-color-mint style-color-mint-text',              // BeaconColorMintCocktail
+		'style-color-ice style-color-ice-text',                // BeaconColorIcyMarshmallow
+		'style-color-blueberry-dark style-color-blueberry-dark-text', // BeaconColorBlueberryPie
+		'style-color-unknown style-color-unknown-text',        // TODO: BeaconColorSweetBeetroot
+		'style-color-unknown style-color-unknown-text',        // TODO: BeaconColorCandyFloss
+		'style-color-unknown style-color-unknown-text',        // TODO: BeaconColorLemonTart
+		'style-color-unknown style-color-unknown-text',        // TODO: BeaconColorVanillaJello
+		'style-color-unknown style-color-unknown-text',        // TODO: BeaconColorLiquoriceSwirl
+		'style-color-white style-color-white-text',            // BeaconColorWhite
+		'style-color-transparent style-color-transparent-text' // BeaconColorTransparent
+		];
 	app.proximityNames = [
 		'unknown',
 		'immediate',

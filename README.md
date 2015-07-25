@@ -26,7 +26,9 @@ See the instructions in the Beacon Finder [README file](examples/beacon-finder/R
 
 The file [documentation.md](documentation.md) contains an overview of the plugin API.
 
-Documentation of all functions is available in the JavaScript API implementation file [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js). There is also [JSDoc generated documentation](http://evomedia.evothings.com/jsdoc/phonegap-estimotebeacons/) available.
+Documentation of all functions is available in the JavaScript API implementation file [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js).
+<!-- TODO: Update generated documentation.
+There is also [JSDoc generated documentation](http://evomedia.evothings.com/jsdoc/phonegap-estimotebeacons/) available. -->
 
 ## Develop beacon apps using live reload
 
@@ -60,3 +62,5 @@ Learn more about Cordova app development for the Internet of Things in the [Cord
 ## Credits
 
 Many thanks goes to [Konrad Dzwinel](https://github.com/kdzwinel) who developed the original version of this plugin and provided valuable support and advice for the redesign of the plugin.
+
+Many thanks also to all contributors! https://github.com/evothings/phonegap-estimotebeacons/pulls?q=is%3Apr+is%3Aclosed

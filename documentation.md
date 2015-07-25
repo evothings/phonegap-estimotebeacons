@@ -8,8 +8,12 @@ See file [changelog.md](changelog.md) for a list of all updates.
 
 ## JavaScript API documentation
 
+<!-- TODO: Update generated documentation.
+
 In addition to this document [JSDoc generated documentation](http://evomedia.evothings.com/jsdoc/phonegap-estimotebeacons/) is available. This is based on the documentation comments in file
-[EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js)
+[EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js) -->
+
+File [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js) contains documentation comments for JSDoc.
 
 ## Basic usage
 
@@ -100,13 +104,11 @@ Example:
 
 ### Start and stop scanning beacons (iOS only)
 
-    estimote.beacons.startEstimoteBeaconsDiscoveryForRegion(
-        region,
+    estimote.beacons.startEstimoteBeaconDiscovery(
         successCallback,
         errorCallback)
 
     estimote.beacons.stopEstimoteBeaconDiscovery(
-        region,
         successCallback,
 		errorCallback)
 
@@ -141,7 +143,7 @@ Properties available both during ranging and scanning:
 
 * major - major value of the beacon
 * minor - minor value of the beacon
-* color - one of estimote.beacons.BeaconColorUnknown, estimote.beacons.BeaconColorMint, estimote.beacons.BeaconColorIce, estimote.beacons.BeaconColorBlueberry, estimote.beacons.BeaconColorWhite, estimote.beacons.BeaconColorTransparent
+* color - one of estimote.beacons.BeaconColor* values (see file [EstimoteBeacons.js](plugin/src/js/EstimoteBeacons.js) for all available values)
 * rssi - number representing the Received Signal Strength Indication
 
 Beacon properties available only when ranging:
@@ -210,10 +212,9 @@ Here is an example:
 	// Step 1: Set App ID and App Token.
 	estimote.beacons.setupAppIDAndAppToken('MyAppID', 'MyAppToken')
 
-	// Step 2: Specify secure field in region object.
-    var region = { identifier: 'MyRegion', secure: true }
-    estimote.beacons.startRangingBeaconsInRegion(
-        region,
+	// Step 2: Range for secure beacons.
+    estimote.beacons.startRangingSecureBeaconsInRegion(
+        {},
         onBeaconsRanged,
         onError)
 

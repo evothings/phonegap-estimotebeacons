@@ -26,7 +26,11 @@ Open a command window and go to the examples/beacon-finder directory, e.g.:
 
     cd examples/beacon-finder
 
-Add the Estimote plugin, this just needs to be done once:
+Add the Cordova whitelist plugin, this just needs to be done once:
+
+    cordova plugin add cordova-plugin-whitelist
+
+Add the Estimote plugin, this just needs to be done once for every update of the plugin:
 
     cordova plugin add https://github.com/evothings/phonegap-estimotebeacons.git
 
@@ -45,3 +49,8 @@ To build and install the app on iOS, first build an Xcode project:
     cordova build ios
 
 Then open and run the generated project using Xcode: platforms/ios/BeaconFinder.xcodeproj
+
+To reinstall the plugin (update to latest version) do:
+
+    cordova plugin rm pl.makingwaves.estimotebeacons
+    cordova plugin add https://github.com/evothings/phonegap-estimotebeacons.git
