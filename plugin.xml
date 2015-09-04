@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	id="pl.makingwaves.estimotebeacons"
+	id="cordova-plugin-estimote"
 	version="0.8.0">
 
 	<name>EstimoteBeacons</name>
