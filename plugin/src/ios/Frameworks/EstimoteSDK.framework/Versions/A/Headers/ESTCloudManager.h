@@ -7,7 +7,6 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
@@ -15,10 +14,14 @@
 #import "ESTNearable.h"
 #import "ESTBeaconVO.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  ESTCloudManager class is responsible for Estimote Cloud integration. It allows you to invoke 
  *  available Estimote Cloud API methods using block pattern to handle result.
  */
+
+__attribute__ ((deprecated(("Starting from SDK 3.5.0 use ESTConfig class and particular requests (eg. ESTRequestGetBeacons) to interact with Estimote Cloud API."))))
 @interface ESTCloudManager : NSObject
 
 #pragma mark - Configuration
@@ -34,6 +37,20 @@
 + (void)setupAppID:(NSString *)appID andAppToken:(NSString *)appToken;
 
 /**
+ * Returns currently used App ID.
+ *
+ * @return currently used App ID.
+ */
++ (NSString * _Nullable)appID;
+
+/**
+ * Returns currently used App Token.
+ *
+ * @return currently used App Token.
+ */
++ (NSString * _Nullable)appToken;
+
+/**
  * Checks if App ID and App Token were set.
  */
 + (BOOL)isAuthorized;
@@ -44,7 +61,7 @@
  *
  *  @param enable flag indicating if analytics should be enabled
  */
-+ (void)enableAnalytics:(BOOL)enable __attribute ((deprecated(("Staring from SDK 3.2.0 use enableMonitoringAnalytics: or enableRangingAnalytics: instead."))));
++ (void)enableAnalytics:(BOOL)enable __attribute ((deprecated(("Starting from SDK 3.2.0 use enableMonitoringAnalytics: or enableRangingAnalytics: instead."))));
 
 /**
  *  Enables analytics requests on Enter/Exit monitoring events. Analytics data
@@ -76,7 +93,7 @@
  *
  *  @return flag that indicates if analytics is enabled
  */
-+ (BOOL)isAnalyticsEnabled __attribute ((deprecated(("Staring from SDK 3.2.0 use enableMonitoringAnalytics: or enableRangingAnalytics: instead."))));
++ (BOOL)isAnalyticsEnabled __attribute__ ((deprecated(("Starting from SDK 3.2.0 use enableMonitoringAnalytics: or enableRangingAnalytics: instead."))));
 
 /**
  *  Indicates current state of monitoring analytics.
@@ -118,6 +135,17 @@
  *  @param completion completion block invoked with fetching is done
  */
 - (void)fetchBeaconDetails:(NSString *)beaconUID completion:(ESTObjectCompletionBlock)completion;
+
+/**
+ *  Fetches additional data about the nearable with the given identifier from Estimote Cloud.
+ *
+ *  @param nearableUID A nearable identifier, as broadcast in the Nearable packet;
+ *         or a “<UUID>:<major>:<minor>” string with nearable’s iBeacon identifier, as broadcast in the iBeacon packet.
+ *  @param completion A block to call upon completion of the request.
+ *         If successful, first argument will be an ESTNearableVO object.
+ *         If not, first argument will be nil, and second argument will be the error object.
+ */
+- (void)fetchNearableDetails:(NSString *)nearableUID completion:(ESTObjectCompletionBlock)completion;
 
 /**
  *  Collects color of particular beacon device stored in Estimote Cloud.
@@ -166,23 +194,59 @@
 /**
  *  Assigns provided GPS location to the beacon.
  *
- *  @param location   CLLocation object with latitude and longitude included
- *  @param beacon     CLBeacon to which location should be assigned
- *  @param completion result information with assigned location provided
+ *  @param location   the location (lat/lng) to assign to the beacon
+ *  @param beacon     the beacon to assign the location to
+ *  @param completion completion callback; first param is the CLLocation just assigned (or nil if there was an error); second param is an NSError object (or nil if assigned successfully)
  */
 - (void)assignGPSLocation:(CLLocation *)location
                  toBeacon:(CLBeacon *)beacon
                completion:(ESTObjectCompletionBlock)completion;
 
 /**
- *  Assigns current GPS location to provided beacon.
- *  Location is obtained internally using single CLLocation manger scan.
+ *  Assigns provided GPS location to the beacon.
  *
- *  @param beacon beacon to which location should be assigned
- *  @param completion completion block with assigned location provided
+ *  @param location   CLLocation object with latitude and longitude included
+ *  @param macAddress macAddress of beacon to which location should be assigned
+ *  @param completion result information with assigned location provided
+ */
+- (void)assignGPSLocation:(CLLocation *)location
+          toBeaconWithMac:(NSString *)macAddress
+               completion:(ESTObjectCompletionBlock)completion;
+
+/**
+ *  Assigns current GPS location to provided beacon.
+ *
+ *  Location is obtained internally using a single CLLocation manger scan.
+ *
+ *  @param beacon     the beacon to assign the location to
+ *  @param completion completion callback; first param is the CLLocation just assigned (or nil if there was an error); second param is an NSError object (or nil if assigned successfully)
  */
 - (void)assignCurrentGPSLocationToBeacon:(CLBeacon *)beacon
                               completion:(ESTObjectCompletionBlock)completion;
+
+/**
+ *  Assigns current GPS location to provided beacon.
+ *  Location is obtained internally using single CLLocation manger scan.
+ *
+ *  @param macAddress macAddress of beacon to which location should be assigned
+ *  @param completion completion block with assigned location provided
+ */
+- (void)assignCurrentGPSLocationToBeaconWithMac:(NSString *)macAddress
+                              completion:(ESTObjectCompletionBlock)completion;
+
+
+/**
+ *  Location is obtained internally using a single CLLocation manger scan.
+ *
+ *  @param uuid       UUID of the beacon to assign the location to
+ *  @param major      major of the beacon to assign the location to
+ *  @param minor      minor of the beacon to assign the location to
+ *  @param completion completion callback; first param is the CLLocation just assigned (or nil if there was an error); second param is an NSError object (or nil if assigned successfully)
+ */
+- (void)assignCurrentGPSLocationToBeaconWithProximityUUID:(NSUUID *)uuid
+                                                    major:(NSNumber *)major
+                                                    minor:(NSNumber *)minor
+                                               completion:(ESTObjectCompletionBlock)completion;
 
 #pragma mark - Bulk Updater
 
@@ -203,5 +267,6 @@
  */
 - (void)fetchPendingBeaconsSettingsWithCompletion:(ESTArrayCompletionBlock)completion;
 
-
 @end
+
+NS_ASSUME_NONNULL_END

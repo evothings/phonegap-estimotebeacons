@@ -7,10 +7,11 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import "ESTDefinitions.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Type of the device marked on enclosure.
@@ -65,7 +66,6 @@ typedef NS_ENUM(NSInteger, ESTNearableFirmwareState)
     ESTNearableFirmwareStateApp
 };
 
-
 @interface ESTNearableDefinitions : ESTDefinitions
 
 /**
@@ -77,5 +77,6 @@ typedef NS_ENUM(NSInteger, ESTNearableFirmwareState)
  */
 + (NSString *)nameForType:(ESTNearableType)type;
 
-
 @end
+
+NS_ASSUME_NONNULL_END

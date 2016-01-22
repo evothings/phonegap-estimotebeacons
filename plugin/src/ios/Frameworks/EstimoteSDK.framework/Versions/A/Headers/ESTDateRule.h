@@ -7,18 +7,20 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import "ESTRule.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The `ESTDateRule` class defines single rule related to time during the day.
  */
+
 @interface ESTDateRule : ESTRule 
 
-@property (nonatomic, strong) NSNumber *afterHour;
-@property (nonatomic, strong) NSNumber *beforeHour;
+@property (nonatomic, strong) NSNumber * _Nullable afterHour;
+@property (nonatomic, strong) NSNumber * _Nullable beforeHour;
 
 /**
  *  Initialization method creating rule when targeted hour is later then.
@@ -49,3 +51,5 @@
 + (instancetype)hourBetween:(int)firstHour and:(int)secondHour;
 
 @end
+
+NS_ASSUME_NONNULL_END

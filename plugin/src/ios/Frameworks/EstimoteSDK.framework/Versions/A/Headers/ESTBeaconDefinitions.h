@@ -7,11 +7,12 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
 #import "ESTDefinitions.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 #define ESTIMOTE_PROXIMITY_UUID             [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"]
 #define ESTIMOTE_MACBEACON_PROXIMITY_UUID   [[NSUUID alloc] initWithUUIDString:@"08D4A950-80F0-4D42-A14B-D53E063516E6"]
@@ -109,9 +110,10 @@ typedef NS_ENUM(NSInteger, ESTBeaconCharInfoType)
     ESTBeaconCharInfoTypeWriteOnly
 };
 
-typedef void(^ESTPowerCompletionBlock)(ESTBeaconPower value, NSError *error);
-
+typedef void(^ESTPowerCompletionBlock)(ESTBeaconPower value, NSError * _Nullable error);
 
 @interface ESTBeaconDefinitions : NSObject
 
 @end
+
+NS_ASSUME_NONNULL_END

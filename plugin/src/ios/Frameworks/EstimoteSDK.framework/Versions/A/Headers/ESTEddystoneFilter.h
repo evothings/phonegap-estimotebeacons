@@ -7,14 +7,17 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
+#import "ESTEddystone.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ESTEddystoneFilter : NSObject
 
-- (NSArray *)filterEddystones:(NSArray *)eddystones;
+- (NSArray<ESTEddystone *> *)filterEddystones:(NSArray<ESTEddystone *> *)eddystones;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -7,7 +7,6 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 /**
@@ -33,6 +32,7 @@ typedef NS_ENUM(NSInteger, ESTNotification)
 };
 
 #define BEACON_REGION_KEY @"beaconRegionKey"
+
 
 @interface ESTNotificationTransporter : NSObject
 

@@ -7,22 +7,24 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import "ESTRule.h"
 #import "ESTNearable.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The `ESTNearableRule` is abstract class defining base methods for all Estimote nearable related rules. It should not be used itself as it is not
  * defining any conditions.
  */
+
 @interface ESTNearableRule : ESTRule
 
 /**
  *  Identifier of nearable that is going to be associated with this rule.
  */
-@property (nonatomic, strong, readonly) NSString *nearableIdentifier;
+@property (nonatomic, strong, readonly) NSString * _Nullable nearableIdentifier;
 
 /**
  *  Type of nearable that is going to be associated with this rule.
@@ -59,3 +61,5 @@
 - (void)updateWithNearable:(ESTNearable *)nearable;
 
 @end
+
+NS_ASSUME_NONNULL_END

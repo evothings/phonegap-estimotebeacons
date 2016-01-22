@@ -7,11 +7,12 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
 #import "ESTNearable.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class ESTNearableManager;
 
@@ -34,7 +35,7 @@
  * @param nearables An array of `<ESTNearable>` objects representing the nearables currently in range. You can use the information in these objects to determine the range of each nearables and its identifying information.
  * @param type The nearable type that was used to range the nearables.
  */
-- (void)nearableManager:(ESTNearableManager *)manager didRangeNearables:(NSArray *)nearables withType:(ESTNearableType)type;
+- (void)nearableManager:(ESTNearableManager *)manager didRangeNearables:(NSArray<ESTNearable *> *)nearables withType:(ESTNearableType)type;
 
 /**
  * Tells the delegate that nearable with particular identifier is in range.
@@ -60,10 +61,10 @@
 
 
 /**
- * Tells the delegate that the user entered region of specified nearable identifier.
+ * Tells the delegate that the user entered region of specified nearable type.
  *
  * @param manager The nearable manager object reporting the event.
- * @param region The nearable type region that was entered.
+ * @param type The nearable type region that was entered.
  */
 - (void)nearableManager:(ESTNearableManager *)manager didEnterTypeRegion:(ESTNearableType)type;
 
@@ -71,7 +72,7 @@
  * Tells the delegate that the user left the region of specified nearable type.
  *
  * @param manager The nearable manager object reporting the event.
- * @param region The nearable type region that was exited.
+ * @param type The nearable type region that was exited.
  */
 - (void)nearableManager:(ESTNearableManager *)manager didExitTypeRegion:(ESTNearableType)type;
 
@@ -79,7 +80,7 @@
  * Tells the delegate that the user entered region of specified nearable identifier.
  *
  * @param manager The nearable manager object reporting the event.
- * @param region The nearable identifier region that was entered.
+ * @param identifier The nearable identifier region that was entered.
  */
 - (void)nearableManager:(ESTNearableManager *)manager didEnterIdentifierRegion:(NSString *)identifier;
 
@@ -87,7 +88,7 @@
  * Tells the delegate that the user left the region of specified nearable identifier.
  *
  * @param manager The nearable manager object reporting the event.
- * @param region The nearable identifier region that was exited.
+ * @param identifier The nearable identifier region that was exited.
  */
 - (void)nearableManager:(ESTNearableManager *)manager didExitIdentifierRegion:(NSString *)identifier;
 
@@ -104,9 +105,10 @@
 /**
  * The `ESTNearableManager` class defines the interface for ranging and monitoring nearables.
  */
+
 @interface ESTNearableManager : NSObject
 
-@property (nonatomic, weak) id <ESTNearableManagerDelegate> delegate;
+@property (nonatomic, weak) id <ESTNearableManagerDelegate> _Nullable delegate;
 
 #pragma mark - Nearable monitoring related methods
 ///--------------------------------------------------------------------
@@ -186,7 +188,7 @@
 /**
  * Stops the delivery of notifications for the specified nearable identifier.
  *
- * @param type The type of nearables. This parameter must not be `nil`
+ * @param identifier The identifier of nearables. This parameter must not be `nil`
  *
  * @see nearableManager:startRangingForType:
  */
@@ -223,3 +225,5 @@
 - (void)stopRanging;
 
 @end
+
+NS_ASSUME_NONNULL_END
