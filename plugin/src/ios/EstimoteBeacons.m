@@ -13,7 +13,7 @@
 
 #pragma mark - Estimote Triggers Declarations
 
-/*********************************************************/
+/*********************************************************/requestStateForRegion
 /************ Estimote Triggers Declarations *************/
 /*********************************************************/
 
@@ -788,9 +788,6 @@
 
 	// Start monitoring.
 	[aManager startMonitoringForRegion:region];
-	
-	// This will get the initial state faster.		
-	[aManager requestStateForRegion:region];
 }
 
 /**
