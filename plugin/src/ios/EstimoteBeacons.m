@@ -847,13 +847,13 @@
 - (void) beaconManager:(id)manager
 	didEnterRegion:(CLBeaconRegion *)region
 {
-	// Not used.
+	[self.commandDelegate evalJs:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion'); "];
 }
 
 - (void) beaconManager:(id)manager
 	didExitRegion:(CLBeaconRegion *)region
 {
-	// Not used.
+	[self.commandDelegate evalJs:@"cordova.fireWindowEvent('estimote.beacons.didExitRegion'); "];
 }
 
 /**
