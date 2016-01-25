@@ -844,8 +844,7 @@
 - (void) beaconManager:(id)manager
 	didEnterRegion:(CLBeaconRegion *)region
 {
-	NSString* proximityUUID = [region.proximityUUID UUIDString];
-	[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'proximityUUID': %@ }); ", [@(proximityUUID) stringValue]]];
+	[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'proximityUUID': %@ }); ", [@(region.proximityUUID) UUIDString]]];
 }
 
 - (void) beaconManager:(id)manager
