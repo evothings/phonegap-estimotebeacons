@@ -844,9 +844,9 @@
 - (void) beaconManager:(id)manager
 	didEnterRegion:(CLBeaconRegion *)region
 {
-	[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion'); "]];
-	[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'major': %1$@, 'minor': %2$@ }); ", [region.major stringValue], [region.minor stringValue]]];
-	[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'proximityUUID': \"%1$@\", 'major': %2$@, 'minor': %3$@ }); ", [region.proximityUUID UUIDString], [region.major stringValue], [region.minor stringValue]]];
+	[self.commandDelegate evalJs:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion');"];
+	//[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'major': %1$@, 'minor': %2$@ }); ", [region.major stringValue], [region.minor stringValue]]];
+	//[self.commandDelegate evalJs:[NSString stringWithFormat:@"cordova.fireWindowEvent('estimote.beacons.didEnterRegion', { 'proximityUUID': \"%1$@\", 'major': %2$@, 'minor': %3$@ }); ", [region.proximityUUID UUIDString], [region.major stringValue], [region.minor stringValue]]];
 }
 
 - (void) beaconManager:(id)manager
