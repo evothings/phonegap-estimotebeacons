@@ -41,13 +41,17 @@
 		$('#id-screen-monitor-regions .style-item-list').empty();
 
 		// Request authorisation.
-		estimote.beacons.requestAlwaysAuthorization();
+		estimote.beacons.requestAlwaysAuthorization(function(){
+			// Start monitoring.
+			estimote.beacons.startMonitoringForRegion(
+				{}, // Empty region matches all beacons.
+				onMonitor,
+				onError);
+		}, function(e){
+			alert(e);
+		});
 
-		// Start monitoring.
-		estimote.beacons.startMonitoringForRegion(
-			{}, // Empty region matches all beacons.
-			onMonitor,
-			onError);
+
 	};
 
 	app.stopMonitoringRegions = function()
