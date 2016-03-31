@@ -169,7 +169,10 @@ public class EstimoteBeacons extends CordovaPlugin
 			writeConnectedMinor(args, callbackContext);
 		}
 		else if ("beacons_requestAlwaysAuthorization".equals(action)) {
-			requestAlwaysAuthorization(args, callbackContext);
+			requestAuthorization(args, callbackContext);
+		}
+		else if ("beacons_requestWhenInUseAuthorization".equals(action)) {
+			requestAuthorization(args, callbackContext);
 		}
 		else if ("bluetooth_bluetoothState".equals(action)) {
 		checkBluetoothState(args, callbackContext);
@@ -226,8 +229,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	{
 		if (mBeaconManager.isBluetoothEnabled()) {
 			callbackContext.success(1);
-		}
-		else {
+		} else {
 			callbackContext.success(0);
 		}
 	}
@@ -632,7 +634,7 @@ public class EstimoteBeacons extends CordovaPlugin
             Log.i(LOGTAG, mConnectedBeacon.getBeacon().getProximityUUID());
             Log.i(LOGTAG, String.valueOf(uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())));
 
-            // already correct, skip
+			// already correct, skip
             if (uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())) {
                 PluginResult r = new PluginResult(PluginResult.Status.OK);
                 callbackContext.sendPluginResult(r);
@@ -717,7 +719,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
             int minor = cordovaArgs.getInt(0);
 
-            // already correct, skip
+			// already correct, skip
             if (minor == mConnectedBeacon.getBeacon().getMinor()) {
                 PluginResult r = new PluginResult(PluginResult.Status.OK);
                 callbackContext.sendPluginResult(r);
@@ -725,7 +727,7 @@ public class EstimoteBeacons extends CordovaPlugin
 
             if (minor == 0) {
                 callbackContext.error("minor cannot be 0");
-                return;
+				return;
             }
 
             BeaconConnection.WriteCallback writeCallback;
@@ -743,15 +745,15 @@ public class EstimoteBeacons extends CordovaPlugin
             };
 
             mConnectedBeacon.writeMinor(minor, writeCallback);
-        }
+		}
 	}
 
 	/**
 	 * Helper method.
 	 */
-	private void requestAlwaysAuthorization(
+	private void requestAuthorization(
 			CordovaArgs cordovaArgs,
-		  	CallbackContext callbackContext)
+			CallbackContext callbackContext)
 	{
 		Log.i(LOGTAG, "requestAlwaysAuthorization");
 
