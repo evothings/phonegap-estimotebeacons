@@ -790,6 +790,22 @@
 	[aManager startMonitoringForRegion:region];
 }
 
+- (void) beacon_requestStateForRegion: (CDVInvokedUrlCommand*)command
+    manager:(id)aManager
+{
+    // Get region dictionary passed from JavaScript and
+    // create a beacon region object.
+    NSDictionary* regionDictionary = [command argumentAtIndex:0];
+    CLBeaconRegion* region = [self createRegionFromDictionary:regionDictionary];
+
+    // Return value to JavaScript.
+    [self.commandDelegate
+        sendPluginResult: [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsInt: 0]
+                    callbackId: command.callbackId];
+
+    [aManager requestStateForRegion:region];
+ }
+
 /**
  * Stop CoreLocation monitoring.
  */

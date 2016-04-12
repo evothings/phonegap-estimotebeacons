@@ -278,6 +278,19 @@ estimote.beacons.RegionStateOutside = 'outside';
  */
 estimote.beacons.RegionStateInside = 'inside';
 
+
+estimote.requestStateForRegion = function(success, error)
+{
+    exec(success,
+        error,
+        'EstimoteBeacons',
+        'beacons_requestStateForRegion',
+        []
+    );
+
+    return true;
+ };
+
 /**
  * Ask the user for permission to use location services
  * while the app is in the foreground.
