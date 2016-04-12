@@ -279,13 +279,13 @@ estimote.beacons.RegionStateOutside = 'outside';
 estimote.beacons.RegionStateInside = 'inside';
 
 
-estimote.requestStateForRegion = function(success, error)
+estimote.requestStateForRegion = function(regionName, success, error)
 {
     exec(success,
         error,
         'EstimoteBeacons',
         'beacons_requestStateForRegion',
-        []
+        [regionName]
     );
 
     return true;
