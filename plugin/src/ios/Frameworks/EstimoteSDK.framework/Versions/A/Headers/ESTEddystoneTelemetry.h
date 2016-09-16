@@ -7,10 +7,11 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Telemetry is a set of utility information showing state
@@ -26,26 +27,39 @@
  * accessible with small time delay.
  *
  */
+
 @interface ESTEddystoneTelemetry : NSObject <NSCopying>
 
 /**
- * Battery Level in Milivolts [mV]
+ * Battery Level in millivolts [mV]
  */
-@property (nonatomic, strong) NSNumber *battery;
+@property (nonatomic, strong) NSNumber * battery __attribute ((deprecated(("Starting from SDK 3.2.2 use batteryVoltage instead."))));
 
 /**
- * Sensor ambient temperature (Provided in Celsius)
+ * Battery Level in millivolts [mV]
+ */
+@property (nonatomic, strong) NSNumber *batteryVoltage;
+
+/**
+ * Sensor ambient temperature provided in Celsius degrees.
  */
 @property (nonatomic, strong) NSNumber *temperature;
 
 /**
- * Count of packet sent by the device since last power up.
+ * Count of packet sent by the device since last power-up.
  */
-@property (nonatomic, strong) NSNumber *pocketCount;
+@property (nonatomic, strong) NSNumber *packetCount;
 
 /**
- * Time the device is running since last power up.
+ * Uptime of the device since last power-up provided in milliseconds.
  */
-@property (nonatomic, strong) NSNumber *awakeTime;
+@property (nonatomic, strong) NSNumber *uptimeMillis;
+
+/**
+ * Uptime of the device since last power-up provided in seconds.
+ */
+@property (nonatomic, strong) NSNumber * awakeTime __attribute ((deprecated(("Starting from SDK 3.2.2 use uptimeMillis instead."))));
 
 @end
+
+NS_ASSUME_NONNULL_END

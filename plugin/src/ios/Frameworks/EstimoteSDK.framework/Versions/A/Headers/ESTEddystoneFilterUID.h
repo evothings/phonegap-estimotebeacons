@@ -7,11 +7,12 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import "ESTEddystoneFilter.h"
 #import "ESTEddystoneUID.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Eddystone-UID based filter used by `ESTEddystoneManager` in discovery process.
@@ -30,3 +31,5 @@
 - (instancetype)initWithUID:(ESTEddystoneUID *)eddystoneUID;
 
 @end
+
+NS_ASSUME_NONNULL_END

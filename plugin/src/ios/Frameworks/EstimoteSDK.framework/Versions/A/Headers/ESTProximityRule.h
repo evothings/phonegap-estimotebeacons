@@ -7,14 +7,16 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import "ESTNearableRule.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The `ESTProximityRule` class defines single rule related to proximity from the Estimote nearable device.
  */
+
 @interface ESTProximityRule : ESTNearableRule
 
 @property (nonatomic, assign) BOOL inRange;
@@ -26,3 +28,5 @@
 + (instancetype)outsideRangeOfNearableType:(ESTNearableType)type;
 
 @end
+
+NS_ASSUME_NONNULL_END

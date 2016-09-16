@@ -7,11 +7,13 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
 #import "ESTNearable.h"
+#import "ESTRule.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class ESTTrigger;
 
@@ -25,14 +27,15 @@
 /**
  * The `ESTTrigger` class defines the trigger object that is a part of Estimote Trigger Engine. Trigger allows to create real life situation definition based on particular set of rules. Trigger should be passed to `<ESTTriggerManager>` class object to start monitoring for its state changes.
  */
+
 @interface ESTTrigger : NSObject
 
-@property (nonatomic, weak) id <ESTTriggerDelegate> delegate;
+@property (nonatomic, weak) id <ESTTriggerDelegate> _Nullable delegate;
 
 /**
  *  Set of rules that should be fulfilled to change trigger state to YES. In all other cases state value is NO.
  */
-@property (nonatomic, strong, readonly) NSArray *rules;
+@property (nonatomic, strong, readonly) NSArray<ESTRule *> *rules;
 
 /**
  *  Unique trigger identifier allows to reference particular object.
@@ -52,6 +55,8 @@
  *
  *  @return create trigger object
  */
-- (instancetype)initWithRules:(NSArray *)rules identifier:(NSString *)identifier;
+- (instancetype)initWithRules:(NSArray<ESTRule *> *)rules identifier:(NSString *)identifier;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -7,7 +7,6 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
@@ -18,6 +17,8 @@
 #import "ESTTemperatureRule.h"
 #import "ESTMotionRule.h"
 #import "ESTOrientationRule.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class ESTTriggerManager;
 
@@ -44,14 +45,15 @@
 /**
  * The `ESTTriggerManager` class defines the interface for defining real life rules based triggers.
  */
+
 @interface ESTTriggerManager : NSObject <ESTTriggerDelegate>
 
-@property (nonatomic, weak) id<ESTTriggerManagerDelegate> delegate;
+@property (nonatomic, weak) id<ESTTriggerManagerDelegate> _Nullable delegate;
 
 /**
  *  Array of alraedy registered monitored triggers.
  */
-@property (nonatomic, strong, readonly) NSArray *triggers;
+@property (nonatomic, strong, readonly) NSArray<ESTTrigger *> *triggers;
 
 /**
  *  Starts monitoring for defined trigger.
@@ -87,3 +89,5 @@
 - (BOOL)stateForTriggerWithIdentifier:(NSString *)identifier;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -7,13 +7,14 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import "ESTBeaconUpdateConfig.h"
 #import "ESTBeaconConnection.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
 {
@@ -24,13 +25,15 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
     ESBeaconUpdateInfoStatusUpdateFailed
 };
 
+@class ESTBeaconUpdateInfo;
+
 /**
  * The `ESBeaconUpdateInfoDelegate` protocol defines the delegate method used to confirm when `ESBeaconUpdateInfo` is ready to be performed in the operation queue (related bluetooth peripheral was found).
  */
 
 @protocol ESBeaconUpdateInfoDelegate <NSObject>
 
-- (void)beaconUpdateInfoInitialized:(id)beaconUpdateInfo;
+- (void)beaconUpdateInfoInitialized:(ESTBeaconUpdateInfo *)beaconUpdateInfo;
 
 @end
 
@@ -43,7 +46,7 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
 /**
  *  Delegate object described with `ESBeaconUpdateInfoDelegate` protocol.
  */
-@property (nonatomic, weak) id<ESBeaconUpdateInfoDelegate> delegate;
+@property (nonatomic, weak) id<ESBeaconUpdateInfoDelegate> _Nullable delegate;
 
 /**
  *  Beacon about which this info is for.
@@ -66,13 +69,24 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
 @property (nonatomic, assign) ESBeaconUpdateInfoStatus status;
 
 /**
- *  Error object if beacon failed to update.
+ *  Settings creation timestamp.
  */
-@property (nonatomic, strong) NSError *error;
+@property (nonatomic, strong) NSDate * _Nullable createdAt;
+
+/**
+ *  Time when settings were applied to the device.
+ */
+@property (nonatomic, strong) NSDate * _Nullable syncedAt;
 
 
 /**
- *  Initialize object with beacon that is going to be updated and proper
+ *  Error object if beacon failed to update.
+ */
+@property (nonatomic, strong) NSError * _Nullable error;
+
+
+/**
+ *  Initialize object with beacon that is going to be (or was) updated and proper
  *  config file containing description how update should be performed.
  *
  *  @param macAddress   Mac Address of beacon.
@@ -84,7 +98,7 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
                             config:(ESTBeaconUpdateConfig *)config;
 
 /**
- *  Initialize object with beacon that is going to be updated and proper
+ *  Initialize object with beacon that is going to be (or was) updated and proper
  *  config file containing description how update should be performed
  *  with delegate object.
  *
@@ -96,7 +110,7 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
  */
 - (instancetype)initWithMacAddress:(NSString *)macAddress
                             config:(ESTBeaconUpdateConfig *)config
-                          delegate:(id<ESBeaconUpdateInfoDelegate>)delegate NS_DESIGNATED_INITIALIZER;
+                          delegate:(id<ESBeaconUpdateInfoDelegate> _Nullable)delegate NS_DESIGNATED_INITIALIZER;
 
 /**
  *  Scans for peripheral related with the beacon.
@@ -118,3 +132,5 @@ typedef NS_ENUM(NSInteger, ESBeaconUpdateInfoStatus)
 - (NSString *)description;
 
 @end
+
+NS_ASSUME_NONNULL_END

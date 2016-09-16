@@ -7,11 +7,12 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <CoreLocation/CoreLocation.h>
 #import "ESTBeaconManagerDelegate.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ESTSecureBeaconManager : NSObject
 
@@ -20,8 +21,7 @@
  *
  * @see ESTBeaconManagerDelegate
  */
-@property (nonatomic, weak) id <ESTBeaconManagerDelegate> delegate;
-
+@property (nonatomic, weak) id <ESTBeaconManagerDelegate> _Nullable delegate;
 
 #pragma mark CoreLocation Authorization (new in iOS 8)
 ///--------------------------------------------------------------------
@@ -131,3 +131,5 @@
 @property (readonly, nonatomic, copy) NSSet *rangedRegions;
 
 @end
+
+NS_ASSUME_NONNULL_END

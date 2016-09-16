@@ -7,15 +7,16 @@
 //  |______|___/\__|_|_| |_| |_|\___/ \__\___| |_____/|_____/|_|\_\
 //
 //
-//  Version: 3.3.1
 //  Copyright (c) 2015 Estimote. All rights reserved.
 
 #import <Foundation/Foundation.h>
-#import "ESTTrigger.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * The `ESTRule` class defines single rule of `<ESTTrigger>` object. Each rule has state value that indicates if it was fulfilled or not.
  */
+
 @interface ESTRule : NSObject
 
 /**
@@ -32,3 +33,5 @@
 - (void)update;
 
 @end
+
+NS_ASSUME_NONNULL_END
