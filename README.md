@@ -1,4 +1,4 @@
-# This plugin is no longer maintained - new maintainer is welcome
+# This plugin is no longer maintained - new maintainer is welcome!
 
 Sadly we don't have the time to maintain this plugin. We recommend using the iBeacon plugin by Peter Metz, which works nicely with Estimote beacons. This plugin can be found here: https://github.com/petermetz/cordova-plugin-ibeacon
 
