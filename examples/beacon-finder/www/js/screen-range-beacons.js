@@ -56,13 +56,17 @@
 		$('#id-screen-range-beacons .style-item-list').empty();
 
 		// Request authorisation.
-		estimote.beacons.requestAlwaysAuthorization();
+		estimote.beacons.requestAlwaysAuthorization(function(){
+			// Start ranging.
+			estimote.beacons.startRangingBeaconsInRegion(
+				{}, // Empty region matches all beacons.
+				onRange,
+				onError);
+		}, function(e){
+			alert(e);	// An error occured, like permission denied
+		});
 
-		// Start ranging.
-		estimote.beacons.startRangingBeaconsInRegion(
-			{}, // Empty region matches all beacons.
-			onRange,
-			onError);
+
 	};
 
 	app.stopRangingBeacons = function()

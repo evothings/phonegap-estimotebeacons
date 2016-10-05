@@ -8,9 +8,11 @@ package com.evothings;
 
 import android.content.Context;
 import android.util.Log;
+import android.Manifest;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 
 import com.estimote.sdk.*;
 import com.estimote.sdk.cloud.model.*;
@@ -40,7 +42,9 @@ public class EstimoteBeacons extends CordovaPlugin
 	private static final String LOGTAG = "EstimoteBeacons";
 	private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
 	private static final String ESTIMOTE_SAMPLE_REGION_ID = "EstimoteSampleRegion";
+	private static final String LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
 	private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+	private static final int REQUEST_COARSE_LOCATION = 2;
 
 	private BeaconManager     mBeaconManager;
 	private EstimoteSDK       mEstimoteSDK;
@@ -60,6 +64,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	private CallbackContext   mBluetoothStateCallbackContext;
 	private CallbackContext   mBeaconConnectionCallback;
 	private CallbackContext   mBeaconDisconnectionCallback;
+	private CallbackContext   mLocationStateCallbackContext;
 
 	// todo: consider using pluginInitialize instead, per Cordova recommendation
 	//   https://github.com/apache/cordova-android/blob/master/framework/src/org/apache/cordova/CordovaPlugin.java#L60-L61
@@ -163,8 +168,14 @@ public class EstimoteBeacons extends CordovaPlugin
 		else if ("beacons_writeConnectedMinor".equals(action)) {
 			writeConnectedMinor(args, callbackContext);
 		}
+		else if ("beacons_requestAlwaysAuthorization".equals(action)) {
+			requestAuthorization(args, callbackContext);
+		}
+		else if ("beacons_requestWhenInUseAuthorization".equals(action)) {
+			requestAuthorization(args, callbackContext);
+		}
 		else if ("bluetooth_bluetoothState".equals(action)) {
-			checkBluetoothState(args, callbackContext);
+		checkBluetoothState(args, callbackContext);
 		}
 		else {
 			return false;
@@ -218,8 +229,7 @@ public class EstimoteBeacons extends CordovaPlugin
 	{
 		if (mBeaconManager.isBluetoothEnabled()) {
 			callbackContext.success(1);
-		}
-		else {
+		} else {
 			callbackContext.success(0);
 		}
 	}
@@ -624,7 +634,7 @@ public class EstimoteBeacons extends CordovaPlugin
             Log.i(LOGTAG, mConnectedBeacon.getBeacon().getProximityUUID());
             Log.i(LOGTAG, String.valueOf(uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())));
 
-            // already correct, skip
+			// already correct, skip
             if (uuid.equals(mConnectedBeacon.getBeacon().getProximityUUID())) {
                 PluginResult r = new PluginResult(PluginResult.Status.OK);
                 callbackContext.sendPluginResult(r);
@@ -709,7 +719,7 @@ public class EstimoteBeacons extends CordovaPlugin
 		if (mConnectedBeacon != null && mConnectedBeacon.isConnected()) {
             int minor = cordovaArgs.getInt(0);
 
-            // already correct, skip
+			// already correct, skip
             if (minor == mConnectedBeacon.getBeacon().getMinor()) {
                 PluginResult r = new PluginResult(PluginResult.Status.OK);
                 callbackContext.sendPluginResult(r);
@@ -717,7 +727,7 @@ public class EstimoteBeacons extends CordovaPlugin
 
             if (minor == 0) {
                 callbackContext.error("minor cannot be 0");
-                return;
+				return;
             }
 
             BeaconConnection.WriteCallback writeCallback;
@@ -735,7 +745,46 @@ public class EstimoteBeacons extends CordovaPlugin
             };
 
             mConnectedBeacon.writeMinor(minor, writeCallback);
-        }
+		}
+	}
+
+	/**
+	 * Helper method.
+	 */
+	private void requestAuthorization(
+			CordovaArgs cordovaArgs,
+			CallbackContext callbackContext)
+	{
+		Log.i(LOGTAG, "requestAlwaysAuthorization");
+
+		if (null != mLocationStateCallbackContext) {
+			callbackContext.error("Location permission request already in progress");
+			return;
+		}
+
+		if(cordova.hasPermission(LOCATION)) {
+			callbackContext.success();
+		} else {
+			mLocationStateCallbackContext = callbackContext;
+			cordova.requestPermission(this, REQUEST_COARSE_LOCATION, LOCATION);
+		}
+	}
+
+	@Override
+	public void onRequestPermissionResult(int requestCode, String[] permissions,
+										  int[] grantResults) throws JSONException {
+		switch (requestCode) {
+			case REQUEST_COARSE_LOCATION: {
+				if (grantResults.length > 0
+						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					mLocationStateCallbackContext.success();
+				} else {
+					mLocationStateCallbackContext.error("Permission denied");
+				}
+				mLocationStateCallbackContext = null;
+				return;
+			}
+		}
 	}
 
 	/**
